@@ -22,6 +22,15 @@ PyQSO is a contact logging tool for amateur radio operators.
 [![Build Status](https://travis-ci.org/ctjacobs/pyqso.svg)](https://travis-ci.org/ctjacobs/pyqso)
 [![Documentation Status](https://readthedocs.org/projects/pyqso/badge/?version=latest)](https://readthedocs.org/projects/pyqso/?badge=latest)
 
+## Plans for this fork:
+
+* Remove ADIF support
+* Remove DX cluster support
+* Remove map support
+* Remove calendar support
+* Add support for export Cabrillo logs in the correct format for contests
+* Add search-support for dropdown menus
+
 ## Dependencies
 
 As the name suggests, PyQSO is written primarily in the [Python](https://www.python.org/) programming language (version 3.x). The graphical user interface has been developed using the [GTK+ library](https://www.gtk.org/) through the [PyGObject bindings](https://pygobject.readthedocs.io). Therefore, in order to run PyQSO, the Python interpreter must be present on your system along with support for GTK+. On many Linux-based systems this can be accomplished by installing the following Debian packages:
