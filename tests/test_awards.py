@@ -19,6 +19,7 @@
 
 import os
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -29,26 +30,29 @@ from pyqso.logbook import Logbook
 
 class TestAwards(unittest.TestCase):
 
-    """ The unit tests for the Awards class. """
+    """The unit tests for the Awards class."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
         PyQSO = mock.MagicMock()
         self.awards = Awards(application=PyQSO())
         self.logbook = Logbook(application=PyQSO())
-        path_to_test_database = os.path.join(os.path.realpath(os.path.dirname(__file__)), "res", "test.db")
+        path_to_test_database = os.path.join(
+            os.path.realpath(os.path.dirname(__file__)), "res", "test.db"
+        )
         success = self.logbook.db_connect(path_to_test_database)
-        assert(success)
+        assert success
         self.logbook.logs = self.logbook.get_logs()
-        assert(self.logbook.logs is not None)
+        assert self.logbook.logs is not None
 
     def test_count(self):
-        """ Check that there are 3 FM/AM/SSB/SSTV QSOs and 1 CW QSO. Note that the BAND must be specified in order to be counted. """
+        """Check that there are 3 FM/AM/SSB/SSTV QSOs and 1 CW QSO. Note that the BAND must be specified in order to be counted."""
         count = self.awards.count(self.logbook)
-        assert(sum(count[0]) == 3)  # FM/AM/SSB/SSTV
-        assert(sum(count[1]) == 1)  # CW
-        assert(sum(count[2]) == 1)  # Other modes
-        assert(sum(count[3]) == 5)  # Mixed
+        assert sum(count[0]) == 3  # FM/AM/SSB/SSTV
+        assert sum(count[1]) == 1  # CW
+        assert sum(count[2]) == 1  # Other modes
+        assert sum(count[3]) == 5  # Mixed
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

@@ -21,28 +21,34 @@ from gi.repository import Gtk
 import logging
 from os.path import basename, getmtime, expanduser, dirname, join, realpath
 from datetime import datetime, date
+
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
 try:
     import matplotlib
-    matplotlib.use('Agg')
-    matplotlib.rcParams['font.size'] = 10.0
-    from matplotlib.backends.backend_gtk3cairo import FigureCanvasGTK3Cairo as FigureCanvas
+
+    matplotlib.use("Agg")
+    matplotlib.rcParams["font.size"] = 10.0
+    from matplotlib.backends.backend_gtk3cairo import (
+        FigureCanvasGTK3Cairo as FigureCanvas,
+    )
     from matplotlib.figure import Figure
     from matplotlib.dates import DateFormatter, MonthLocator
+
     have_matplotlib = True
 except ImportError as e:
     logging.warning(e)
-    logging.warning("Could not import matplotlib, so you will not be able to plot annual logbook statistics. Check that all the PyQSO dependencies are satisfied.")
+    logging.warning(
+        "Could not import matplotlib, so you will not be able to plot annual logbook statistics. Check that all the PyQSO dependencies are satisfied."
+    )
     have_matplotlib = False
 
 
 class Summary(object):
-
     def __init__(self, application):
-        """ Create a summary page containing various statistics such as the number of logs in the logbook, the logbook's modification date, etc.
+        """Create a summary page containing various statistics such as the number of logs in the logbook, the logbook's modification date, etc.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -57,24 +63,31 @@ class Summary(object):
         self.items = {}
 
         # Database name in large font at the top of the summary page
-        self.builder.get_object("database_name").set_markup("<span size=\"x-large\">%s</span>" % basename(self.logbook.path))
+        self.builder.get_object("database_name").set_markup(
+            '<span size="x-large">%s</span>' % basename(self.logbook.path)
+        )
         self.items["LOG_COUNT"] = self.builder.get_object("log_count")
         self.items["QSO_COUNT"] = self.builder.get_object("qso_count")
         self.items["DATE_MODIFIED"] = self.builder.get_object("date_modified")
 
         # Yearly statistics
         config = configparser.ConfigParser()
-        have_config = (config.read(expanduser('~/.config/pyqso/preferences.ini')) != [])
+        have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
         (section, option) = ("general", "show_yearly_statistics")
-        if(have_config and config.has_option(section, option)):
-            if(config.getboolean("general", "show_yearly_statistics") and have_matplotlib):
+        if have_config and config.has_option(section, option):
+            if (
+                config.getboolean("general", "show_yearly_statistics")
+                and have_matplotlib
+            ):
                 hbox = Gtk.HBox()
-                label = Gtk.Label(label="Display statistics for year: ", halign=Gtk.Align.START)
+                label = Gtk.Label(
+                    label="Display statistics for year: ", halign=Gtk.Align.START
+                )
                 hbox.pack_start(label, False, False, 6)
                 year_select = Gtk.ComboBoxText()
                 min_year, max_year = self.get_year_bounds()
                 if min_year and max_year:
-                    for year in range(max_year, min_year-1, -1):
+                    for year in range(max_year, min_year - 1, -1):
                         year_select.append_text(str(year))
                 year_select.append_text("")
                 year_select.connect("changed", self.on_year_changed)
@@ -95,13 +108,15 @@ class Summary(object):
         tab.pack_start(icon, False, False, 0)
         tab.show_all()
 
-        self.logbook.notebook.insert_page(self.summary_page, tab, 0)  # Append as a new tab
+        self.logbook.notebook.insert_page(
+            self.summary_page, tab, 0
+        )  # Append as a new tab
         self.logbook.notebook.show_all()
 
         return
 
     def on_year_changed(self, combo):
-        """ Re-plot the statistics for the year selected by the user. """
+        """Re-plot the statistics for the year selected by the user."""
 
         # Clear figure
         self.items["YEARLY_STATISTICS"].clf()
@@ -120,7 +135,13 @@ class Summary(object):
         contact_count = self.get_annual_contact_count(year)
 
         # x-axis formatting based on the date
-        contact_count_plot.bar(list(contact_count.keys()), list(contact_count.values()), color="k", width=15, align="center")
+        contact_count_plot.bar(
+            list(contact_count.keys()),
+            list(contact_count.values()),
+            color="k",
+            width=15,
+            align="center",
+        )
         formatter = DateFormatter("%b")
         contact_count_plot.xaxis.set_major_formatter(formatter)
         month_locator = MonthLocator()
@@ -129,12 +150,19 @@ class Summary(object):
 
         # Set x-axis upper limit based on the current month.
         contact_count_plot.xaxis_date()
-        contact_count_plot.set_xlim([date(year-1, 12, 16), date(year, 12, 15)])  # Make a bit of space either side of January and December of the selected year.
+        contact_count_plot.set_xlim(
+            [date(year - 1, 12, 16), date(year, 12, 15)]
+        )  # Make a bit of space either side of January and December of the selected year.
 
         # Pie chart of all the modes used.
         mode_count_plot = self.items["YEARLY_STATISTICS"].add_subplot(122)
         mode_count = self.get_annual_mode_count(year)
-        (patches, texts, autotexts) = mode_count_plot.pie(list(mode_count.values()), labels=mode_count.keys(), autopct='%1.1f%%', shadow=False)
+        (patches, texts, autotexts) = mode_count_plot.pie(
+            list(mode_count.values()),
+            labels=mode_count.keys(),
+            autopct="%1.1f%%",
+            shadow=False,
+        )
         for p in patches:
             # Make the patches partially transparent.
             p.set_alpha(0.75)
@@ -145,7 +173,7 @@ class Summary(object):
         return
 
     def get_year_bounds(self):
-        """ Find the years of the oldest and newest QSOs across all logs in the logbook.
+        """Find the years of the oldest and newest QSOs across all logs in the logbook.
 
         :returns: The years of the oldest and newest QSOs. The tuple (None, None) is returned if no QSOs have been made or no QSO dates have been specified.
         :rtype: tuple
@@ -169,7 +197,7 @@ class Summary(object):
             return min(min_years), max(max_years)
 
     def get_annual_contact_count(self, year):
-        """ Find the total number of contacts made in each month in the specified year.
+        """Find the total number of contacts made in each month in the specified year.
 
         :arg int year: The year of interest.
         :returns: The total number of contacts made in each month of a given year.
@@ -180,7 +208,10 @@ class Summary(object):
         c = self.logbook.connection.cursor()
 
         for log in self.logbook.logs:
-            query = "SELECT QSO_DATE, count(QSO_DATE) FROM %s WHERE QSO_DATE >= %d0101 AND QSO_DATE < %d0101 GROUP by QSO_DATE" % (log.name, year, year+1)
+            query = (
+                "SELECT QSO_DATE, count(QSO_DATE) FROM %s WHERE QSO_DATE >= %d0101 AND QSO_DATE < %d0101 GROUP by QSO_DATE"
+                % (log.name, year, year + 1)
+            )
             c.execute(query)
             xy = c.fetchall()
 
@@ -197,7 +228,7 @@ class Summary(object):
         return contact_count
 
     def get_annual_mode_count(self, year):
-        """ Find the total number of contacts made with each mode in a specified year.
+        """Find the total number of contacts made with each mode in a specified year.
 
         :arg int year: The year of interest.
         :returns: The total number of contacts made with each mode in a given year.
@@ -207,7 +238,10 @@ class Summary(object):
         mode_count = {}
 
         for log in self.logbook.logs:
-            query = "SELECT MODE, count(MODE) FROM %s WHERE QSO_DATE >= %d0101 AND QSO_DATE < %d0101 GROUP by MODE" % (log.name, year, year+1)
+            query = (
+                "SELECT MODE, count(MODE) FROM %s WHERE QSO_DATE >= %d0101 AND QSO_DATE < %d0101 GROUP by MODE"
+                % (log.name, year, year + 1)
+            )
             c = self.logbook.connection.cursor()
             c.execute(query)
             xy = c.fetchall()
@@ -226,12 +260,14 @@ class Summary(object):
         return mode_count
 
     def update(self):
-        """ Update the information presented on the summary page. """
+        """Update the information presented on the summary page."""
 
         self.items["LOG_COUNT"].set_label(str(self.logbook.log_count))
         self.items["QSO_COUNT"].set_label(str(self.logbook.record_count))
         try:
-            t = datetime.fromtimestamp(getmtime(self.logbook.path)).strftime("%d %B %Y @ %H:%M")
+            t = datetime.fromtimestamp(getmtime(self.logbook.path)).strftime(
+                "%d %B %Y @ %H:%M"
+            )
             self.items["DATE_MODIFIED"].set_label(str(t))
         except (IOError, OSError) as e:
             logging.exception(e)

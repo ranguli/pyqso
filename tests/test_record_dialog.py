@@ -19,6 +19,7 @@
 
 from gi.repository import Gtk
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -28,10 +29,10 @@ from pyqso.record_dialog import *
 
 class TestRecordDialog(unittest.TestCase):
 
-    """ The unit tests for the RecordDialog class. """
+    """The unit tests for the RecordDialog class."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
         PyQSO = mock.MagicMock()
         self.record_dialog = RecordDialog(application=PyQSO(), log=None)
         self.record_dialog.frequency_unit = "MHz"
@@ -54,58 +55,73 @@ class TestRecordDialog(unittest.TestCase):
         return
 
     def test_autocomplete_band(self):
-        """ Given a frequency, check that the band field is automatically set to the correct value. """
+        """Given a frequency, check that the band field is automatically set to the correct value."""
         self.record_dialog.sources["FREQ"].set_text("145.525")
         self.record_dialog.autocomplete_band()
         band = self.record_dialog.sources["BAND"].get_active_text()
-        assert(band == "2m")
+        assert band == "2m"
 
         self.record_dialog.sources["FREQ"].set_text("9001")
         self.record_dialog.autocomplete_band()
         band = self.record_dialog.sources["BAND"].get_active_text()
-        assert(band == "")  # Frequency does not lie in any of the specified bands.
+        assert band == ""  # Frequency does not lie in any of the specified bands.
 
     def test_convert_frequency(self):
-        """ Check that a frequency can be successfully converted from one unit to another. """
+        """Check that a frequency can be successfully converted from one unit to another."""
         frequency = "7.140"  # In MHz
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="AHz")  # Unknown to_unit. This should return the input unmodified (and give an error message).
-        assert(converted == frequency)
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="kHz")  # Convert from MHz to kHz.
-        assert(float(converted) == 1e3*float(frequency))
-        converted = self.record_dialog.convert_frequency(converted, from_unit="kHz", to_unit="MHz")  # Convert from kHz back to MHz. This should give the original frequency.
-        assert(float(converted) == float(frequency))
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="AHz"
+        )  # Unknown to_unit. This should return the input unmodified (and give an error message).
+        assert converted == frequency
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="kHz"
+        )  # Convert from MHz to kHz.
+        assert float(converted) == 1e3 * float(frequency)
+        converted = self.record_dialog.convert_frequency(
+            converted, from_unit="kHz", to_unit="MHz"
+        )  # Convert from kHz back to MHz. This should give the original frequency.
+        assert float(converted) == float(frequency)
 
         # Floating-point data type.
         frequency = 7.140  # In MHz
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="kHz")
-        assert(converted == frequency*1e3)
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="kHz"
+        )
+        assert converted == frequency * 1e3
 
         # Floating-point data type.
         frequency = 7.140  # In MHz
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="MHz")
-        assert(converted == frequency)
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="MHz"
+        )
+        assert converted == frequency
 
         # Empty string.
         frequency = ""
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="kHz")
-        assert(converted == frequency)
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="kHz"
+        )
+        assert converted == frequency
 
         # Not a valid frequency.
         frequency = "HelloWorld"
-        converted = self.record_dialog.convert_frequency(frequency, from_unit="MHz", to_unit="kHz")
-        assert(converted == frequency)
+        converted = self.record_dialog.convert_frequency(
+            frequency, from_unit="MHz", to_unit="kHz"
+        )
+        assert converted == frequency
 
     def test_hamlib_autofill(self):
-        """ Check that FREQ, MODE and SUBMODE information can be retrieved from Hamlib's dummy rig (if the Hamlib module exists). """
-        if(have_hamlib):
+        """Check that FREQ, MODE and SUBMODE information can be retrieved from Hamlib's dummy rig (if the Hamlib module exists)."""
+        if have_hamlib:
             rig_model = "RIG_MODEL_DUMMY"
             rig_pathname = "/dev/Rig"
             self.record_dialog.hamlib_autofill(rig_model, rig_pathname)
-            assert(self.record_dialog.sources["FREQ"].get_text() == "145.000000")
-            assert(self.record_dialog.sources["MODE"].get_active_text() == "FM")
-            assert(self.record_dialog.sources["SUBMODE"].get_active_text() == "")
+            assert self.record_dialog.sources["FREQ"].get_text() == "145.000000"
+            assert self.record_dialog.sources["MODE"].get_active_text() == "FM"
+            assert self.record_dialog.sources["SUBMODE"].get_active_text() == ""
         else:
             pass
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

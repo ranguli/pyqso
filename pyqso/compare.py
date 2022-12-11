@@ -19,7 +19,7 @@
 
 
 def compare_date_and_time(model, row1, row2, user_data):
-    """ Compare two rows (let's call them A and B) in a Gtk.ListStore, and sort by both date and time.
+    """Compare two rows (let's call them A and B) in a Gtk.ListStore, and sort by both date and time.
 
     :arg Gtk.TreeModel model: The model used to sort the log data.
     :arg Gtk.TreeIter row1: The pointer to row A.
@@ -32,13 +32,13 @@ def compare_date_and_time(model, row1, row2, user_data):
     date2 = model.get_value(row2, user_data[0])
     time1 = model.get_value(row1, user_data[1])
     time2 = model.get_value(row2, user_data[1])
-    if(date1 < date2):
+    if date1 < date2:
         return -1
-    elif(date1 == date2):
+    elif date1 == date2:
         # If the dates are the same, then let's also sort by time.
-        if(time1 > time2):
+        if time1 > time2:
             return 1
-        elif(time1 == time2):
+        elif time1 == time2:
             return 0
         else:
             return -1
@@ -47,7 +47,7 @@ def compare_date_and_time(model, row1, row2, user_data):
 
 
 def compare_default(model, row1, row2, user_data):
-    """ The default sorting function for all Gtk.ListStore objects.
+    """The default sorting function for all Gtk.ListStore objects.
 
     :arg Gtk.TreeModel model: The model used to sort the log data.
     :arg Gtk.TreeIter row1: The pointer to row A.
@@ -65,9 +65,9 @@ def compare_default(model, row1, row2, user_data):
         value1 = model.get_value(row1, user_data)
         value2 = model.get_value(row2, user_data)
 
-    if(value1 < value2):
+    if value1 < value2:
         return -1
-    elif(value1 == value2):
+    elif value1 == value2:
         return 0
     else:
         return 1

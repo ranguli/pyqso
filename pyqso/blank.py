@@ -22,10 +22,10 @@ from gi.repository import Gtk
 
 class Blank(object):
 
-    """ A blank page in the logbook for the "+" (New Log) tab. """
+    """A blank page in the logbook for the "+" (New Log) tab."""
 
     def __init__(self, application):
-        """ Create the blank page.
+        """Create the blank page.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -50,7 +50,7 @@ class Blank(object):
         button.set_focus_on_click(False)
         button.connect("clicked", self.application.logbook.new_log)
         button.add(icon)
-        button.set_tooltip_text('New Log')
+        button.set_tooltip_text("New Log")
         tab.pack_start(button, False, False, 0)
 
         tab.show_all()

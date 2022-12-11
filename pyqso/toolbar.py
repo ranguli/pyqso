@@ -20,10 +20,10 @@
 
 class Toolbar:
 
-    """ The toolbar underneath the menu bar. """
+    """The toolbar underneath the menu bar."""
 
     def __init__(self, application):
-        """ Set up the various buttons in the toolbar, and connect to their corresponding functions.
+        """Set up the various buttons in the toolbar, and connect to their corresponding functions.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -47,19 +47,27 @@ class Toolbar:
 
         # Add record
         self.buttons["ADD_RECORD"] = self.builder.get_object("toolbar_add_record")
-        self.buttons["ADD_RECORD"].connect("clicked", self.application.logbook.add_record_callback)
+        self.buttons["ADD_RECORD"].connect(
+            "clicked", self.application.logbook.add_record_callback
+        )
 
         # Edit record
         self.buttons["EDIT_RECORD"] = self.builder.get_object("toolbar_edit_record")
-        self.buttons["EDIT_RECORD"].connect("clicked", self.application.logbook.edit_record_callback)
+        self.buttons["EDIT_RECORD"].connect(
+            "clicked", self.application.logbook.edit_record_callback
+        )
 
         # Delete record
         self.buttons["DELETE_RECORD"] = self.builder.get_object("toolbar_delete_record")
-        self.buttons["DELETE_RECORD"].connect("clicked", self.application.logbook.delete_record_callback)
+        self.buttons["DELETE_RECORD"].connect(
+            "clicked", self.application.logbook.delete_record_callback
+        )
 
         # Filter log
         self.filter_source = self.builder.get_object("filter_source")
-        self.filter_source.connect_after("changed", self.application.logbook.filter_logs)
+        self.filter_source.connect_after(
+            "changed", self.application.logbook.filter_logs
+        )
 
         # Set sensitivities.
         self.set_logbook_button_sensitive(True)
@@ -69,7 +77,7 @@ class Toolbar:
         return
 
     def set_logbook_button_sensitive(self, sensitive):
-        """ Enable/disable logbook-related toolbar items.
+        """Enable/disable logbook-related toolbar items.
 
         :arg bool sensitive: If True, enable the 'new logbook' and 'open logbook' toolbar items. If False, disable them.
         """
@@ -79,7 +87,7 @@ class Toolbar:
         return
 
     def set_record_buttons_sensitive(self, sensitive):
-        """ Enable/disable record-related toolbar items.
+        """Enable/disable record-related toolbar items.
 
         :arg bool sensitive: If True, enable all the record-related toolbar items. If False, disable them all.
         """

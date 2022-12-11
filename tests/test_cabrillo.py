@@ -23,16 +23,47 @@ from pyqso.cabrillo import *
 
 class TestCabrillo(unittest.TestCase):
 
-    """ The unit tests for the Cabrillo class. """
+    """The unit tests for the Cabrillo class."""
 
     def setUp(self):
-        """ Set up the Cabrillo object needed for the unit tests. """
+        """Set up the Cabrillo object needed for the unit tests."""
         self.cabrillo = Cabrillo()
         return
 
     def test_write(self):
-        """ Check that QSOs are written correctly in Cabrillo format. """
-        records = [{'TIME_ON': '1955', 'BAND': '40m', 'CALL': 'TEST', 'FREQ': "145.550", 'MODE': 'FM', 'QSO_DATE': '20130322', 'RST_SENT': '59 001', 'RST_RCVD': '59 002'}, {'TIME_ON': '0820', 'BAND': '20m', 'CALL': 'TEST2ABC', 'FREQ': "144.330", 'MODE': 'SSB', 'QSO_DATE': '20150227', 'RST_SENT': '55 020', 'RST_RCVD': '57 003'}, {'TIME_ON': '0832', 'BAND': '2m', 'CALL': 'HELLO', 'FREQ': "145.550", 'MODE': 'FM', 'QSO_DATE': '20150227', 'RST_SENT': '59 001', 'RST_RCVD': '59 002'}]
+        """Check that QSOs are written correctly in Cabrillo format."""
+        records = [
+            {
+                "TIME_ON": "1955",
+                "BAND": "40m",
+                "CALL": "TEST",
+                "FREQ": "145.550",
+                "MODE": "FM",
+                "QSO_DATE": "20130322",
+                "RST_SENT": "59 001",
+                "RST_RCVD": "59 002",
+            },
+            {
+                "TIME_ON": "0820",
+                "BAND": "20m",
+                "CALL": "TEST2ABC",
+                "FREQ": "144.330",
+                "MODE": "SSB",
+                "QSO_DATE": "20150227",
+                "RST_SENT": "55 020",
+                "RST_RCVD": "57 003",
+            },
+            {
+                "TIME_ON": "0832",
+                "BAND": "2m",
+                "CALL": "HELLO",
+                "FREQ": "145.550",
+                "MODE": "FM",
+                "QSO_DATE": "20150227",
+                "RST_SENT": "59 001",
+                "RST_RCVD": "59 002",
+            },
+        ]
 
         expected = """START-OF-LOG: 3.0
 CREATED-BY: PyQSO v1.1.0
@@ -55,7 +86,8 @@ END-OF-LOG:"""
             actual += line
         f.close()
         print("Actual Cabrillo file contents: ", actual)
-        assert(expected == actual)
+        assert expected == actual
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

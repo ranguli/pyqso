@@ -24,12 +24,12 @@ from pyqso.compare import *
 
 class TestCompare(unittest.TestCase):
 
-    """ The unit tests for the comparison schemes. """
+    """The unit tests for the comparison schemes."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
 
-        data_types = [int] + [str]*3
+        data_types = [int] + [str] * 3
         self.model = Gtk.ListStore(*data_types)
         row1 = [0, "100", "20150323", "1433"]
         self.model.append(row1)
@@ -42,7 +42,7 @@ class TestCompare(unittest.TestCase):
         return
 
     def test_compare_default(self):
-        """ Check the correctness of the default comparison scheme. """
+        """Check the correctness of the default comparison scheme."""
 
         # Get the row iterables.
         path = Gtk.TreePath(0)
@@ -54,14 +54,14 @@ class TestCompare(unittest.TestCase):
         # Compare values in the second column.
         column_index = 1
         result = compare_default(self.model, iter1, iter2, column_index)
-        assert(result == -1)
+        assert result == -1
         result = compare_default(self.model, iter2, iter3, column_index)
-        assert(result == 0)
+        assert result == 0
         result = compare_default(self.model, iter3, iter4, column_index)
-        assert(result == 1)
+        assert result == 1
 
     def test_compare_date_and_time(self):
-        """ Check that dates in yyyymmdd format are compared correctly. """
+        """Check that dates in yyyymmdd format are compared correctly."""
 
         # Get the row iterables.
         path = Gtk.TreePath(0)
@@ -72,14 +72,23 @@ class TestCompare(unittest.TestCase):
 
         # Compare values in the third (and fourth, if necessary) column.
         column_index = 2
-        result = compare_date_and_time(self.model, iter1, iter2, [column_index, column_index+1])
-        assert(result == -1)
-        result = compare_date_and_time(self.model, iter2, iter3, [column_index, column_index+1])
-        assert(result == -1)
-        result = compare_date_and_time(self.model, iter3, iter4, [column_index, column_index+1])
-        assert(result == 0)
-        result = compare_date_and_time(self.model, iter4, iter1, [column_index, column_index+1])
-        assert(result == 1)
+        result = compare_date_and_time(
+            self.model, iter1, iter2, [column_index, column_index + 1]
+        )
+        assert result == -1
+        result = compare_date_and_time(
+            self.model, iter2, iter3, [column_index, column_index + 1]
+        )
+        assert result == -1
+        result = compare_date_and_time(
+            self.model, iter3, iter4, [column_index, column_index + 1]
+        )
+        assert result == 0
+        result = compare_date_and_time(
+            self.model, iter4, iter1, [column_index, column_index + 1]
+        )
+        assert result == 1
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()
