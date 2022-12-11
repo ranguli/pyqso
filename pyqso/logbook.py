@@ -37,7 +37,6 @@ from pyqso.record_dialog import RecordDialog
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.summary import Summary
 from pyqso.blank import Blank
-from pyqso.printer import Printer
 from pyqso.compare import compare_date_and_time, compare_default
 
 
@@ -169,7 +168,6 @@ class Logbook:
             logging.debug("All logs rendered successfully.")
 
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
             context_id = self.application.statusbar.get_context_id("Status")
             self.application.statusbar.push(context_id, "Logbook: %s" % self.path)
@@ -396,7 +394,6 @@ class Logbook:
             self.notebook.remove_page(page_index)
 
         self.summary.update()
-        self.application.toolbox.awards.count(self)
         return
 
     def filter_logs(self, widget=None):
@@ -743,7 +740,6 @@ class Logbook:
 
         # Update statistics, etc.
         self.summary.update()
-        self.application.toolbox.awards.count(self)
 
         auxiliary_dialog.info(
             parent=self.application.window,
@@ -930,39 +926,6 @@ class Logbook:
 
         return
 
-    def print_log(self, widget=None):
-        """Print all the records in the log (that is currently selected).
-        Note that only a few important fields are printed because of the restricted width of the page."""
-
-        # Get the index of the selected tab in the logbook.
-        try:
-            log_index = self.get_log_index()
-            if log_index is None:
-                raise ValueError(
-                    "The log index could not be determined. Perhaps the Summary page is selected?"
-                )
-        except ValueError as e:
-            auxiliary_dialog.error(parent=self.application.window, message=e)
-            return
-        log = self.logs[log_index]
-
-        # Retrieve the records.
-        try:
-            records = log.records
-        except sqlite.Error as e:
-            logging.exception(e)
-            auxiliary_dialog.error(
-                parent=self.application.window,
-                message="Could not retrieve the records from the SQL database. No records have been printed.",
-            )
-            return
-
-        # Print the records.
-        printer = Printer(self.application)
-        printer.print_records(records, title="Log: %s" % log.name)
-
-        return
-
     def add_record_callback(self, widget):
         """A callback function used to add a particular record/QSO."""
         # Get the index of the selected tab in the logbook.
@@ -1049,7 +1012,6 @@ class Logbook:
 
                         # Update summary, etc.
                         self.summary.update()
-                        self.application.toolbox.awards.count(self)
 
                 else:
                     exit = True
@@ -1105,7 +1067,6 @@ class Logbook:
 
             # Update summary, etc.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 
@@ -1202,7 +1163,6 @@ class Logbook:
 
                     # Update summary, etc.
                     self.summary.update()
-                    self.application.toolbox.awards.count(self)
 
         rd.dialog.destroy()
         return
@@ -1235,7 +1195,6 @@ class Logbook:
         if number_of_duplicates_removed > 0:
             # Update statistics.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 
@@ -1279,12 +1238,9 @@ class Logbook:
             row_index = self.get_record_index()
             if log_index is None or row_index is None:
                 raise ValueError("Could not determine the log and/or record index.")
-            r = self.logs[log_index].get_record_by_index(row_index)
         except ValueError as e:
             logging.error(e)
             return
-
-        self.application.toolbox.world_map.pinpoint(r)
 
         return
 
