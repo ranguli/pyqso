@@ -540,6 +540,7 @@ class HamlibPage:
                 for item in dir(Hamlib):
                     if item.startswith("RIG_MODEL_"):
                         models.append(item)
+            #TODO: do not use bare 'except'
             except:
                 logging.error("Could not obtain rig models list via Hamlib!")
         else:

@@ -37,9 +37,9 @@ except ImportError:
     logging.warning("Could not import the Hamlib module!")
     have_hamlib = False
 
-from pyqso.adif import *
-from pyqso.callsign_lookup import *
-from pyqso.auxiliary_dialogs import *
+from pyqso import adif
+from pyqso import callsign_lookup
+from pyqso import auxiliary_dialog
 from pyqso.calendar_dialog import CalendarDialog
 
 
@@ -114,13 +114,13 @@ class RecordDialog:
 
         # BAND
         self.sources["BAND"] = self.builder.get_object("qso_band_combo")
-        for band in BANDS:
+        for band in adif.BANDS:
             self.sources["BAND"].append_text(band)
         self.sources["BAND"].set_active(0)  # Set an empty string as the default option.
 
         # MODE
         self.sources["MODE"] = self.builder.get_object("qso_mode_combo")
-        for mode in sorted(MODES.keys()):
+        for mode in sorted(adif.MODES.keys()):
             self.sources["MODE"].append_text(mode)
         self.sources["MODE"].set_active(0)  # Set an empty string as the default option.
         self.sources["MODE"].connect("changed", self.on_mode_changed)
@@ -136,7 +136,7 @@ class RecordDialog:
         self.sources["PROP_MODE"] = self.builder.get_object(
             "qso_propagation_mode_combo"
         )
-        for propagation_mode in PROPAGATION_MODES:
+        for propagation_mode in adif.PROPAGATION_MODES:
             self.sources["PROP_MODE"].append_text(propagation_mode)
         self.sources["PROP_MODE"].set_active(
             0
@@ -215,13 +215,13 @@ class RecordDialog:
         if index is not None:
             # The record already exists, so display its current data in the input boxes.
             record = log.get_record_by_index(index)
-            field_names = AVAILABLE_FIELD_NAMES_ORDERED
+            field_names = adif.AVAILABLE_FIELD_NAMES_ORDERED
             for i in range(0, len(field_names)):
                 data = record[field_names[i].lower()]
                 if data is None:
                     data = ""
                 if field_names[i] == "BAND":
-                    self.sources[field_names[i]].set_active(BANDS.index(data))
+                    self.sources[field_names[i]].set_active(adif.BANDS.index(data))
                 elif field_names[i] == "FREQ" and self.frequency_unit != "MHz":
                     converted = self.convert_frequency(
                         data, from_unit="MHz", to_unit=self.frequency_unit
@@ -229,19 +229,19 @@ class RecordDialog:
                     self.sources[field_names[i]].set_text(str(converted))
                 elif field_names[i] == "MODE":
                     self.sources[field_names[i]].set_active(
-                        sorted(MODES.keys()).index(data)
+                        sorted(adif.MODES.keys()).index(data)
                     )
                     # Handle SUBMODE at the same time.
                     submode_data = record["submode"]
                     if submode_data is None:
                         submode_data = ""
-                    self.sources["SUBMODE"].set_active(MODES[data].index(submode_data))
+                    self.sources["SUBMODE"].set_active(adif.MODES[data].index(submode_data))
                 elif field_names[i] == "SUBMODE":
                     # Skip, because this has been (or will be) handled when populating the MODE field.
                     continue
                 elif field_names[i] == "PROP_MODE":
                     self.sources[field_names[i]].set_active(
-                        PROPAGATION_MODES.index(data)
+                        adif.PROPAGATION_MODES.index(data)
                     )
                 elif field_names[i] == "QSL_SENT":
                     self.sources[field_names[i]].set_active(
@@ -264,7 +264,7 @@ class RecordDialog:
                 mode = config.get(section, option)
             else:
                 mode = ""
-            self.sources["MODE"].set_active(sorted(MODES.keys()).index(mode))
+            self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
 
             # Submode
             (section, option) = ("records", "default_submode")
@@ -272,7 +272,7 @@ class RecordDialog:
                 submode = config.get(section, option)
             else:
                 submode = ""
-            self.sources["SUBMODE"].set_active(MODES[mode].index(submode))
+            self.sources["SUBMODE"].set_active(adif.MODES[mode].index(submode))
 
             # Power
             (section, option) = ("records", "default_power")
@@ -353,10 +353,10 @@ class RecordDialog:
         """If the MODE field has changed its value, then fill the SUBMODE field with all the available SUBMODE options for that new MODE."""
         self.sources["SUBMODE"].get_model().clear()
         mode = combo.get_active_text()
-        for submode in MODES[mode]:
+        for submode in adif.MODES[mode]:
             self.sources["SUBMODE"].append_text(submode)
         self.sources["SUBMODE"].set_active(
-            MODES[mode].index("")
+            adif.MODES[mode].index("")
         )  # Set the submode to an empty string.
         return
 
@@ -393,8 +393,8 @@ class RecordDialog:
             )
 
         # Find which band the frequency lies in.
-        for i in range(1, len(BANDS)):
-            if frequency >= BANDS_RANGES[i][0] and frequency <= BANDS_RANGES[i][1]:
+        for i in range(1, len(adif.BANDS)):
+            if frequency >= adif.BANDS_RANGES[i][0] and frequency <= adif.BANDS_RANGES[i][1]:
                 self.sources["BAND"].set_active(i)
                 return
 
@@ -418,6 +418,7 @@ class RecordDialog:
             )  # Look up the model's numerical index in Hamlib's symbol dictionary.
             rig.set_conf("rig_pathname", rig_pathname)
             rig.open()
+        # TODO: do not use bare 'except'
         except:
             logging.error(
                 "Could not open a communication channel to the rig via Hamlib!"
@@ -435,6 +436,7 @@ class RecordDialog:
                     )
                 )
             self.sources["FREQ"].set_text(frequency)
+        # TODO: do not use bare 'except'
         except:
             logging.error("Could not obtain the current frequency via Hamlib!")
 
@@ -446,10 +448,11 @@ class RecordDialog:
             if mode == "USB" or mode == "LSB":
                 submode = mode
                 mode = "SSB"
-                self.sources["MODE"].set_active(sorted(MODES.keys()).index(mode))
-                self.sources["SUBMODE"].set_active(MODES[mode].index(submode))
+                self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
+                self.sources["SUBMODE"].set_active(adif.MODES[mode].index(submode))
             else:
-                self.sources["MODE"].set_active(sorted(MODES.keys()).index(mode))
+                self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
+        # TODO: do not use bare 'except'
         except:
             logging.error(
                 "Could not obtain the current mode (e.g. FM, AM, CW) via Hamlib!"
@@ -458,6 +461,7 @@ class RecordDialog:
         # Close communication channel.
         try:
             rig.close()
+        # TODO: do not use bare 'except'
         except:
             logging.error(
                 "Could not close the communication channel to the rig via Hamlib!"
@@ -479,7 +483,7 @@ class RecordDialog:
             else:
                 raise ValueError
         except ValueError:
-            error(
+            auxiliary_dialog.error(
                 parent=self.dialog,
                 message="To perform a callsign lookup, please specify the name of the callsign database in the Preferences.",
             )
@@ -488,15 +492,15 @@ class RecordDialog:
         try:
             if database == "qrz.com":
                 # QRZ.com
-                callsign_lookup = CallsignLookupQRZ(parent=self.dialog)
+                lookup = callsign_lookup.CallsignLookupQRZ(parent=self.dialog)
             elif database == "hamqth.com":
                 # HamQTH.com
-                callsign_lookup = CallsignLookupHamQTH(parent=self.dialog)
+                lookup = callsign_lookup.CallsignLookupHamQTH(parent=self.dialog)
             else:
                 raise ValueError("Unknown callsign database: %s" % database)
         except ValueError as e:
             logging.exception(e)
-            error(parent=self.dialog, message=e)
+            auxiliary_dialog.error(parent=self.dialog, message=e)
             return
 
         # Get username and password from configuration file.
@@ -516,7 +520,7 @@ class RecordDialog:
         else:
             details_given = False
         if not details_given:
-            error(
+            auxiliary_dialog.error(
                 parent=self.dialog,
                 message="To perform a callsign lookup, please specify your username and password in the Preferences.",
             )
@@ -526,11 +530,11 @@ class RecordDialog:
         full_callsign = self.sources["CALL"].get_text()
         if not full_callsign:
             # Empty callsign field.
-            error(parent=self.dialog, message="Please enter a callsign to lookup.")
+            auxiliary_dialog.error(parent=self.dialog, message="Please enter a callsign to lookup.")
             return
 
         # Connect to the database.
-        connected = callsign_lookup.connect(username, password)
+        connected = lookup.connect(username, password)
         if connected:
             # Check whether we want to ignore any prefixes (e.g. "IA/") or suffixes "(e.g. "/M") in the callsign
             # before performing the lookup.
