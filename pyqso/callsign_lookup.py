@@ -30,7 +30,7 @@ try:
 except ImportError:
     from urllib import quote
 
-from pyqso.auxiliary_dialogs import error
+from pyqso.auxiliary_dialog import error
 
 
 class CallsignLookupQRZ:

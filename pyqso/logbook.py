@@ -31,7 +31,7 @@ except ImportError:
 from pyqso.adif import ADIF, AVAILABLE_FIELD_NAMES_ORDERED, AVAILABLE_FIELD_NAMES_FRIENDLY, AVAILABLE_FIELD_NAMES_TYPES
 from pyqso.cabrillo import Cabrillo
 from pyqso.log import Log
-from pyqso import auxiliary_dialogs
+from pyqso import auxiliary_dialog
 from pyqso.log_name_dialog import LogNameDialog
 from pyqso.record_dialog import RecordDialog
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
@@ -143,7 +143,7 @@ class Logbook:
                 self.logs = self.get_logs()
             except (sqlite.Error, IndexError) as e:
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not open logbook. Something went wrong when trying to retrieve the logs. Perhaps the logbook file is encrypted, corrupted, or in the wrong format?",
                 )
@@ -231,7 +231,7 @@ class Logbook:
         except sqlite.Error as e:
             # Cannot connect to the database.
             logging.exception(e)
-            auxiliary_dialogs.error(
+            auxiliary_dialog.error(
                 parent=self.application.window,
                 message="Cannot connect to the database. Check file permissions?",
             )
@@ -313,7 +313,7 @@ class Logbook:
                 except sqlite.Error as e:
                     logging.exception(e)
                     # Data is not valid - inform the user.
-                    auxiliary_dialogs.error(
+                    auxiliary_dialog.error(
                         parent=ln.dialog,
                         message="Database error. Try another log name.",
                     )
@@ -368,7 +368,7 @@ class Logbook:
             logging.debug("No logs to delete!")
             return
 
-        response = auxiliary_dialogs.question(
+        response = auxiliary_dialog.question(
             parent=self.application.window,
             message="Are you sure you want to delete log %s?" % log.name,
         )
@@ -379,7 +379,7 @@ class Logbook:
                     c.execute("DROP TABLE %s" % log.name)
             except sqlite.Error as e:
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Database error. Could not delete the log.",
                 )
@@ -598,7 +598,7 @@ class Logbook:
                     ln.dialog.destroy()
                 else:
                     # Unsuccessful rename attempt. Inform the user.
-                    auxiliary_dialogs.error(
+                    auxiliary_dialog.error(
                         parent=ln.dialog,
                         message="Database error. Try another log name.",
                     )
@@ -664,14 +664,14 @@ class Logbook:
         try:
             records = adif.read(path)
         except IOError as e:
-            auxiliary_dialogs.error(
+            auxiliary_dialog.error(
                 parent=self.application.window,
                 message="Could not import the log. I/O error %d: %s"
                 % (e.errno, e.strerror),
             )
             return
         except Exception as e:
-            auxiliary_dialogs.error(parent=self.application.window, message="Could not import the log.")
+            auxiliary_dialog.error(parent=self.application.window, message="Could not import the log.")
             logging.exception(e)
             return
 
@@ -688,7 +688,7 @@ class Logbook:
                 except (sqlite.Error, IndexError) as e:
                     # Could not determine if the log name exists. It's safer to stop here than to try to add a new log.
                     logging.exception(e)
-                    auxiliary_dialogs.error(
+                    auxiliary_dialog.error(
                         parent=ln.dialog,
                         message="Database error. Could not check if the log name exists.",
                     )
@@ -698,7 +698,7 @@ class Logbook:
                 if exists:
                     # Import into existing log.
                     log_object = self.logs[self.get_log_index(name=log_name)]
-                    response = auxiliary_dialogs.question(
+                    response = auxiliary_dialog.question(
                         parent=ln.dialog,
                         message="Are you sure you want to import into an existing log?",
                     )
@@ -723,7 +723,7 @@ class Logbook:
                     except sqlite.Error as e:
                         logging.exception(e)
                         # Data is not valid - inform the user.
-                        auxiliary_dialogs.error(
+                        auxiliary_dialog.error(
                             parent=ln.dialog,
                             message="Database error. Try another log name.",
                         )
@@ -745,7 +745,7 @@ class Logbook:
         self.summary.update()
         self.application.toolbox.awards.count(self)
 
-        auxiliary_dialogs.info(
+        auxiliary_dialog.info(
             parent=self.application.window,
             message="Imported %d QSOs into log '%s'." % (len(records), log_object.name),
         )
@@ -762,7 +762,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -806,7 +806,7 @@ class Logbook:
                 records = log.records
             except sqlite.Error as e:
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not retrieve the records from the SQL database. No records have been exported.",
                 )
@@ -816,20 +816,20 @@ class Logbook:
             adif = ADIF()
             try:
                 adif.write(records, path)
-                auxiliary_dialogs.info(
+                auxiliary_dialog.info(
                     parent=self.application.window,
                     message="Exported %d QSOs to %s in ADIF format."
                     % (len(records), path),
                 )
             except IOError as e:
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not export the records. I/O error %d: %s"
                     % (e.errno, e.strerror),
                 )
             except Exception as e:  # All other exceptions.
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not export the records.",
                 )
@@ -846,7 +846,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -900,7 +900,7 @@ class Logbook:
                 records = log.records
             except sqlite.Error as e:
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not retrieve the records from the SQL database. No records have been exported.",
                 )
@@ -910,20 +910,20 @@ class Logbook:
             cabrillo = Cabrillo()
             try:
                 cabrillo.write(records, path, contest=contest, mycall=mycall)
-                auxiliary_dialogs.info(
+                auxiliary_dialog.info(
                     parent=self.application.window,
                     message="Exported %d QSOs to %s in Cabrillo format."
                     % (len(records), path),
                 )
             except IOError as e:
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not export the records. I/O error %d: %s"
                     % (e.errno, e.strerror),
                 )
             except Exception as e:  # All other exceptions.
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not export the records.",
                 )
@@ -942,7 +942,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -951,7 +951,7 @@ class Logbook:
             records = log.records
         except sqlite.Error as e:
             logging.exception(e)
-            auxiliary_dialogs.error(
+            auxiliary_dialog.error(
                 parent=self.application.window,
                 message="Could not retrieve the records from the SQL database. No records have been printed.",
             )
@@ -973,7 +973,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -1020,7 +1020,7 @@ class Logbook:
                             )
                         ):
                             # Data is not valid - inform the user.
-                            auxiliary_dialogs.error(
+                            auxiliary_dialog.error(
                                 parent=rd.dialog,
                                 message='The data in field "%s" is not valid!'
                                 % field_names[i],
@@ -1034,7 +1034,7 @@ class Logbook:
                             log.add_record(fields_and_data)
                         except (sqlite.Error, IndexError) as e:
                             logging.exception(e)
-                            auxiliary_dialogs.error(
+                            auxiliary_dialog.error(
                                 parent=self.application.window,
                                 message="Could not add the record to the log.",
                             )
@@ -1068,7 +1068,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -1087,7 +1087,7 @@ class Logbook:
             )
             return
 
-        response = auxiliary_dialogs.question(
+        response = auxiliary_dialog.question(
             parent=self.application.window,
             message="Are you sure you want to delete record %d?" % row_index,
         )
@@ -1098,7 +1098,7 @@ class Logbook:
                 log.delete_record(row_index, iter=child_iter)
             except (sqlite.Error, IndexError) as e:
                 logging.exception(e)
-                auxiliary_dialogs.error(
+                auxiliary_dialog.error(
                     parent=self.application.window,
                     message="Could not delete the record from the log.",
                 )
@@ -1123,7 +1123,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
         log = self.logs[log_index]
 
@@ -1166,7 +1166,7 @@ class Logbook:
                         )
                     ):
                         # Data is not valid - inform the user.
-                        auxiliary_dialogs.error(
+                        auxiliary_dialog.error(
                             parent=rd.dialog,
                             message='The data in field "%s" is not valid!'
                             % field_names[i],
@@ -1195,7 +1195,7 @@ class Logbook:
                                 )
                     except (sqlite.Error, IndexError) as e:
                         logging.exception(e)
-                        auxiliary_dialogs.error(
+                        auxiliary_dialog.error(
                             parent=rd.dialog,
                             message="Could not edit record %d." % row_index,
                         )
@@ -1220,13 +1220,13 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
 
         log = self.logs[log_index]
 
         (number_of_duplicates, number_of_duplicates_removed) = log.remove_duplicates()
-        auxiliary_dialogs.info(
+        auxiliary_dialog.info(
             parent=self.application.window,
             message="Found %d duplicate(s). Successfully removed %d duplicate(s)."
             % (number_of_duplicates, number_of_duplicates_removed),
@@ -1250,20 +1250,20 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            auxiliary_dialogs.error(parent=self.application.window, message=e)
+            auxiliary_dialog.error(parent=self.application.window, message=e)
             return
 
         # Get the number of records.
         log = self.logs[log_index]
         try:
             record_count = log.record_count
-            auxiliary_dialogs.info(
+            auxiliary_dialog.info(
                 parent=self.application.window,
                 message="Log '%s' contains %d records." % (log.name, record_count),
             )
         except sqlite.Error as e:
             logging.exception(e)
-            auxiliary_dialogs.error(
+            auxiliary_dialog.error(
                 parent=self.application.window,
                 message="Could not get the record count for '%s' because of a database error."
                 % log.name,

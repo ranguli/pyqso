@@ -20,7 +20,7 @@
 from gi.repository import Gtk, Pango, PangoCairo
 import logging
 
-from pyqso.auxiliary_dialogs import error
+from pyqso.auxiliary_dialog import error
 
 
 class Printer(object):

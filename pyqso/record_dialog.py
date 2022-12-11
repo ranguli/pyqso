@@ -40,7 +40,6 @@ except ImportError:
 from pyqso import adif
 from pyqso import callsign_lookup
 from pyqso import auxiliary_dialog
-from pyqso.calendar_dialog import CalendarDialog
 
 
 class RecordDialog:
@@ -91,9 +90,6 @@ class RecordDialog:
 
         # DATE
         self.sources["QSO_DATE"] = self.builder.get_object("qso_date_entry")
-        self.builder.get_object("select_date").connect(
-            "clicked", self.calendar_callback
-        )
 
         # TIME
         self.sources["TIME_ON"] = self.builder.get_object("qso_time_entry")
@@ -551,15 +547,6 @@ class RecordDialog:
             )
             for field_name in list(fields_and_data.keys()):
                 self.sources[field_name].set_text(fields_and_data[field_name])
-        return
-
-    def calendar_callback(self, widget):
-        """Open up a calendar widget for easy QSO_DATE selection. Return None after the user destroys the dialog."""
-        c = CalendarDialog(self.application)
-        response = c.dialog.run()
-        if response == Gtk.ResponseType.OK:
-            self.sources["QSO_DATE"].set_text(c.date)
-        c.dialog.destroy()
         return
 
     def set_current_datetime_callback(self, widget=None):

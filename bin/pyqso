@@ -20,7 +20,7 @@
 from gi import require_version
 require_version('Gtk', '3.0')
 require_version('PangoCairo', '1.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+from gi.repository import Gtk, Gdk
 import argparse
 try:
     import configparser
@@ -46,7 +46,6 @@ from pyqso.logbook import *
 from pyqso.menu import *
 from pyqso.popup import *
 from pyqso.toolbar import *
-from pyqso.toolbox import *
 from pyqso.preferences_dialog import *
 
 
@@ -92,7 +91,6 @@ class PyQSO:
         # Create a Logbook so we can add/remove/edit logs and records,
         # once connected to the SQLite database.
         self.logbook = Logbook(self)
-        self.toolbox = Toolbox(self)
 
         # Set up the menu and toolbar. These classes depend on the Logbook and Toolbox class.
         self.menu = Menu(self)
@@ -104,13 +102,6 @@ class PyQSO:
 
         # Show the main window.
         self.window.show_all()
-
-        if(have_config):
-            if(not config.getboolean("general", "show_toolbox")):
-                self.toolbox.toggle_visible_callback()
-        else:
-            # Hide the Toolbox by default.
-            self.toolbox.toggle_visible_callback()
 
         if(logbook_path):
             logging.info("Opening logbook: %s" % logbook_path)

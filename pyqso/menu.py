@@ -19,13 +19,6 @@
 
 from gi.repository import Gtk
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-import os.path
-
-
 class Menu:
 
     """The menu bar along the top of the main window."""
@@ -76,12 +69,6 @@ class Menu:
             "activate", self.application.logbook.import_log
         )
 
-        # Export the current log as ADIF
-        self.items["EXPORT_LOG_ADIF"] = self.builder.get_object("mitem_export_log_adif")
-        self.items["EXPORT_LOG_ADIF"].connect(
-            "activate", self.application.logbook.export_log_adif
-        )
-
         # Export the current log as Cabrillo
         self.items["EXPORT_LOG_CABRILLO"] = self.builder.get_object(
             "mitem_export_log_cabrillo"
@@ -89,10 +76,6 @@ class Menu:
         self.items["EXPORT_LOG_CABRILLO"].connect(
             "activate", self.application.logbook.export_log_cabrillo
         )
-
-        # Print log
-        self.items["PRINT_LOG"] = self.builder.get_object("mitem_print_log")
-        self.items["PRINT_LOG"].connect("activate", self.application.logbook.print_log)
 
         # Preferences
         self.items["PREFERENCES"] = self.builder.get_object("mitem_preferences")
@@ -134,21 +117,6 @@ class Menu:
             "activate", self.application.logbook.record_count_callback
         )
 
-        # View toolbox
-        self.items["TOOLBOX"] = self.builder.get_object("mitem_toolbox")
-        config = configparser.ConfigParser()
-        have_config = (
-            config.read(os.path.expanduser("~/.config/pyqso/preferences.ini")) != []
-        )
-        (section, option) = ("general", "show_toolbox")
-        if have_config and config.has_option(section, option):
-            self.items["TOOLBOX"].set_active(config.getboolean(section, option))
-        else:
-            self.items["TOOLBOX"].set_active(False)  # Don't show the toolbox by default
-        self.items["TOOLBOX"].connect(
-            "activate", self.application.toolbox.toggle_visible_callback
-        )
-
         # About
         self.items["ABOUT"] = self.builder.get_object("mitem_about")
         self.items["ABOUT"].connect("activate", self.application.show_about)
@@ -181,9 +149,7 @@ class Menu:
             "DELETE_LOG",
             "RENAME_LOG",
             "IMPORT_LOG",
-            "EXPORT_LOG_ADIF",
-            "EXPORT_LOG_CABRILLO",
-            "PRINT_LOG",
+            "EXPORT_LOG_CABRILLO"
         ]:
             self.items[item_name].set_sensitive(sensitive)
         return
