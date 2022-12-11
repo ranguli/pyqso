@@ -24,10 +24,10 @@ from pyqso.cabrillo import CONTESTS
 
 class CabrilloExportDialog:
 
-    """ A handler for the Gtk.Dialog through which a user can specify Cabrillo log details. """
+    """A handler for the Gtk.Dialog through which a user can specify Cabrillo log details."""
 
     def __init__(self, application):
-        """ Create and show the Cabrillo export dialog to the user.
+        """Create and show the Cabrillo export dialog to the user.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -35,7 +35,9 @@ class CabrilloExportDialog:
         logging.debug("Building new Cabrillo export dialog...")
 
         self.builder = application.builder
-        glade_file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade")
+        glade_file_path = os.path.join(
+            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
+        )
         self.builder.add_objects_from_file(glade_file_path, ("cabrillo_export_dialog",))
         self.dialog = self.builder.get_object("cabrillo_export_dialog")
 
@@ -52,7 +54,7 @@ class CabrilloExportDialog:
 
     @property
     def contest(self):
-        """ Return the name of the contest.
+        """Return the name of the contest.
 
         :returns: The name of the contest.
         :rtype: str
@@ -61,7 +63,7 @@ class CabrilloExportDialog:
 
     @property
     def mycall(self):
-        """ Return the callsign used during the contest.
+        """Return the callsign used during the contest.
 
         :returns: The callsign used during the contest.
         :rtype: str

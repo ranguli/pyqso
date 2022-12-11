@@ -19,20 +19,24 @@
 
 from gi.repository import Gtk
 import logging
+
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
 import os.path
 import base64
+
 try:
     import Hamlib
+
     have_hamlib = True
 except ImportError:
     logging.warning("Could not import the Hamlib module!")
     have_hamlib = False
 try:
     import geocoder
+
     have_geocoder = True
 except ImportError:
     logging.warning("Could not import the geocoder module!")
@@ -46,10 +50,10 @@ PREFERENCES_FILE = os.path.expanduser("~/.config/pyqso/preferences.ini")
 
 class PreferencesDialog:
 
-    """ A dialog to specify the PyQSO preferences. """
+    """A dialog to specify the PyQSO preferences."""
 
     def __init__(self, application):
-        """ Set up the various pages of the preferences dialog.
+        """Set up the various pages of the preferences dialog.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -58,7 +62,9 @@ class PreferencesDialog:
 
         self.application = application
         self.builder = self.application.builder
-        glade_file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade")
+        glade_file_path = os.path.join(
+            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
+        )
         self.builder.add_objects_from_file(glade_file_path, ("preferences_dialog",))
         self.dialog = self.builder.get_object("preferences_dialog")
 
@@ -76,7 +82,7 @@ class PreferencesDialog:
         return
 
     def commit(self):
-        """ Commit the user preferences to the configuration file. """
+        """Commit the user preferences to the configuration file."""
 
         logging.debug("Committing the user preferences to the configuration file...")
 
@@ -113,7 +119,7 @@ class PreferencesDialog:
             config.set("world_map", key.lower(), str(self.world_map.data[key]))
 
         # Write the preferences to file.
-        with open(os.path.expanduser(PREFERENCES_FILE), 'w') as f:
+        with open(os.path.expanduser(PREFERENCES_FILE), "w") as f:
             config.write(f)
 
         return
@@ -121,10 +127,10 @@ class PreferencesDialog:
 
 class GeneralPage:
 
-    """ The section of the preferences dialog containing general preferences. """
+    """The section of the preferences dialog containing general preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the General page of the Preferences dialog. """
+        """Set up the General page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
@@ -133,52 +139,76 @@ class GeneralPage:
         # Remember that the have_config conditional in the PyQSO class may be out-of-date the next time the user opens up the preferences dialog
         # because a configuration file may have been created after launching the application. Let's check to see if one exists again...
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         # Show toolbox.
-        self.sources["SHOW_TOOLBOX"] = self.builder.get_object("general_show_toolbox_checkbutton")
+        self.sources["SHOW_TOOLBOX"] = self.builder.get_object(
+            "general_show_toolbox_checkbutton"
+        )
         (section, option) = ("general", "show_toolbox")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["SHOW_TOOLBOX"].set_active(config.getboolean(section, option))
         else:
             self.sources["SHOW_TOOLBOX"].set_active(False)
 
         # Show statistics.
-        self.sources["SHOW_YEARLY_STATISTICS"] = self.builder.get_object("general_show_yearly_statistics_checkbutton")
+        self.sources["SHOW_YEARLY_STATISTICS"] = self.builder.get_object(
+            "general_show_yearly_statistics_checkbutton"
+        )
         (section, option) = ("general", "show_yearly_statistics")
-        if(have_config and config.has_option(section, option)):
-            self.sources["SHOW_YEARLY_STATISTICS"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["SHOW_YEARLY_STATISTICS"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["SHOW_YEARLY_STATISTICS"].set_active(False)
 
         # Default logbook.
-        self.sources["DEFAULT_LOGBOOK"] = self.builder.get_object("general_default_logbook_checkbutton")
+        self.sources["DEFAULT_LOGBOOK"] = self.builder.get_object(
+            "general_default_logbook_checkbutton"
+        )
         (section, option) = ("general", "default_logbook")
-        if(have_config and config.has_option(section, option)):
-            self.sources["DEFAULT_LOGBOOK"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["DEFAULT_LOGBOOK"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["DEFAULT_LOGBOOK"].set_active(False)
-        self.sources["DEFAULT_LOGBOOK"].connect("toggled", self.on_default_logbook_toggled)
+        self.sources["DEFAULT_LOGBOOK"].connect(
+            "toggled", self.on_default_logbook_toggled
+        )
 
-        self.sources["DEFAULT_LOGBOOK_PATH"] = self.builder.get_object("general_default_logbook_entry")
+        self.sources["DEFAULT_LOGBOOK_PATH"] = self.builder.get_object(
+            "general_default_logbook_entry"
+        )
         (section, option) = ("general", "default_logbook")
         # Disable the text entry box if the default logbook checkbox is not checked.
-        if(have_config and config.has_option(section, option)):
-            self.sources["DEFAULT_LOGBOOK_PATH"].set_sensitive(self.sources["DEFAULT_LOGBOOK"].get_active())
-            self.builder.get_object("general_default_logbook_button").set_sensitive(self.sources["DEFAULT_LOGBOOK"].get_active())
+        if have_config and config.has_option(section, option):
+            self.sources["DEFAULT_LOGBOOK_PATH"].set_sensitive(
+                self.sources["DEFAULT_LOGBOOK"].get_active()
+            )
+            self.builder.get_object("general_default_logbook_button").set_sensitive(
+                self.sources["DEFAULT_LOGBOOK"].get_active()
+            )
         else:
             self.sources["DEFAULT_LOGBOOK_PATH"].set_sensitive(False)
-            self.builder.get_object("general_default_logbook_button").set_sensitive(False)
+            self.builder.get_object("general_default_logbook_button").set_sensitive(
+                False
+            )
         (section, option) = ("general", "default_logbook_path")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["DEFAULT_LOGBOOK_PATH"].set_text(config.get(section, option))
 
-        self.builder.get_object("general_default_logbook_button").connect("clicked", self.on_default_logbook_clicked)
+        self.builder.get_object("general_default_logbook_button").connect(
+            "clicked", self.on_default_logbook_clicked
+        )
 
         # Keep 'Add Record' dialog open.
-        self.sources["KEEP_OPEN"] = self.builder.get_object("general_keep_open_checkbutton")
+        self.sources["KEEP_OPEN"] = self.builder.get_object(
+            "general_keep_open_checkbutton"
+        )
         (section, option) = ("general", "keep_open")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["KEEP_OPEN"].set_active(config.getboolean(section, option))
         else:
             self.sources["KEEP_OPEN"].set_active(False)
@@ -187,35 +217,49 @@ class GeneralPage:
 
     @property
     def data(self):
-        """ User preferences regarding General settings. """
+        """User preferences regarding General settings."""
         data = {}
         data["SHOW_TOOLBOX"] = self.sources["SHOW_TOOLBOX"].get_active()
-        data["SHOW_YEARLY_STATISTICS"] = self.sources["SHOW_YEARLY_STATISTICS"].get_active()
+        data["SHOW_YEARLY_STATISTICS"] = self.sources[
+            "SHOW_YEARLY_STATISTICS"
+        ].get_active()
         data["DEFAULT_LOGBOOK"] = self.sources["DEFAULT_LOGBOOK"].get_active()
-        data["DEFAULT_LOGBOOK_PATH"] = os.path.expanduser(self.sources["DEFAULT_LOGBOOK_PATH"].get_text())
+        data["DEFAULT_LOGBOOK_PATH"] = os.path.expanduser(
+            self.sources["DEFAULT_LOGBOOK_PATH"].get_text()
+        )
         data["KEEP_OPEN"] = self.sources["KEEP_OPEN"].get_active()
         return data
 
     def on_default_logbook_toggled(self, widget, data=None):
-        if(widget.get_active()):
+        if widget.get_active():
             self.sources["DEFAULT_LOGBOOK_PATH"].set_sensitive(True)
-            self.builder.get_object("general_default_logbook_button").set_sensitive(True)
+            self.builder.get_object("general_default_logbook_button").set_sensitive(
+                True
+            )
         else:
             self.sources["DEFAULT_LOGBOOK_PATH"].set_sensitive(False)
-            self.builder.get_object("general_default_logbook_button").set_sensitive(False)
+            self.builder.get_object("general_default_logbook_button").set_sensitive(
+                False
+            )
         return
 
     def on_default_logbook_clicked(self, widget):
-        """ Let the user select the default logbook file via a file chooser dialog,
-        and set the path in the adjacent entry box. """
+        """Let the user select the default logbook file via a file chooser dialog,
+        and set the path in the adjacent entry box."""
 
-        dialog = Gtk.FileChooserDialog("Select SQLite Database File",
-                                       self.parent,
-                                       Gtk.FileChooserAction.OPEN,
-                                       (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                                        Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
+        dialog = Gtk.FileChooserDialog(
+            "Select SQLite Database File",
+            self.parent,
+            Gtk.FileChooserAction.OPEN,
+            (
+                Gtk.STOCK_CANCEL,
+                Gtk.ResponseType.CANCEL,
+                Gtk.STOCK_OPEN,
+                Gtk.ResponseType.OK,
+            ),
+        )
         response = dialog.run()
-        if(response == Gtk.ResponseType.OK):
+        if response == Gtk.ResponseType.OK:
             path = dialog.get_filename()
             self.sources["DEFAULT_LOGBOOK_PATH"].set_text(path)
         dialog.destroy()
@@ -224,23 +268,27 @@ class GeneralPage:
 
 class ViewPage:
 
-    """ The section of the preferences dialog containing view-related preferences. """
+    """The section of the preferences dialog containing view-related preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the View page of the Preferences dialog. """
+        """Set up the View page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
         self.sources = {}
 
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         # Visible fields
         for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
-            self.sources[field_name] = self.builder.get_object("visible_fields_%s" % (field_name.lower()))
-            if(have_config and config.has_option("view", field_name.lower())):
-                self.sources[field_name].set_active(config.getboolean("view", field_name.lower()))
+            self.sources[field_name] = self.builder.get_object(
+                "visible_fields_%s" % (field_name.lower())
+            )
+            if have_config and config.has_option("view", field_name.lower()):
+                self.sources[field_name].set_active(
+                    config.getboolean("view", field_name.lower())
+                )
             else:
                 self.sources[field_name].set_active(True)
 
@@ -248,7 +296,7 @@ class ViewPage:
 
     @property
     def data(self):
-        """ User preferences regarding View settings. """
+        """User preferences regarding View settings."""
         data = {}
         for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
             data[field_name] = self.sources[field_name].get_active()
@@ -257,10 +305,10 @@ class ViewPage:
 
 class RecordsPage:
 
-    """ The section of the preferences dialog containing record-related preferences. """
+    """The section of the preferences dialog containing record-related preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the Record page of the Preferences dialog. """
+        """Set up the Record page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
@@ -269,19 +317,25 @@ class RecordsPage:
         # Remember that the have_config conditional in the PyQSO class may be out-of-date the next time the user opens up the preferences dialog
         # because a configuration file may have been created after launching the application. Let's check to see if one exists again...
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         # Autocomplete
-        self.sources["AUTOCOMPLETE_BAND"] = self.builder.get_object("records_autocomplete_band_checkbutton")
+        self.sources["AUTOCOMPLETE_BAND"] = self.builder.get_object(
+            "records_autocomplete_band_checkbutton"
+        )
         (section, option) = ("records", "autocomplete_band")
-        if(have_config and config.has_option(section, option)):
-            self.sources["AUTOCOMPLETE_BAND"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["AUTOCOMPLETE_BAND"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["AUTOCOMPLETE_BAND"].set_active(True)
 
-        self.sources["USE_UTC"] = self.builder.get_object("records_autocomplete_utc_checkbutton")
+        self.sources["USE_UTC"] = self.builder.get_object(
+            "records_autocomplete_utc_checkbutton"
+        )
         (section, option) = ("records", "use_utc")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["USE_UTC"].set_active(config.getboolean(section, option))
         else:
             self.sources["USE_UTC"].set_active(True)
@@ -289,11 +343,13 @@ class RecordsPage:
         # Default values
 
         # Mode
-        self.sources["DEFAULT_MODE"] = self.builder.get_object("default_values_mode_combo")
+        self.sources["DEFAULT_MODE"] = self.builder.get_object(
+            "default_values_mode_combo"
+        )
         for mode in sorted(MODES.keys()):
             self.sources["DEFAULT_MODE"].append_text(mode)
         (section, option) = ("records", "default_mode")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             mode = config.get(section, option)
         else:
             mode = ""
@@ -301,62 +357,84 @@ class RecordsPage:
         self.sources["DEFAULT_MODE"].connect("changed", self.on_mode_changed)
 
         # Submode
-        self.sources["DEFAULT_SUBMODE"] = self.builder.get_object("default_values_submode_combo")
+        self.sources["DEFAULT_SUBMODE"] = self.builder.get_object(
+            "default_values_submode_combo"
+        )
         for submode in MODES[mode]:
             self.sources["DEFAULT_SUBMODE"].append_text(submode)
         (section, option) = ("records", "default_submode")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             submode = config.get(section, option)
         else:
             submode = ""
         self.sources["DEFAULT_SUBMODE"].set_active(MODES[mode].index(submode))
 
         # Power
-        self.sources["DEFAULT_POWER"] = self.builder.get_object("default_values_tx_power_entry")
+        self.sources["DEFAULT_POWER"] = self.builder.get_object(
+            "default_values_tx_power_entry"
+        )
         (section, option) = ("records", "default_power")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["DEFAULT_POWER"].set_text(config.get(section, option))
         else:
             self.sources["DEFAULT_POWER"].set_text("")
 
         # Frequency unit
-        self.sources["DEFAULT_FREQUENCY_UNIT"] = self.builder.get_object("default_values_frequency_unit_combo")
+        self.sources["DEFAULT_FREQUENCY_UNIT"] = self.builder.get_object(
+            "default_values_frequency_unit_combo"
+        )
         units = ["Hz", "kHz", "MHz", "GHz"]
         for unit in units:
             self.sources["DEFAULT_FREQUENCY_UNIT"].append_text(unit)
         (section, option) = ("records", "default_frequency_unit")
-        if(have_config and config.has_option(section, option)):
-            self.sources["DEFAULT_FREQUENCY_UNIT"].set_active(units.index(config.get(section, option)))
+        if have_config and config.has_option(section, option):
+            self.sources["DEFAULT_FREQUENCY_UNIT"].set_active(
+                units.index(config.get(section, option))
+            )
         else:
             self.sources["DEFAULT_FREQUENCY_UNIT"].set_active(units.index("MHz"))
 
         # Callsign lookup
-        self.sources["CALLSIGN_DATABASE"] = self.builder.get_object("callsign_lookup_database_combo")
+        self.sources["CALLSIGN_DATABASE"] = self.builder.get_object(
+            "callsign_lookup_database_combo"
+        )
         callsign_database = ["", "qrz.com", "hamqth.com"]
         for database in callsign_database:
             self.sources["CALLSIGN_DATABASE"].append_text(database)
         (section, option) = ("records", "callsign_database")
-        if(have_config and config.has_option(section, option)):
-            self.sources["CALLSIGN_DATABASE"].set_active(callsign_database.index(config.get(section, option)))
+        if have_config and config.has_option(section, option):
+            self.sources["CALLSIGN_DATABASE"].set_active(
+                callsign_database.index(config.get(section, option))
+            )
         else:
             self.sources["CALLSIGN_DATABASE"].set_active(callsign_database.index(""))
 
         # Login details
-        self.sources["CALLSIGN_DATABASE_USERNAME"] = self.builder.get_object("callsign_lookup_login_details_username_entry")
+        self.sources["CALLSIGN_DATABASE_USERNAME"] = self.builder.get_object(
+            "callsign_lookup_login_details_username_entry"
+        )
         (section, option) = ("records", "callsign_database_username")
-        if(have_config and config.has_option(section, option)):
-            self.sources["CALLSIGN_DATABASE_USERNAME"].set_text(config.get(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["CALLSIGN_DATABASE_USERNAME"].set_text(
+                config.get(section, option)
+            )
 
-        self.sources["CALLSIGN_DATABASE_PASSWORD"] = self.builder.get_object("callsign_lookup_login_details_password_entry")
+        self.sources["CALLSIGN_DATABASE_PASSWORD"] = self.builder.get_object(
+            "callsign_lookup_login_details_password_entry"
+        )
         (section, option) = ("records", "callsign_database_password")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             password = base64.b64decode(config.get(section, option)).decode("utf-8")
             self.sources["CALLSIGN_DATABASE_PASSWORD"].set_text(password)
 
-        self.sources["IGNORE_PREFIX_SUFFIX"] = self.builder.get_object("callsign_lookup_ignore_prefix_suffix_checkbutton")
+        self.sources["IGNORE_PREFIX_SUFFIX"] = self.builder.get_object(
+            "callsign_lookup_ignore_prefix_suffix_checkbutton"
+        )
         (section, option) = ("records", "ignore_prefix_suffix")
-        if(have_config and config.has_option(section, option)):
-            self.sources["IGNORE_PREFIX_SUFFIX"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["IGNORE_PREFIX_SUFFIX"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["IGNORE_PREFIX_SUFFIX"].set_active(True)
 
@@ -364,7 +442,7 @@ class RecordsPage:
 
     @property
     def data(self):
-        """ User preferences regarding Records settings. """
+        """User preferences regarding Records settings."""
         data = {}
         data["AUTOCOMPLETE_BAND"] = self.sources["AUTOCOMPLETE_BAND"].get_active()
         data["USE_UTC"] = self.sources["USE_UTC"].get_active()
@@ -372,16 +450,24 @@ class RecordsPage:
         data["DEFAULT_MODE"] = self.sources["DEFAULT_MODE"].get_active_text()
         data["DEFAULT_SUBMODE"] = self.sources["DEFAULT_SUBMODE"].get_active_text()
         data["DEFAULT_POWER"] = self.sources["DEFAULT_POWER"].get_text()
-        data["DEFAULT_FREQUENCY_UNIT"] = self.sources["DEFAULT_FREQUENCY_UNIT"].get_active_text()
+        data["DEFAULT_FREQUENCY_UNIT"] = self.sources[
+            "DEFAULT_FREQUENCY_UNIT"
+        ].get_active_text()
 
         data["CALLSIGN_DATABASE"] = self.sources["CALLSIGN_DATABASE"].get_active_text()
-        data["CALLSIGN_DATABASE_USERNAME"] = self.sources["CALLSIGN_DATABASE_USERNAME"].get_text()
-        data["CALLSIGN_DATABASE_PASSWORD"] = base64.b64encode(self.sources["CALLSIGN_DATABASE_PASSWORD"].get_text().encode("utf-8")).decode("utf-8")  # Need to convert from bytes to str here.
+        data["CALLSIGN_DATABASE_USERNAME"] = self.sources[
+            "CALLSIGN_DATABASE_USERNAME"
+        ].get_text()
+        data["CALLSIGN_DATABASE_PASSWORD"] = base64.b64encode(
+            self.sources["CALLSIGN_DATABASE_PASSWORD"].get_text().encode("utf-8")
+        ).decode(
+            "utf-8"
+        )  # Need to convert from bytes to str here.
         data["IGNORE_PREFIX_SUFFIX"] = self.sources["IGNORE_PREFIX_SUFFIX"].get_active()
         return data
 
     def on_mode_changed(self, combo):
-        """ If the MODE field has changed its value, then fill the SUBMODE field with all the available SUBMODE options for that new MODE. """
+        """If the MODE field has changed its value, then fill the SUBMODE field with all the available SUBMODE options for that new MODE."""
         self.sources["DEFAULT_SUBMODE"].get_model().clear()
         mode = combo.get_active_text()
         for submode in MODES[mode]:
@@ -392,10 +478,10 @@ class RecordsPage:
 
 class ImportExportPage:
 
-    """ The section of the preferences dialog containing import/export-related preferences. """
+    """The section of the preferences dialog containing import/export-related preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the Import/Export page of the Preferences dialog. """
+        """Set up the Import/Export page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
@@ -404,12 +490,14 @@ class ImportExportPage:
         # Remember that the have_config conditional in the PyQSO class may be out-of-date the next time the user opens up the preferences dialog
         # because a configuration file may have been created after launching the application. Let's check to see if one exists again...
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         # Import
-        self.sources["MERGE_COMMENT"] = self.builder.get_object("adif_import_merge_comment_checkbutton")
+        self.sources["MERGE_COMMENT"] = self.builder.get_object(
+            "adif_import_merge_comment_checkbutton"
+        )
         (section, option) = ("import_export", "merge_comment")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["MERGE_COMMENT"].set_active(config.getboolean(section, option))
         else:
             self.sources["MERGE_COMMENT"].set_active(False)
@@ -418,7 +506,7 @@ class ImportExportPage:
 
     @property
     def data(self):
-        """ User preferences regarding Import/Export settings. """
+        """User preferences regarding Import/Export settings."""
         data = {}
         data["MERGE_COMMENT"] = self.sources["MERGE_COMMENT"].get_active()
         return data
@@ -426,57 +514,67 @@ class ImportExportPage:
 
 class HamlibPage:
 
-    """ The section of the preferences dialog containing Hamlib-related preferences. """
+    """The section of the preferences dialog containing Hamlib-related preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the Hamlib page of the Preferences dialog. """
+        """Set up the Hamlib page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
         self.sources = {}
 
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         self.sources["AUTOFILL"] = self.builder.get_object("hamlib_support_checkbutton")
         (section, option) = ("hamlib", "autofill")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["AUTOFILL"].set_active(config.getboolean(section, option))
         else:
             self.sources["AUTOFILL"].set_active(False)
 
         # Get the list of rig models
         models = ["RIG_MODEL_NONE"]
-        if(have_hamlib):
+        if have_hamlib:
             try:
                 for item in dir(Hamlib):
-                    if(item.startswith("RIG_MODEL_")):
+                    if item.startswith("RIG_MODEL_"):
                         models.append(item)
             except:
                 logging.error("Could not obtain rig models list via Hamlib!")
         else:
-            logging.debug("Hamlib module not present. Could not obtain a list of rig models.")
+            logging.debug(
+                "Hamlib module not present. Could not obtain a list of rig models."
+            )
 
-        self.sources["RIG_MODEL"] = self.builder.get_object("hamlib_support_model_combo")
+        self.sources["RIG_MODEL"] = self.builder.get_object(
+            "hamlib_support_model_combo"
+        )
         for model in models:
             self.sources["RIG_MODEL"].append_text(model)
         (section, option) = ("hamlib", "rig_model")
-        if(have_config and config.has_option("hamlib", "rig_model")):
-            self.sources["RIG_MODEL"].set_active(models.index(config.get("hamlib", "rig_model")))
+        if have_config and config.has_option("hamlib", "rig_model"):
+            self.sources["RIG_MODEL"].set_active(
+                models.index(config.get("hamlib", "rig_model"))
+            )
         else:
-            self.sources["RIG_MODEL"].set_active(models.index("RIG_MODEL_NONE"))  # Set to RIG_MODEL_NONE as the default option.
+            self.sources["RIG_MODEL"].set_active(
+                models.index("RIG_MODEL_NONE")
+            )  # Set to RIG_MODEL_NONE as the default option.
 
         # Path to rig
-        self.sources["RIG_PATHNAME"] = self.builder.get_object("hamlib_support_path_entry")
+        self.sources["RIG_PATHNAME"] = self.builder.get_object(
+            "hamlib_support_path_entry"
+        )
         (section, option) = ("hamlib", "rig_pathname")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["RIG_PATHNAME"].set_text(config.get(section, option))
 
         return
 
     @property
     def data(self):
-        """ User preferences regarding Hamlib settings. """
+        """User preferences regarding Hamlib settings."""
         data = {}
         data["AUTOFILL"] = self.sources["AUTOFILL"].get_active()
         data["RIG_PATHNAME"] = self.sources["RIG_PATHNAME"].get_text()
@@ -486,10 +584,10 @@ class HamlibPage:
 
 class WorldMapPage:
 
-    """ The section of the preferences dialog containing World Map preferences. """
+    """The section of the preferences dialog containing World Map preferences."""
 
     def __init__(self, parent, builder):
-        """ Set up the World Map page of the Preferences dialog. """
+        """Set up the World Map page of the Preferences dialog."""
 
         self.parent = parent
         self.builder = builder
@@ -498,29 +596,43 @@ class WorldMapPage:
         # Remember that the have_config conditional in the PyQSO class may be out-of-date the next time the user opens up the preferences dialog
         # because a configuration file may have been created after launching the application. Let's check to see if one exists again...
         config = configparser.ConfigParser()
-        have_config = (config.read(PREFERENCES_FILE) != [])
+        have_config = config.read(PREFERENCES_FILE) != []
 
         # Option to pinpoint QTH on grey line map.
-        self.sources["SHOW_QTH"] = self.builder.get_object("world_map_show_qth_checkbutton")
+        self.sources["SHOW_QTH"] = self.builder.get_object(
+            "world_map_show_qth_checkbutton"
+        )
         (section, option) = ("world_map", "show_qth")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["SHOW_QTH"].set_active(config.getboolean(section, option))
         else:
             self.sources["SHOW_QTH"].set_active(False)
 
         self.sources["QTH_NAME"] = self.builder.get_object("world_map_qth_name_entry")
         button = self.builder.get_object("world_map_qth_lookup")
-        button.connect("clicked", self.lookup_callback)  # Uses geocoding to find the latitude-longitude coordinates.
+        button.connect(
+            "clicked", self.lookup_callback
+        )  # Uses geocoding to find the latitude-longitude coordinates.
 
-        self.sources["QTH_LATITUDE"] = self.builder.get_object("world_map_qth_coordinates_latitude_entry")
-        self.sources["QTH_LONGITUDE"] = self.builder.get_object("world_map_qth_coordinates_longitude_entry")
+        self.sources["QTH_LATITUDE"] = self.builder.get_object(
+            "world_map_qth_coordinates_latitude_entry"
+        )
+        self.sources["QTH_LONGITUDE"] = self.builder.get_object(
+            "world_map_qth_coordinates_longitude_entry"
+        )
 
         (section, option) = ("world_map", "show_qth")
         # Disable the text entry boxes if the SHOW_QTH checkbox is not checked.
-        if(have_config and config.has_option(section, option)):
-            self.sources["QTH_NAME"].set_sensitive(self.sources["SHOW_QTH"].get_active())
-            self.sources["QTH_LATITUDE"].set_sensitive(self.sources["SHOW_QTH"].get_active())
-            self.sources["QTH_LONGITUDE"].set_sensitive(self.sources["SHOW_QTH"].get_active())
+        if have_config and config.has_option(section, option):
+            self.sources["QTH_NAME"].set_sensitive(
+                self.sources["SHOW_QTH"].get_active()
+            )
+            self.sources["QTH_LATITUDE"].set_sensitive(
+                self.sources["SHOW_QTH"].get_active()
+            )
+            self.sources["QTH_LONGITUDE"].set_sensitive(
+                self.sources["SHOW_QTH"].get_active()
+            )
             button.set_sensitive(self.sources["SHOW_QTH"].get_active())
         else:
             self.sources["QTH_NAME"].set_sensitive(False)
@@ -528,29 +640,37 @@ class WorldMapPage:
             self.sources["QTH_LONGITUDE"].set_sensitive(False)
             button.set_sensitive(False)
         (section, option) = ("world_map", "qth_name")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["QTH_NAME"].set_text(config.get(section, option))
         (section, option) = ("world_map", "qth_latitude")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["QTH_LATITUDE"].set_text(config.get(section, option))
         (section, option) = ("world_map", "qth_longitude")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.sources["QTH_LONGITUDE"].set_text(config.get(section, option))
         self.sources["SHOW_QTH"].connect("toggled", self.on_show_qth_toggled)
 
         # Option to show Maidenhead grid squares.
-        self.sources["SHOW_GRID_SQUARES"] = self.builder.get_object("world_map_show_grid_squares_checkbutton")
+        self.sources["SHOW_GRID_SQUARES"] = self.builder.get_object(
+            "world_map_show_grid_squares_checkbutton"
+        )
         (section, option) = ("world_map", "show_grid_squares")
-        if(have_config and config.has_option(section, option)):
-            self.sources["SHOW_GRID_SQUARES"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["SHOW_GRID_SQUARES"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["SHOW_GRID_SQUARES"].set_active(False)
 
         # Option to shade in worked Maidenhead grid squares.
-        self.sources["SHADE_WORKED_GRID_SQUARES"] = self.builder.get_object("world_map_shade_worked_grid_squares_checkbutton")
+        self.sources["SHADE_WORKED_GRID_SQUARES"] = self.builder.get_object(
+            "world_map_shade_worked_grid_squares_checkbutton"
+        )
         (section, option) = ("world_map", "shade_worked_grid_squares")
-        if(have_config and config.has_option(section, option)):
-            self.sources["SHADE_WORKED_GRID_SQUARES"].set_active(config.getboolean(section, option))
+        if have_config and config.has_option(section, option):
+            self.sources["SHADE_WORKED_GRID_SQUARES"].set_active(
+                config.getboolean(section, option)
+            )
         else:
             self.sources["SHADE_WORKED_GRID_SQUARES"].set_active(False)
 
@@ -558,18 +678,20 @@ class WorldMapPage:
 
     @property
     def data(self):
-        """ User preferences regarding World Map settings. """
+        """User preferences regarding World Map settings."""
         data = {}
         data["SHOW_QTH"] = self.sources["SHOW_QTH"].get_active()
         data["QTH_NAME"] = self.sources["QTH_NAME"].get_text()
         data["QTH_LATITUDE"] = self.sources["QTH_LATITUDE"].get_text()
         data["QTH_LONGITUDE"] = self.sources["QTH_LONGITUDE"].get_text()
         data["SHOW_GRID_SQUARES"] = self.sources["SHOW_GRID_SQUARES"].get_active()
-        data["SHADE_WORKED_GRID_SQUARES"] = self.sources["SHADE_WORKED_GRID_SQUARES"].get_active()
+        data["SHADE_WORKED_GRID_SQUARES"] = self.sources[
+            "SHADE_WORKED_GRID_SQUARES"
+        ].get_active()
         return data
 
     def on_show_qth_toggled(self, widget, data=None):
-        if(widget.get_active()):
+        if widget.get_active():
             self.sources["QTH_NAME"].set_sensitive(True)
             self.sources["QTH_LATITUDE"].set_sensitive(True)
             self.sources["QTH_LONGITUDE"].set_sensitive(True)
@@ -582,9 +704,12 @@ class WorldMapPage:
         return
 
     def lookup_callback(self, widget=None):
-        """ Perform geocoding of the QTH location to obtain latitude-longitude coordinates. """
-        if(not have_geocoder):
-            error(parent=self.parent, message="Geocoder module could not be imported. Geocoding aborted.")
+        """Perform geocoding of the QTH location to obtain latitude-longitude coordinates."""
+        if not have_geocoder:
+            error(
+                parent=self.parent,
+                message="Geocoder module could not be imported. Geocoding aborted.",
+            )
             return
         logging.debug("Geocoding QTH location...")
         name = self.sources["QTH_NAME"].get_text()
@@ -593,11 +718,19 @@ class WorldMapPage:
             latitude, longitude = g.latlng
             self.sources["QTH_LATITUDE"].set_text(str(latitude))
             self.sources["QTH_LONGITUDE"].set_text(str(longitude))
-            logging.debug("QTH coordinates found: (%s, %s)", str(latitude), str(longitude))
+            logging.debug(
+                "QTH coordinates found: (%s, %s)", str(latitude), str(longitude)
+            )
         except ValueError as e:
-            error(parent=self.parent, message="Unable to lookup QTH coordinates. Is the QTH name correct?")
+            error(
+                parent=self.parent,
+                message="Unable to lookup QTH coordinates. Is the QTH name correct?",
+            )
             logging.exception(e)
         except Exception as e:
-            error(parent=self.parent, message="Unable to lookup QTH coordinates. Check connection to the internets? Lookup limit reached?")
+            error(
+                parent=self.parent,
+                message="Unable to lookup QTH coordinates. Check connection to the internets? Lookup limit reached?",
+            )
             logging.exception(e)
         return

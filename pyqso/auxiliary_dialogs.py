@@ -22,7 +22,7 @@ import logging
 
 
 def error(parent, message):
-    """ Display an error message.
+    """Display an error message.
 
     :arg parent: The Gtk parent window/dialog.
     :arg str message: The message to display to the user.
@@ -32,7 +32,7 @@ def error(parent, message):
 
 
 def info(parent, message):
-    """ Display some information.
+    """Display some information.
 
     :arg parent: The Gtk parent window/dialog.
     :arg str message: The message to display to the user.
@@ -42,7 +42,7 @@ def info(parent, message):
 
 
 def question(parent, message):
-    """ Ask the user a question. The dialog comes with 'Yes' and 'No' response buttons.
+    """Ask the user a question. The dialog comes with 'Yes' and 'No' response buttons.
 
     :arg parent: The Gtk parent window/dialog.
     :arg str message: The message to display to the user.
@@ -65,8 +65,14 @@ def handle_gtk_dialog(parent, msgtype, message, title):
     """
     bt = Gtk.ButtonsType
     buttons = bt.YES_NO if msgtype == Gtk.MessageType.QUESTION else bt.OK
-    dialog = Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                               msgtype, buttons, message, title=title)
+    dialog = Gtk.MessageDialog(
+        parent,
+        Gtk.DialogFlags.DESTROY_WITH_PARENT,
+        msgtype,
+        buttons,
+        message,
+        title=title,
+    )
     response = dialog.run()
     dialog.destroy()
     return response

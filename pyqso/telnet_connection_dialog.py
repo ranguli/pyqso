@@ -22,23 +22,29 @@ import os
 
 class TelnetConnectionDialog:
 
-    """ A handler for the Gtk.Dialog through which a user can specify Telnet connection details. """
+    """A handler for the Gtk.Dialog through which a user can specify Telnet connection details."""
 
     def __init__(self, application):
-        """ Create and show the Telnet connection dialog to the user.
+        """Create and show the Telnet connection dialog to the user.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
 
         self.builder = application.builder
-        glade_file_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade")
-        self.builder.add_objects_from_file(glade_file_path, ("telnet_connection_dialog",))
+        glade_file_path = os.path.join(
+            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
+        )
+        self.builder.add_objects_from_file(
+            glade_file_path, ("telnet_connection_dialog",)
+        )
         self.dialog = self.builder.get_object("telnet_connection_dialog")
-        self.sources = {"HOST": self.builder.get_object("host_entry"),
-                        "PORT": self.builder.get_object("port_entry"),
-                        "USERNAME": self.builder.get_object("username_entry"),
-                        "PASSWORD": self.builder.get_object("password_entry"),
-                        "BOOKMARK": self.builder.get_object("bookmark_checkbox")}
+        self.sources = {
+            "HOST": self.builder.get_object("host_entry"),
+            "PORT": self.builder.get_object("port_entry"),
+            "USERNAME": self.builder.get_object("username_entry"),
+            "PASSWORD": self.builder.get_object("password_entry"),
+            "BOOKMARK": self.builder.get_object("bookmark_checkbox"),
+        }
 
         self.dialog.show_all()
 
@@ -46,7 +52,7 @@ class TelnetConnectionDialog:
 
     @property
     def host(self):
-        """ Return the Telnet server's host name.
+        """Return the Telnet server's host name.
 
         :returns: The server's host name.
         :rtype: str
@@ -55,7 +61,7 @@ class TelnetConnectionDialog:
 
     @property
     def port(self):
-        """ Return the Telnet server's port number (as a string).
+        """Return the Telnet server's port number (as a string).
 
         :returns: The server's port number (as a string).
         :rtype: str
@@ -64,7 +70,7 @@ class TelnetConnectionDialog:
 
     @property
     def username(self):
-        """ Return the user's username.
+        """Return the user's username.
 
         :returns: The user's username.
         :rtype: str
@@ -73,7 +79,7 @@ class TelnetConnectionDialog:
 
     @property
     def password(self):
-        """ Return the user's password.
+        """Return the user's password.
 
         :returns: The user's password.
         :rtype: str
@@ -82,7 +88,7 @@ class TelnetConnectionDialog:
 
     @property
     def bookmark(self):
-        """ Return True if a new bookmark should be created, otherwise return False.
+        """Return True if a new bookmark should be created, otherwise return False.
 
         :returns: True if a new bookmark should be created, otherwise False.
         :rtype: bool

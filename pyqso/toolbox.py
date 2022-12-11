@@ -24,10 +24,10 @@ from pyqso.awards import Awards
 
 class Toolbox:
 
-    """ Contains a Gtk.Notebook full of amateur radio-related tools. """
+    """Contains a Gtk.Notebook full of amateur radio-related tools."""
 
     def __init__(self, application):
-        """ Instantiate and insert the various tools into the toolbox.
+        """Instantiate and insert the various tools into the toolbox.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -46,13 +46,13 @@ class Toolbox:
         return
 
     def toggle_visible_callback(self, widget=None):
-        """ Show/hide the toolbox. """
+        """Show/hide the toolbox."""
         toolbox_frame = self.builder.get_object("toolbox")
         toolbox_frame.set_visible(not toolbox_frame.get_visible())
         return
 
     def on_switch_page(self, widget, label, new_page):
-        """ Re-draw the WorldMap if the user switches to the World Map tab. """
-        if(widget.get_tab_label(label).get_text() == "World Map"):
+        """Re-draw the WorldMap if the user switches to the World Map tab."""
+        if widget.get_tab_label(label).get_text() == "World Map":
             self.world_map.draw()
         return
