@@ -27,14 +27,14 @@ class PopupDialog():
 
 
     def error(self):
-        self.buttons = bt.GtkButtonType.OK
+        self.buttons = GtkButtonType.OK
         self.title = "Error"
         self.msgtype = Gtk.MessageType.ERROR
 
         return self.show()
 
     def question(self):
-        self.buttons = bt.GtkButtonType.YES_NO
+        self.buttons = GtkButtonType.YES_NO
         self.title = "Question"
         self.msgtype = Gtk.MessageType.QUESTION
 
@@ -52,7 +52,6 @@ class PopupDialog():
         :returns: The response from the user, based on which button they pushed.
         :rtype: Gtk.ResponseType
         """
-        bt = Gtk.ButtonsType
         dialog = Gtk.MessageDialog(
             parent,
             Gtk.DialogFlags.DESTROY_WITH_PARENT,
