@@ -90,10 +90,6 @@ class Menu:
             "activate", self.application.logbook.export_log_cabrillo
         )
 
-        # Print log
-        self.items["PRINT_LOG"] = self.builder.get_object("mitem_print_log")
-        self.items["PRINT_LOG"].connect("activate", self.application.logbook.print_log)
-
         # Preferences
         self.items["PREFERENCES"] = self.builder.get_object("mitem_preferences")
         self.items["PREFERENCES"].connect("activate", self.application.show_preferences)

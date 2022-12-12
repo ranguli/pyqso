@@ -37,7 +37,6 @@ from pyqso.record_dialog import RecordDialog
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.summary import Summary
 from pyqso.blank import Blank
-from pyqso.printer import Printer
 from pyqso.compare import compare_date_and_time, compare_default
 
 
@@ -945,41 +944,6 @@ class Logbook:
                     message="Could not export the records.",
                 )
                 d.error()
-
-        return
-
-    def print_log(self, widget=None):
-        """Print all the records in the log (that is currently selected).
-        Note that only a few important fields are printed because of the restricted width of the page."""
-
-        # Get the index of the selected tab in the logbook.
-        try:
-            log_index = self.get_log_index()
-            if log_index is None:
-                raise ValueError(
-                    "The log index could not be determined. Perhaps the Summary page is selected?"
-                )
-        except ValueError as e:
-            d = PopupDialog(parent=self.application.window, message=e)
-            d.error()
-            return
-        log = self.logs[log_index]
-
-        # Retrieve the records.
-        try:
-            records = log.records
-        except sqlite.Error as e:
-            logging.exception(e)
-            d = PopupDialog(
-                parent=self.application.window,
-                message="Could not retrieve the records from the SQL database. No records have been printed.",
-            )
-            d.error()
-            return
-
-        # Print the records.
-        printer = Printer(self.application)
-        printer.print_records(records, title="Log: %s" % log.name)
 
         return
 
