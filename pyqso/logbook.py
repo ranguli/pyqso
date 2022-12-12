@@ -169,7 +169,6 @@ class Logbook:
             logging.debug("All logs rendered successfully.")
 
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
             context_id = self.application.statusbar.get_context_id("Status")
             self.application.statusbar.push(context_id, "Logbook: %s" % self.path)
@@ -396,7 +395,6 @@ class Logbook:
             self.notebook.remove_page(page_index)
 
         self.summary.update()
-        self.application.toolbox.awards.count(self)
         return
 
     def filter_logs(self, widget=None):
@@ -743,7 +741,6 @@ class Logbook:
 
         # Update statistics, etc.
         self.summary.update()
-        self.application.toolbox.awards.count(self)
 
         auxiliary_dialogs.info(
             parent=self.application.window,
@@ -1049,7 +1046,6 @@ class Logbook:
 
                         # Update summary, etc.
                         self.summary.update()
-                        self.application.toolbox.awards.count(self)
 
                 else:
                     exit = True
@@ -1105,7 +1101,6 @@ class Logbook:
 
             # Update summary, etc.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 
@@ -1202,7 +1197,6 @@ class Logbook:
 
                     # Update summary, etc.
                     self.summary.update()
-                    self.application.toolbox.awards.count(self)
 
         rd.dialog.destroy()
         return
@@ -1235,7 +1229,6 @@ class Logbook:
         if number_of_duplicates_removed > 0:
             # Update statistics.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 

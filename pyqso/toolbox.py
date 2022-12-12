@@ -19,7 +19,6 @@
 
 from pyqso.dx_cluster import DXCluster
 from pyqso.world_map import WorldMap
-from pyqso.awards import Awards
 
 
 class Toolbox:
@@ -39,7 +38,6 @@ class Toolbox:
 
         self.dx_cluster = DXCluster(self.application)
         self.world_map = WorldMap(self.application)
-        self.awards = Awards(self.application)
 
         self.tools.connect_after("switch-page", self.on_switch_page)
 
