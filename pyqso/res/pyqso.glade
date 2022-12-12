@@ -14,12 +14,6 @@
     <property name="stock">gtk-go-back</property>
     <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="image11">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="stock">gtk-print</property>
-    <property name="icon_size">1</property>
-  </object>
   <object class="GtkImage" id="image12">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -228,22 +222,6 @@
                         <property name="can-focus">False</property>
                         <property name="image">image29</property>
                         <property name="use-stock">False</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkSeparatorMenuItem" id="separatormenuitem3">
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkImageMenuItem" id="mitem_print_log">
-                        <property name="label" translatable="yes">Print Log...</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <property name="image">image11</property>
-                        <property name="use-stock">False</property>
-                        <accelerator key="p" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
