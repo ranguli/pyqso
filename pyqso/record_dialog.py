@@ -39,7 +39,7 @@ except ImportError:
 
 from pyqso import adif
 from pyqso import callsign_lookup
-from pyqso import auxiliary_dialog
+from pyqso.ui.popup_dialog import PopupDialog
 from pyqso.calendar_dialog import CalendarDialog
 
 
@@ -483,10 +483,11 @@ class RecordDialog:
             else:
                 raise ValueError
         except ValueError:
-            auxiliary_dialog.error(
+            d = PopupDialog(
                 parent=self.dialog,
                 message="To perform a callsign lookup, please specify the name of the callsign database in the Preferences.",
             )
+            d.error()
             return
 
         try:
@@ -500,7 +501,8 @@ class RecordDialog:
                 raise ValueError("Unknown callsign database: %s" % database)
         except ValueError as e:
             logging.exception(e)
-            auxiliary_dialog.error(parent=self.dialog, message=e)
+            d = PopupDialog(parent=self.dialog, message=e)
+            d.error()
             return
 
         # Get username and password from configuration file.
@@ -520,17 +522,19 @@ class RecordDialog:
         else:
             details_given = False
         if not details_given:
-            auxiliary_dialog.error(
+            d = PopupDialog(
                 parent=self.dialog,
                 message="To perform a callsign lookup, please specify your username and password in the Preferences.",
             )
+            d.error()
             return
 
         # Get the callsign from the CALL field.
         full_callsign = self.sources["CALL"].get_text()
         if not full_callsign:
             # Empty callsign field.
-            auxiliary_dialog.error(parent=self.dialog, message="Please enter a callsign to lookup.")
+            d = PopupDialog(parent=self.dialog, message="Please enter a callsign to lookup.")
+            d.error()
             return
 
         # Connect to the database.

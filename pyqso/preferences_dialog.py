@@ -43,7 +43,7 @@ except ImportError:
     have_geocoder = False
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED, MODES
-from pyqso.auxiliary_dialogs import error
+from pyqso.ui.popup_dialog import PopupDialog
 
 PREFERENCES_FILE = os.path.expanduser("~/.config/pyqso/preferences.ini")
 

@@ -20,7 +20,7 @@
 from gi.repository import Gtk, Pango, PangoCairo
 import logging
 
-from pyqso.auxiliary_dialogs import error
+from pyqso.ui.popup_dialog import PopupDialog
 
 
 class Printer(object):
@@ -98,7 +98,8 @@ class Printer(object):
 
         result = self.operation.run(self.action, parent=self.application.window)
         if result == Gtk.PrintOperationResult.ERROR:
-            error(parent=self.application.window, message="Unable to print the log.")
+            d = PopupDialog(parent=self.application.window, message="Unable to print the log.")
+            d.error()
 
         return result
 
