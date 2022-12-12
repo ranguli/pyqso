@@ -43,7 +43,7 @@ except ImportError:
     have_geocoder = False
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED, MODES
-from pyqso.auxiliary_dialogs import error
+from pyqso.ui.popup_dialog import PopupDialog
 
 PREFERENCES_FILE = os.path.expanduser("~/.config/pyqso/preferences.ini")
 
@@ -707,10 +707,11 @@ class WorldMapPage:
     def lookup_callback(self, widget=None):
         """Perform geocoding of the QTH location to obtain latitude-longitude coordinates."""
         if not have_geocoder:
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="Geocoder module could not be imported. Geocoding aborted.",
             )
+            d.error()
             return
         logging.debug("Geocoding QTH location...")
         name = self.sources["QTH_NAME"].get_text()
@@ -723,15 +724,17 @@ class WorldMapPage:
                 "QTH coordinates found: (%s, %s)", str(latitude), str(longitude)
             )
         except ValueError as e:
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="Unable to lookup QTH coordinates. Is the QTH name correct?",
             )
+            d.error()
             logging.exception(e)
         except Exception as e:
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="Unable to lookup QTH coordinates. Check connection to the internets? Lookup limit reached?",
             )
+            d.error()
             logging.exception(e)
         return

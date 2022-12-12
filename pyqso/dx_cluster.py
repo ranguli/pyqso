@@ -28,7 +28,7 @@ except ImportError:
 import os.path
 
 from pyqso.telnet_connection_dialog import TelnetConnectionDialog
-from pyqso.auxiliary_dialogs import error
+from pyqso.ui.popup_dialog import PopupDialog
 
 BOOKMARKS_FILE = os.path.expanduser("~/.config/pyqso/bookmarks.ini")
 
@@ -239,10 +239,11 @@ class DXCluster:
 
         # Handle empty host/port string (or the case where host/port are None).
         if not host:
-            error(
+            d = PopupDialog(
                 parent=self.application.window,
                 message="Unable to connect to a DX cluster because no hostname was specified.",
             )
+            d.error()
             return
         if not port:
             logging.warning("No port specified. Assuming default port 23...")
@@ -266,7 +267,8 @@ class DXCluster:
                 "Could not create a connection to the Telnet server %s:%d. Check connection to the internets? Check connection details?"
                 % (host, port)
             )
-            error(parent=self.application.window, message=message)
+            d = Dialog(parent=self.application.window, message=message)
+            d.error()
             logging.exception(e)
             self.connection = None
             return
