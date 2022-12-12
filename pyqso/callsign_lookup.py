@@ -30,7 +30,7 @@ try:
 except ImportError:
     from urllib import quote
 
-from pyqso.auxiliary_dialogs import error
+from pyqso.ui.popup_dialog import PopupDialog
 
 
 class CallsignLookupQRZ:
@@ -68,10 +68,11 @@ class CallsignLookupQRZ:
             response = self.connection.getresponse()
         except Exception as e:
             logging.exception(e)
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="Could not connect to the qrz.com server. Check connection to the internets?",
             )
+            d.error()
             return False
 
         # Get the session key.
@@ -94,9 +95,10 @@ class CallsignLookupQRZ:
         session_error_node = session_node.getElementsByTagName("Error")
         if session_error_node:
             session_error = session_error_node[0].firstChild.nodeValue
-            error(
+            d = PopupDialog(
                 parent=self.parent, message="qrz.com session error: %s" % session_error
             )
+            d.error()
 
         return connected
 
@@ -209,7 +211,8 @@ class CallsignLookupQRZ:
                     session_error_node = session_node[0].getElementsByTagName("Error")
                     if session_error_node:
                         session_error = session_error_node[0].firstChild.nodeValue
-                        error(parent=self.parent, message=session_error)
+                        d = PopupDialog(parent=self.parent, message=session_error)
+                        d.error()
                 # Return empty strings for the field data.
             logging.debug("Callsign lookup complete. Returning data...")
         return fields_and_data
@@ -247,10 +250,11 @@ class CallsignLookupHamQTH:
             response = self.connection.getresponse()
         except Exception as e:
             logging.exception(e)
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="Could not connect to the hamqth.com server. Check connection to the internets?",
             )
+            d.error()
             return False
 
         # Get the session ID.
@@ -273,10 +277,11 @@ class CallsignLookupHamQTH:
         session_error_node = session_node.getElementsByTagName("error")
         if session_error_node:
             session_error = session_error_node[0].firstChild.nodeValue
-            error(
+            d = PopupDialog(
                 parent=self.parent,
                 message="hamqth.com session error: %s" % session_error,
             )
+            d.error()
 
         return connected
 
@@ -371,7 +376,8 @@ class CallsignLookupHamQTH:
                     session_error_node = session_node[0].getElementsByTagName("error")
                     if session_error_node:
                         session_error = session_error_node[0].firstChild.nodeValue
-                        error(parent=self.parent, message=session_error)
+                        d = PopupDialog(parent=self.parent, message=session_error)
+                        d.error()
                 # Return empty strings for the field data.
 
             logging.debug("Callsign lookup complete. Returning data...")
