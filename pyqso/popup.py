@@ -20,10 +20,10 @@
 
 class Popup:
 
-    """ The popup menu that appears when a QSO record is right-clicked. """
+    """The popup menu that appears when a QSO record is right-clicked."""
 
     def __init__(self, application):
-        """ Set up popup menu items. """
+        """Set up popup menu items."""
 
         self.application = application
         self.builder = self.application.builder
@@ -35,7 +35,9 @@ class Popup:
 
         # Plot selected QSO on the world map.
         self.items["PINPOINT"] = self.builder.get_object("mitem_pinpoint")
-        self.items["PINPOINT"].connect("activate", self.application.logbook.pinpoint_callback)
+        self.items["PINPOINT"].connect(
+            "activate", self.application.logbook.pinpoint_callback
+        )
 
         self.items["COPY"] = self.builder.get_object("mitem_copy")
         self.items["COPY"].connect("activate", self.application.logbook.copy_callback)

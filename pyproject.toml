@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "pyqso"
+version = "1.0.0"
+description = "PyQSO is a contact logging tool for amateur radio operators."
+authors = ["ranguli <hello@joshmurphy.ca>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+numpy = "^1.23.5"
+geocoder = "^1.38.1"
+matplotlib = "^3.6.2"
+sphinx = "^5.3.0"
+cairocffi = "^1.4.0"
+cartopy = "^0.21.0"
+pygobject = "^3.42.2"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.12.0"
+flake8 = "^6.0.0"
+pytest = "^7.2.0"
+nox = "^2022.11.21"
+bandit = "^1.7.4"
+isort = "^5.10.1"
+nox-poetry = "^1.0.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

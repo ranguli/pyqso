@@ -21,20 +21,72 @@ import logging
 
 CABRILLO_VERSION = "3.0"
 
-CONTESTS = ["", "AP-SPRINT", "ARRL-10", "ARRL-160", "ARRL-222", "ARRL-DX-CW", "ARRL-DX-SSB", "ARRL-RR-PH", "ARRL-RR-DIG", "ARRL-RR-CW", "ARRL-SCR", "ARRL-SS-CW", "ARRL-SS-SSB", "ARRL-UHF-AUG", "ARRL-VHF-JAN", "ARRL-VHF-JUN", "ARRL-VHF-SEP", "ARRL-RTTY", "BARTG-RTTY", "CQ-160-CW", "CQ-160-SSB", "CQ-WPX-CW", "CQ-WPX-RTTY", "CQ-WPX-SSB", "CQ-VHF", "CQ-WW-CW", "CQ-WW-RTTY", "CQ-WW-SSB", "DARC-WAEDC-CW", "DARC-WAEDC-RTTY", "DARC-WAEDC-SSB", "DL-DX-RTTY", "DRCG-WW-RTTY", "FCG-FQP", "IARU-HF", "JIDX-CW", "JIDX-SSB", "NAQP-CW", "NAQP-SSB", "NA-SPRINT-CW", "NA-SPRINT-SSB", "NCCC-CQP", "NEQP", "OCEANIA-DX-CW", "OCEANIA-DX-SSB", "RDXC", "RSGB-IOTA", "SAC-CW", "SAC-SSB", "STEW-PERRY", "TARA-RTTY"]
+CONTESTS = [
+    "",
+    "AP-SPRINT",
+    "ARRL-10",
+    "ARRL-160",
+    "ARRL-222",
+    "ARRL-DX-CW",
+    "ARRL-DX-SSB",
+    "ARRL-RR-PH",
+    "ARRL-RR-DIG",
+    "ARRL-RR-CW",
+    "ARRL-SCR",
+    "ARRL-SS-CW",
+    "ARRL-SS-SSB",
+    "ARRL-UHF-AUG",
+    "ARRL-VHF-JAN",
+    "ARRL-VHF-JUN",
+    "ARRL-VHF-SEP",
+    "ARRL-RTTY",
+    "BARTG-RTTY",
+    "CQ-160-CW",
+    "CQ-160-SSB",
+    "CQ-WPX-CW",
+    "CQ-WPX-RTTY",
+    "CQ-WPX-SSB",
+    "CQ-VHF",
+    "CQ-WW-CW",
+    "CQ-WW-RTTY",
+    "CQ-WW-SSB",
+    "DARC-WAEDC-CW",
+    "DARC-WAEDC-RTTY",
+    "DARC-WAEDC-SSB",
+    "DL-DX-RTTY",
+    "DRCG-WW-RTTY",
+    "FCG-FQP",
+    "IARU-HF",
+    "JIDX-CW",
+    "JIDX-SSB",
+    "NAQP-CW",
+    "NAQP-SSB",
+    "NA-SPRINT-CW",
+    "NA-SPRINT-SSB",
+    "NCCC-CQP",
+    "NEQP",
+    "OCEANIA-DX-CW",
+    "OCEANIA-DX-SSB",
+    "RDXC",
+    "RSGB-IOTA",
+    "SAC-CW",
+    "SAC-SSB",
+    "STEW-PERRY",
+    "TARA-RTTY",
+]
 
 
 class Cabrillo:
 
-    """ The Cabrillo class supplies methods for writing log files in the Cabrillo format (v3.0).
-    For more information, visit http://wwrof.org/cabrillo/ """
+    """The Cabrillo class supplies methods for writing log files in the Cabrillo format (v3.0).
+    For more information, visit http://wwrof.org/cabrillo/"""
 
     def __init__(self):
-        """ Initialise class for I/O of files using the Cabrillo format. """
+        """Initialise class for I/O of files using the Cabrillo format."""
         return
 
     def write(self, records, path, contest="", mycall=""):
-        """ Write a list of QSO records to a file in the Cabrillo format.
+        """Write a list of QSO records to a file in the Cabrillo format.
 
         :arg list records: The list of QSO records to write.
         :arg str path: The desired path of the Cabrillo file to write to.
@@ -45,7 +97,7 @@ class Cabrillo:
 
         logging.debug("Writing records to a Cabrillo file...")
 
-        with open(path, mode='w', errors="replace") as f:  # Open file for writing
+        with open(path, mode="w", errors="replace") as f:  # Open file for writing
 
             # Header
             f.write("""START-OF-LOG: %s\n""" % (CABRILLO_VERSION))
@@ -58,23 +110,29 @@ class Cabrillo:
 
                 # Frequency. Note that this must be in kHz. The frequency is stored in MHz in the database, so it's converted to kHz here.
                 try:
-                    freq = str(float(r["FREQ"])*1e3)
+                    freq = str(float(r["FREQ"]) * 1e3)
                 except ValueError:
                     freq = ""
 
                 # Mode
-                if(r["MODE"] == "SSB"):
+                if r["MODE"] == "SSB":
                     mo = "PH"
-                elif(r["MODE"] == "CW"):
+                elif r["MODE"] == "CW":
                     mo = "CW"
-                elif(r["MODE"] == "FM"):
+                elif r["MODE"] == "FM":
                     mo = "FM"
                 else:
                     # FIXME: This assumes that the mode is any other non-CW digital mode, which isn't always going to be the case (e.g. for AM).
                     mo = "RY"
 
                 # Date in yyyy-mm-dd format.
-                date = r["QSO_DATE"][0:4] + "-" + r["QSO_DATE"][4:6] + "-" + r["QSO_DATE"][6:8]
+                date = (
+                    r["QSO_DATE"][0:4]
+                    + "-"
+                    + r["QSO_DATE"][4:6]
+                    + "-"
+                    + r["QSO_DATE"][6:8]
+                )
 
                 # Time
                 time = r["TIME_ON"]
@@ -95,11 +153,26 @@ class Cabrillo:
                 # FIXME: For now this has been hard-coded to 0.
                 t = "0"
 
-                f.write("""QSO: %s %s %s %s %s %s %s %s %s\n""" % (freq, mo, date, time, call_sent, exch_sent, call_rcvd, exch_rcvd, t))
+                f.write(
+                    """QSO: %s %s %s %s %s %s %s %s %s\n"""
+                    % (
+                        freq,
+                        mo,
+                        date,
+                        time,
+                        call_sent,
+                        exch_sent,
+                        call_rcvd,
+                        exch_rcvd,
+                        t,
+                    )
+                )
 
             # Footer
             f.write("END-OF-LOG:")
 
-            logging.info("Wrote %d QSOs to %s in Cabrillo format." % (len(records), path))
+            logging.info(
+                "Wrote %d QSOs to %s in Cabrillo format." % (len(records), path)
+            )
 
         return

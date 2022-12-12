@@ -18,6 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -27,23 +28,26 @@ from pyqso.dx_cluster import *
 
 class TestDXCluster(unittest.TestCase):
 
-    """ The unit tests for the DXCluster class. """
+    """The unit tests for the DXCluster class."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
 
         PyQSO = mock.MagicMock()
         self.dxcluster = DXCluster(application=PyQSO())
 
     def test_on_telnet_io(self):
-        """ Check that the response from the Telnet server can be correctly decoded. """
+        """Check that the response from the Telnet server can be correctly decoded."""
 
         telnetlib.Telnet = mock.Mock(spec=telnetlib.Telnet)
         connection = telnetlib.Telnet("hello", "world")
-        connection.read_very_eager.return_value = b"Test message from the Telnet server."
+        connection.read_very_eager.return_value = (
+            b"Test message from the Telnet server."
+        )
         self.dxcluster.connection = connection
         result = self.dxcluster.on_telnet_io()
-        assert(result)
+        assert result
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

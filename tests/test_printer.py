@@ -19,6 +19,7 @@
 
 from gi.repository import Gtk
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -29,24 +30,36 @@ from pyqso.printer import *
 
 class TestPrinter(unittest.TestCase):
 
-    """ The unit tests for the Printer class. """
+    """The unit tests for the Printer class."""
 
     def setUp(self):
-        """ Set up the Printer object. """
+        """Set up the Printer object."""
         PyQSO = mock.MagicMock()
         self.printer = Printer(application=PyQSO())
         self.printer.application.window = Gtk.Window()
 
     def test_print_records(self):
-        """ Check that a list of records can be printed to a PDF file. """
+        """Check that a list of records can be printed to a PDF file."""
         self.printer.action = Gtk.PrintOperationAction.EXPORT
         pdf = "Printer.test_print_records.pdf"
         self.printer.operation.set_export_filename(pdf)
-        records = [{"id": 1, "CALL": "MYCALL", "QSO_DATE": "24062017", "TIME_ON": "1519", "FREQ": "145.550", "MODE": "FM", "RST_SENT": "59", "RST_RCVD": "57"}]
+        records = [
+            {
+                "id": 1,
+                "CALL": "MYCALL",
+                "QSO_DATE": "24062017",
+                "TIME_ON": "1519",
+                "FREQ": "145.550",
+                "MODE": "FM",
+                "RST_SENT": "59",
+                "RST_RCVD": "57",
+            }
+        ]
         result = self.printer.print_records(records)
-        assert(result != Gtk.PrintOperationResult.ERROR)
-        assert(result == Gtk.PrintOperationResult.APPLY)
-        assert(os.path.exists(pdf))
+        assert result != Gtk.PrintOperationResult.ERROR
+        assert result == Gtk.PrintOperationResult.APPLY
+        assert os.path.exists(pdf)
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

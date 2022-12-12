@@ -18,6 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import Gtk
+
 try:
     import configparser
 except ImportError:
@@ -27,10 +28,10 @@ import os.path
 
 class Menu:
 
-    """ The menu bar along the top of the main window. """
+    """The menu bar along the top of the main window."""
 
     def __init__(self, application):
-        """ Set up all menu items and connect to the various functions.
+        """Set up all menu items and connect to the various functions.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -59,23 +60,35 @@ class Menu:
 
         # Delete the current log
         self.items["DELETE_LOG"] = self.builder.get_object("mitem_delete_log")
-        self.items["DELETE_LOG"].connect("activate", self.application.logbook.delete_log)
+        self.items["DELETE_LOG"].connect(
+            "activate", self.application.logbook.delete_log
+        )
 
         # Rename the current log
         self.items["RENAME_LOG"] = self.builder.get_object("mitem_rename_log")
-        self.items["RENAME_LOG"].connect("activate", self.application.logbook.rename_log)
+        self.items["RENAME_LOG"].connect(
+            "activate", self.application.logbook.rename_log
+        )
 
         # Import log
         self.items["IMPORT_LOG"] = self.builder.get_object("mitem_import_log")
-        self.items["IMPORT_LOG"].connect("activate", self.application.logbook.import_log)
+        self.items["IMPORT_LOG"].connect(
+            "activate", self.application.logbook.import_log
+        )
 
         # Export the current log as ADIF
         self.items["EXPORT_LOG_ADIF"] = self.builder.get_object("mitem_export_log_adif")
-        self.items["EXPORT_LOG_ADIF"].connect("activate", self.application.logbook.export_log_adif)
+        self.items["EXPORT_LOG_ADIF"].connect(
+            "activate", self.application.logbook.export_log_adif
+        )
 
         # Export the current log as Cabrillo
-        self.items["EXPORT_LOG_CABRILLO"] = self.builder.get_object("mitem_export_log_cabrillo")
-        self.items["EXPORT_LOG_CABRILLO"].connect("activate", self.application.logbook.export_log_cabrillo)
+        self.items["EXPORT_LOG_CABRILLO"] = self.builder.get_object(
+            "mitem_export_log_cabrillo"
+        )
+        self.items["EXPORT_LOG_CABRILLO"].connect(
+            "activate", self.application.logbook.export_log_cabrillo
+        )
 
         # Print log
         self.items["PRINT_LOG"] = self.builder.get_object("mitem_print_log")
@@ -91,34 +104,50 @@ class Menu:
 
         # Add record
         self.items["ADD_RECORD"] = self.builder.get_object("mitem_add_record")
-        self.items["ADD_RECORD"].connect("activate", self.application.logbook.add_record_callback)
+        self.items["ADD_RECORD"].connect(
+            "activate", self.application.logbook.add_record_callback
+        )
 
         # Edit selected record
         self.items["EDIT_RECORD"] = self.builder.get_object("mitem_edit_record")
-        self.items["EDIT_RECORD"].connect("activate", self.application.logbook.edit_record_callback)
+        self.items["EDIT_RECORD"].connect(
+            "activate", self.application.logbook.edit_record_callback
+        )
 
         # Delete selected record
         self.items["DELETE_RECORD"] = self.builder.get_object("mitem_delete_record")
-        self.items["DELETE_RECORD"].connect("activate", self.application.logbook.delete_record_callback)
+        self.items["DELETE_RECORD"].connect(
+            "activate", self.application.logbook.delete_record_callback
+        )
 
         # Remove duplicates
-        self.items["REMOVE_DUPLICATES"] = self.builder.get_object("mitem_remove_duplicates")
-        self.items["REMOVE_DUPLICATES"].connect("activate", self.application.logbook.remove_duplicates_callback)
+        self.items["REMOVE_DUPLICATES"] = self.builder.get_object(
+            "mitem_remove_duplicates"
+        )
+        self.items["REMOVE_DUPLICATES"].connect(
+            "activate", self.application.logbook.remove_duplicates_callback
+        )
 
         # Record count
         self.items["RECORD_COUNT"] = self.builder.get_object("mitem_record_count")
-        self.items["RECORD_COUNT"].connect("activate", self.application.logbook.record_count_callback)
+        self.items["RECORD_COUNT"].connect(
+            "activate", self.application.logbook.record_count_callback
+        )
 
         # View toolbox
         self.items["TOOLBOX"] = self.builder.get_object("mitem_toolbox")
         config = configparser.ConfigParser()
-        have_config = (config.read(os.path.expanduser('~/.config/pyqso/preferences.ini')) != [])
+        have_config = (
+            config.read(os.path.expanduser("~/.config/pyqso/preferences.ini")) != []
+        )
         (section, option) = ("general", "show_toolbox")
-        if(have_config and config.has_option(section, option)):
+        if have_config and config.has_option(section, option):
             self.items["TOOLBOX"].set_active(config.getboolean(section, option))
         else:
             self.items["TOOLBOX"].set_active(False)  # Don't show the toolbox by default
-        self.items["TOOLBOX"].connect("activate", self.application.toolbox.toggle_visible_callback)
+        self.items["TOOLBOX"].connect(
+            "activate", self.application.toolbox.toggle_visible_callback
+        )
 
         # About
         self.items["ABOUT"] = self.builder.get_object("mitem_about")
@@ -131,7 +160,7 @@ class Menu:
         return
 
     def set_logbook_item_sensitive(self, sensitive):
-        """ Enable/disable logbook-related menu items.
+        """Enable/disable logbook-related menu items.
 
         :arg bool sensitive: If True, enable the 'new logbook' and 'open logbook' menu items. If False, disable them.
         """
@@ -142,21 +171,35 @@ class Menu:
         return
 
     def set_log_items_sensitive(self, sensitive):
-        """ Enable/disable log-related menu items.
+        """Enable/disable log-related menu items.
 
         :arg bool sensitive: If True, enable all the log-related menu items. If False, disable them all.
         """
 
-        for item_name in ["NEW_LOG", "DELETE_LOG", "RENAME_LOG", "IMPORT_LOG", "EXPORT_LOG_ADIF", "EXPORT_LOG_CABRILLO", "PRINT_LOG"]:
+        for item_name in [
+            "NEW_LOG",
+            "DELETE_LOG",
+            "RENAME_LOG",
+            "IMPORT_LOG",
+            "EXPORT_LOG_ADIF",
+            "EXPORT_LOG_CABRILLO",
+            "PRINT_LOG",
+        ]:
             self.items[item_name].set_sensitive(sensitive)
         return
 
     def set_record_items_sensitive(self, sensitive):
-        """ Enable/disable record-related menu items.
+        """Enable/disable record-related menu items.
 
         :arg bool sensitive: If True, enable all the record-related menu items. If False, disable them all.
         """
 
-        for item_name in ["ADD_RECORD", "EDIT_RECORD", "DELETE_RECORD", "REMOVE_DUPLICATES", "RECORD_COUNT"]:
+        for item_name in [
+            "ADD_RECORD",
+            "EDIT_RECORD",
+            "DELETE_RECORD",
+            "REMOVE_DUPLICATES",
+            "RECORD_COUNT",
+        ]:
             self.items[item_name].set_sensitive(sensitive)
         return

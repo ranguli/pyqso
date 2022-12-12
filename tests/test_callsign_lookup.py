@@ -18,6 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -27,15 +28,15 @@ from pyqso.callsign_lookup import *
 
 class TestCallsignLookup(unittest.TestCase):
 
-    """ The unit tests for the callsign lookup functionality. """
+    """The unit tests for the callsign lookup functionality."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
         self.qrz = CallsignLookupQRZ(parent=None)
         self.hamqth = CallsignLookupHamQTH(parent=None)
 
     def test_strip(self):
-        """ Check that a callsign with a prefix and a suffix is stripped correctly. """
+        """Check that a callsign with a prefix and a suffix is stripped correctly."""
         assert strip("F/MYCALL/MM") == "MYCALL"
         assert strip("F/MYCALL/M") == "MYCALL"
         assert strip("HB9/MYCALL/P") == "MYCALL"
@@ -45,11 +46,11 @@ class TestCallsignLookup(unittest.TestCase):
         assert strip("HB9/MYCALL/PM") == "MYCALL"
 
     def test_strip_prefix_only(self):
-        """ Check that a callsign with only a prefix is stripped correctly. """
+        """Check that a callsign with only a prefix is stripped correctly."""
         assert strip("F/MYCALL") == "MYCALL"
 
     def test_strip_suffix_only(self):
-        """ Check that a callsign with only a suffix is stripped correctly. """
+        """Check that a callsign with only a suffix is stripped correctly."""
         assert strip("MYCALL/M") == "MYCALL"
         assert strip("MYCALL/P") == "MYCALL"
         assert strip("MYCALL/A") == "MYCALL"
@@ -59,17 +60,17 @@ class TestCallsignLookup(unittest.TestCase):
         assert strip("MYCALL/QRP") == "MYCALL"
 
     def test_strip_no_prefix_or_suffix(self):
-        """ Check that a callsign with no prefix or suffix remains unmodified. """
+        """Check that a callsign with no prefix or suffix remains unmodified."""
         callsign = "MYCALL"
         assert strip(callsign) == "MYCALL"
 
     def test_strip_too_many_components(self):
-        """ Check that a callsign with too many prefix/suffix components remains unmodified. """
+        """Check that a callsign with too many prefix/suffix components remains unmodified."""
         callsign = "F/HB9/MYCALL/MM"
         assert strip(callsign) == "F/HB9/MYCALL/MM"
 
     def test_qrz_connect(self):
-        """ Check the example response from the qrz.com server, and make sure the session key has been correctly extracted. """
+        """Check the example response from the qrz.com server, and make sure the session key has been correctly extracted."""
 
         http_client.HTTPConnection = mock.Mock(spec=http_client.HTTPConnection)
         http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
@@ -80,11 +81,11 @@ class TestCallsignLookup(unittest.TestCase):
         connection.getresponse.return_value = response
 
         result = self.qrz.connect("hello", "world")
-        assert(result)
-        assert(self.qrz.session_key == "3b1fd1d3ba495189984f93ff67bd45b6")
+        assert result
+        assert self.qrz.session_key == "3b1fd1d3ba495189984f93ff67bd45b6"
 
     def test_qrz_lookup(self):
-        """ Check the example callsign lookup response from the qrz.com server, and make sure the callsign information has been correctly extracted. """
+        """Check the example callsign lookup response from the qrz.com server, and make sure the callsign information has been correctly extracted."""
 
         http_client.HTTPConnection = mock.Mock(spec=http_client.HTTPConnection)
         http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
@@ -97,12 +98,12 @@ class TestCallsignLookup(unittest.TestCase):
         self.qrz.connection = connection
         self.qrz.session_key = "3b1fd1d3ba495189984f93ff67bd45b6"
         fields_and_data = self.qrz.lookup("MYCALL")
-        assert(fields_and_data["NAME"] == "FIRSTNAME LASTNAME")
-        assert(fields_and_data["ADDRESS"] == "ADDRESS2")
-        assert(fields_and_data["COUNTRY"] == "COUNTRY")
+        assert fields_and_data["NAME"] == "FIRSTNAME LASTNAME"
+        assert fields_and_data["ADDRESS"] == "ADDRESS2"
+        assert fields_and_data["COUNTRY"] == "COUNTRY"
 
     def test_hamqth_connect(self):
-        """ Check the example response from the hamqth.com server, and make sure the session ID has been correctly extracted. """
+        """Check the example response from the hamqth.com server, and make sure the session ID has been correctly extracted."""
 
         http_client.HTTPSConnection = mock.Mock(spec=http_client.HTTPSConnection)
         http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
@@ -113,11 +114,11 @@ class TestCallsignLookup(unittest.TestCase):
         connection.getresponse.return_value = response
 
         result = self.hamqth.connect("hello", "world")
-        assert(result)
-        assert(self.hamqth.session_id == "09b0ae90050be03c452ad235a1f2915ad684393c")
+        assert result
+        assert self.hamqth.session_id == "09b0ae90050be03c452ad235a1f2915ad684393c"
 
     def test_hamqth_lookup(self):
-        """ Check the example callsign lookup response from the hamqth.com server, and make sure the callsign information has been correctly extracted. """
+        """Check the example callsign lookup response from the hamqth.com server, and make sure the callsign information has been correctly extracted."""
 
         http_client.HTTPSConnection = mock.Mock(spec=http_client.HTTPSConnection)
         http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
@@ -130,12 +131,13 @@ class TestCallsignLookup(unittest.TestCase):
         self.hamqth.connection = connection
         self.hamqth.session_id = "09b0ae90050be03c452ad235a1f2915ad684393c"
         fields_and_data = self.hamqth.lookup("MYCALL")
-        assert(fields_and_data["NAME"] == "NAME")
-        assert(fields_and_data["ADDRESS"] == "ADDRESS")
-        assert(fields_and_data["COUNTRY"] == "COUNTRY")
-        assert(fields_and_data["CQZ"] == "CQ")
-        assert(fields_and_data["ITUZ"] == "ITU")
-        assert(fields_and_data["IOTA"] == "IOTA")
+        assert fields_and_data["NAME"] == "NAME"
+        assert fields_and_data["ADDRESS"] == "ADDRESS"
+        assert fields_and_data["COUNTRY"] == "COUNTRY"
+        assert fields_and_data["CQZ"] == "CQ"
+        assert fields_and_data["ITUZ"] == "ITU"
+        assert fields_and_data["IOTA"] == "IOTA"
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()

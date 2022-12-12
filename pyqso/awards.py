@@ -24,11 +24,11 @@ import sqlite3 as sqlite
 
 class Awards:
 
-    """ A tool for tracking progress towards an award. Currently this only supports the DXCC award.
-    For more information visit http://www.arrl.org/dxcc """
+    """A tool for tracking progress towards an award. Currently this only supports the DXCC award.
+    For more information visit http://www.arrl.org/dxcc"""
 
     def __init__(self, application):
-        """ Set up a table for progress tracking purposes.
+        """Set up a table for progress tracking purposes.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
         """
@@ -38,10 +38,23 @@ class Awards:
         self.application = application
         self.builder = self.application.builder
 
-        self.bands = ["70cm", "2m", "6m", "10m", "12m", "15m", "17m", "20m", "30m", "40m", "80m", "160m"]
+        self.bands = [
+            "70cm",
+            "2m",
+            "6m",
+            "10m",
+            "12m",
+            "15m",
+            "17m",
+            "20m",
+            "30m",
+            "40m",
+            "80m",
+            "160m",
+        ]
         self.modes = ["Phone", "CW", "Digital", "Mixed"]
 
-        data_types = [str] + [int]*len(self.bands)
+        data_types = [str] + [int] * len(self.bands)
         self.awards = Gtk.ListStore(*data_types)
 
         # The main table for the awards.
@@ -55,7 +68,7 @@ class Awards:
         logging.debug("Initialising the columns in the awards table.")
         for i in range(0, len(self.bands)):
             renderer = Gtk.CellRendererText()
-            column = Gtk.TreeViewColumn(self.bands[i], renderer, text=i+1)
+            column = Gtk.TreeViewColumn(self.bands[i], renderer, text=i + 1)
             column.set_min_width(40)
             column.set_clickable(False)
             self.treeview.append_column(column)
@@ -71,7 +84,7 @@ class Awards:
         return
 
     def count(self, logbook):
-        """ Update the table for progress tracking.
+        """Update the table for progress tracking.
 
         :arg logbook: The logbook containing logs which in turn contain QSOs.
         :returns: A list of lists containing the QSO counts for different modes and bands.
@@ -86,27 +99,32 @@ class Awards:
         # For each mode, add a new list for holding the totals, and initialise the values to zero.
         count = []
         for i in range(0, len(self.bands)):
-            count.append([0]*len(self.bands))
+            count.append([0] * len(self.bands))
 
         for log in logbook.logs:
             try:
                 records = log.records
                 for r in records:
-                    if(r["BAND"] is not None and r["MODE"] is not None):
-                        if(r["BAND"].lower() in self.bands and r["MODE"] != ""):
+                    if r["BAND"] is not None and r["MODE"] is not None:
+                        if r["BAND"].lower() in self.bands and r["MODE"] != "":
                             band = self.bands.index(r["BAND"].lower())
                             # Phone modes
-                            if(r["MODE"].upper() in ["FM", "AM", "SSB", "SSTV"]):
+                            if r["MODE"].upper() in ["FM", "AM", "SSB", "SSTV"]:
                                 count[0][band] += 1
-                            elif(r["MODE"].upper() == "CW"):
+                            elif r["MODE"].upper() == "CW":
                                 count[1][band] += 1
                             else:
                                 # FIXME: This assumes that all the other modes in the ADIF list are digital modes. Is this the case?
                                 count[2][band] += 1
-                            count[3][band] += 1  # Keep the total of each column in the "Mixed" mode.
+                            count[3][
+                                band
+                            ] += 1  # Keep the total of each column in the "Mixed" mode.
 
             except sqlite.Error as e:
-                logging.error("Could not update the awards table for '%s' because of a database error." % log.name)
+                logging.error(
+                    "Could not update the awards table for '%s' because of a database error."
+                    % log.name
+                )
                 logging.exception(e)
 
         # Insert the rows containing the totals.

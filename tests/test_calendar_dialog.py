@@ -19,6 +19,7 @@
 
 from gi.repository import Gtk
 import unittest
+
 try:
     import unittest.mock as mock
 except ImportError:
@@ -28,18 +29,21 @@ from pyqso.calendar_dialog import *
 
 class TestCalendarDialog(unittest.TestCase):
 
-    """ The unit tests for the CalendarDialog class. """
+    """The unit tests for the CalendarDialog class."""
 
     def setUp(self):
-        """ Set up the objects needed for the unit tests. """
+        """Set up the objects needed for the unit tests."""
         self.cd = CalendarDialog(application=mock.MagicMock())
         self.cd.calendar = Gtk.Calendar()
-        self.cd.calendar.select_month(3, 2017)  # Note: Months start from 0 when using the Calendar widget. So "3" represents April here.
+        self.cd.calendar.select_month(
+            3, 2017
+        )  # Note: Months start from 0 when using the Calendar widget. So "3" represents April here.
         self.cd.calendar.select_day(2)
 
     def test_date(self):
-        """ Check that the date obtained from the Calendar is in the correct format. """
-        assert(self.cd.date == "20170402")
+        """Check that the date obtained from the Calendar is in the correct format."""
+        assert self.cd.date == "20170402"
 
-if(__name__ == '__main__'):
+
+if __name__ == "__main__":
     unittest.main()
