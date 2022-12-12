@@ -135,16 +135,6 @@ class GeneralPage:
         config = configparser.ConfigParser()
         have_config = config.read(PREFERENCES_FILE) != []
 
-        # Show toolbox.
-        self.sources["SHOW_TOOLBOX"] = self.builder.get_object(
-            "general_show_toolbox_checkbutton"
-        )
-        (section, option) = ("general", "show_toolbox")
-        if have_config and config.has_option(section, option):
-            self.sources["SHOW_TOOLBOX"].set_active(config.getboolean(section, option))
-        else:
-            self.sources["SHOW_TOOLBOX"].set_active(False)
-
         # Show statistics.
         self.sources["SHOW_YEARLY_STATISTICS"] = self.builder.get_object(
             "general_show_yearly_statistics_checkbutton"
