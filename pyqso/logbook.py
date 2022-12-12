@@ -170,7 +170,6 @@ class Logbook:
             logging.debug("All logs rendered successfully.")
 
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
             context_id = self.application.statusbar.get_context_id("Status")
             self.application.statusbar.push(context_id, "Logbook: %s" % self.path)
@@ -399,7 +398,6 @@ class Logbook:
             self.notebook.remove_page(page_index)
 
         self.summary.update()
-        self.application.toolbox.awards.count(self)
         return
 
     def filter_logs(self, widget=None):
@@ -753,7 +751,6 @@ class Logbook:
 
         # Update statistics, etc.
         self.summary.update()
-        self.application.toolbox.awards.count(self)
 
         d = PopupDialog(
             parent=self.application.window,
@@ -1075,7 +1072,6 @@ class Logbook:
 
                         # Update summary, etc.
                         self.summary.update()
-                        self.application.toolbox.awards.count(self)
 
                 else:
                     exit = True
@@ -1133,7 +1129,6 @@ class Logbook:
 
             # Update summary, etc.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 
@@ -1233,7 +1228,6 @@ class Logbook:
 
                     # Update summary, etc.
                     self.summary.update()
-                    self.application.toolbox.awards.count(self)
 
         rd.dialog.destroy()
         return
@@ -1268,7 +1262,6 @@ class Logbook:
         if number_of_duplicates_removed > 0:
             # Update statistics.
             self.summary.update()
-            self.application.toolbox.awards.count(self)
 
         return
 
@@ -1304,23 +1297,6 @@ class Logbook:
                 % log.name,
             )
             d.error()
-
-        return
-
-    def pinpoint_callback(self, widget=None, path=None):
-        """A callback function used to pinpoint the callsign on the world map."""
-
-        try:
-            log_index = self.get_log_index()
-            row_index = self.get_record_index()
-            if log_index is None or row_index is None:
-                raise ValueError("Could not determine the log and/or record index.")
-            r = self.logs[log_index].get_record_by_index(row_index)
-        except ValueError as e:
-            logging.error(e)
-            return
-
-        self.application.toolbox.world_map.pinpoint(r)
 
         return
 
