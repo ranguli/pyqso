@@ -17,8 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyqso.world_map import WorldMap
-
 
 class Toolbox:
 
@@ -35,8 +33,6 @@ class Toolbox:
 
         self.tools = self.builder.get_object("tools")
 
-        self.world_map = WorldMap(self.application)
-
         self.tools.connect_after("switch-page", self.on_switch_page)
 
         return
@@ -48,7 +44,5 @@ class Toolbox:
         return
 
     def on_switch_page(self, widget, label, new_page):
-        """Re-draw the WorldMap if the user switches to the World Map tab."""
-        if widget.get_tab_label(label).get_text() == "World Map":
-            self.world_map.draw()
+        # TODO: no-op
         return

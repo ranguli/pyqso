@@ -1264,23 +1264,6 @@ class Logbook:
 
         return
 
-    def pinpoint_callback(self, widget=None, path=None):
-        """A callback function used to pinpoint the callsign on the world map."""
-
-        try:
-            log_index = self.get_log_index()
-            row_index = self.get_record_index()
-            if log_index is None or row_index is None:
-                raise ValueError("Could not determine the log and/or record index.")
-            r = self.logs[log_index].get_record_by_index(row_index)
-        except ValueError as e:
-            logging.error(e)
-            return
-
-        self.application.toolbox.world_map.pinpoint(r)
-
-        return
-
     def copy_callback(self, widget=None, path=None):
         """A callback function used to copy selected logs."""
 
