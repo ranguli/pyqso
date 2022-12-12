@@ -17,7 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from pyqso.dx_cluster import DXCluster
 from pyqso.world_map import WorldMap
 
 
@@ -36,7 +35,6 @@ class Toolbox:
 
         self.tools = self.builder.get_object("tools")
 
-        self.dx_cluster = DXCluster(self.application)
         self.world_map = WorldMap(self.application)
 
         self.tools.connect_after("switch-page", self.on_switch_page)

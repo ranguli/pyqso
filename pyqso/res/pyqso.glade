@@ -91,18 +91,6 @@
     <property name="stock">gtk-add</property>
     <property name="icon_size">1</property>
   </object>
-  <object class="GtkImage" id="image5">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="stock">gtk-connect</property>
-    <property name="icon_size">1</property>
-  </object>
-  <object class="GtkImage" id="image6">
-    <property name="visible">True</property>
-    <property name="can-focus">False</property>
-    <property name="stock">gtk-disconnect</property>
-    <property name="icon_size">1</property>
-  </object>
   <object class="GtkImage" id="image7">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
@@ -649,147 +637,10 @@
                         <property name="visible">True</property>
                         <property name="can-focus">True</property>
                         <child>
-                          <object class="GtkBox" id="dx_cluster">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <property name="spacing">2</property>
-                            <child>
-                              <object class="GtkMenuBar" id="dx_cluster_menu">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <child>
-                                  <object class="GtkMenuItem" id="mitem_connection">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <property name="label" translatable="yes">Connection</property>
-                                    <child type="submenu">
-                                      <object class="GtkMenu" id="connection_menu">
-                                        <property name="visible">True</property>
-                                        <property name="can-focus">False</property>
-                                        <child>
-                                          <object class="GtkImageMenuItem" id="mitem_connect">
-                                            <property name="label" translatable="yes">Connect to Telnet Server</property>
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="image">image5</property>
-                                            <property name="use-stock">False</property>
-                                            <child type="submenu">
-                                              <object class="GtkMenu" id="subm_connect">
-                                                <property name="visible">True</property>
-                                                <property name="can-focus">False</property>
-                                                <child>
-                                                  <object class="GtkMenuItem" id="mitem_new">
-                                                    <property name="visible">True</property>
-                                                    <property name="can-focus">False</property>
-                                                    <property name="label" translatable="yes">New...</property>
-                                                  </object>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkMenuItem" id="mitem_bookmark ">
-                                                    <property name="visible">True</property>
-                                                    <property name="can-focus">False</property>
-                                                    <property name="label" translatable="yes">From Bookmark</property>
-                                                    <child type="submenu">
-                                                      <object class="GtkMenu" id="subm_bookmarks">
-                                                        <property name="visible">True</property>
-                                                        <property name="can-focus">False</property>
-                                                      </object>
-                                                    </child>
-                                                  </object>
-                                                </child>
-                                              </object>
-                                            </child>
-                                          </object>
-                                        </child>
-                                        <child>
-                                          <object class="GtkImageMenuItem" id="mitem_disconnect">
-                                            <property name="label" translatable="yes">Disconnect from Telnet Server</property>
-                                            <property name="visible">True</property>
-                                            <property name="can-focus">False</property>
-                                            <property name="image">image6</property>
-                                            <property name="use-stock">False</property>
-                                          </object>
-                                        </child>
-                                      </object>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkScrolledWindow" id="sw">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="shadow-type">etched-in</property>
-                                <child>
-                                  <object class="GtkTextView" id="renderer">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="editable">False</property>
-                                    <property name="cursor-visible">False</property>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="commandbox">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="spacing">2</property>
-                                <child>
-                                  <object class="GtkEntry" id="command">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="tooltip-text" translatable="yes">The command to send to the DX cluster. For example, HELP or SHOW/DX.</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
-                                  <object class="GtkButton" id="send">
-                                    <property name="label" translatable="yes">Send Command</property>
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">True</property>
-                                    <property name="receives-default">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                          </object>
+                          <placeholder/>
                         </child>
                         <child type="tab">
-                          <object class="GtkLabel" id="dxcluster_label">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="label" translatable="yes">DX Cluster</property>
-                          </object>
-                          <packing>
-                            <property name="tab-fill">False</property>
-                          </packing>
+                          <placeholder/>
                         </child>
                         <child>
                           <object class="GtkBox" id="world_map">
