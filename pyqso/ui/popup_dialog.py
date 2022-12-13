@@ -20,11 +20,11 @@
 from gi.repository import Gtk
 import logging
 
-class PopupDialog():
+
+class PopupDialog:
     def __init__(self, parent, message):
         self.parent = parent
         self.message = message
-
 
     def error(self):
         self.buttons = GtkButtonType.OK
@@ -39,7 +39,6 @@ class PopupDialog():
         self.msgtype = Gtk.MessageType.QUESTION
 
         return self.show()
-
 
     def show(self):
         """
@@ -58,7 +57,7 @@ class PopupDialog():
             self.msgtype,
             self.buttons,
             self.message,
-            self.title
+            self.title,
         )
         response = dialog.run()
         dialog.destroy()

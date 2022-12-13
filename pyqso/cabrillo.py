@@ -171,8 +171,6 @@ class Cabrillo:
             # Footer
             f.write("END-OF-LOG:")
 
-            logging.info(
-                "Wrote %d QSOs to %s in Cabrillo format." % (len(qsos), path)
-            )
+            logging.info("Wrote %d QSOs to %s in Cabrillo format." % (len(qsos), path))
 
         return

@@ -524,7 +524,7 @@ class HamlibPage:
                 for item in dir(Hamlib):
                     if item.startswith("RIG_MODEL_"):
                         models.append(item)
-            #TODO: do not use bare 'except'
+            # TODO: do not use bare 'except'
             except:
                 logging.error("Could not obtain rig models list via Hamlib!")
         else:
@@ -565,4 +565,3 @@ class HamlibPage:
         data["RIG_PATHNAME"] = self.sources["RIG_PATHNAME"].get_text()
         data["RIG_MODEL"] = self.sources["RIG_MODEL"].get_active_text()
         return data
-

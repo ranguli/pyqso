@@ -213,8 +213,7 @@ class TestLog(unittest.TestCase):
                 continue
             else:
                 assert (
-                    qso[field_name.upper()]
-                    == self.fields_and_data[field_name.upper()]
+                    qso[field_name.upper()] == self.fields_and_data[field_name.upper()]
                 )
         assert len(qso) == len(self.fields_and_data) + 1
 

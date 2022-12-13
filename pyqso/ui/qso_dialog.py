@@ -235,7 +235,9 @@ class AddQSODialog:
                     submode_data = qso["submode"]
                     if submode_data is None:
                         submode_data = ""
-                    self.sources["SUBMODE"].set_active(adif.MODES[data].index(submode_data))
+                    self.sources["SUBMODE"].set_active(
+                        adif.MODES[data].index(submode_data)
+                    )
                 elif field_names[i] == "SUBMODE":
                     # Skip, because this has been (or will be) handled when populating the MODE field.
                     continue
@@ -395,7 +397,10 @@ class AddQSODialog:
 
         # Find which band the frequency lies in.
         for i in range(1, len(adif.BANDS)):
-            if frequency >= adif.BANDS_RANGES[i][0] and frequency <= adif.BANDS_RANGES[i][1]:
+            if (
+                frequency >= adif.BANDS_RANGES[i][0]
+                and frequency <= adif.BANDS_RANGES[i][1]
+            ):
                 self.sources["BAND"].set_active(i)
                 return
 
@@ -534,7 +539,9 @@ class AddQSODialog:
         full_callsign = self.sources["CALL"].get_text()
         if not full_callsign:
             # Empty callsign field.
-            d = PopupDialog(parent=self.dialog, message="Please enter a callsign to lookup.")
+            d = PopupDialog(
+                parent=self.dialog, message="Please enter a callsign to lookup."
+            )
             d.error()
             return
 
@@ -544,9 +551,7 @@ class AddQSODialog:
             # Check whether we want to ignore any prefixes (e.g. "IA/") or suffixes "(e.g. "/M") in the callsign
             # before performing the lookup.
             if have_config and config.has_option("qsos", "ignore_prefix_suffix"):
-                ignore_prefix_suffix = config.getboolean(
-                    "qsos", "ignore_prefix_suffix"
-                )
+                ignore_prefix_suffix = config.getboolean("qsos", "ignore_prefix_suffix")
             else:
                 ignore_prefix_suffix = True
 

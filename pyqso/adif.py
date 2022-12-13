@@ -381,9 +381,7 @@ class ADIF:
         qsos = self.parse_adi(text)
 
         if qsos == []:
-            logging.warning(
-                "No QSOs found in the file. Empty file or wrong file type?"
-            )
+            logging.warning("No QSOs found in the file. Empty file or wrong file type?")
 
         logging.info("Read %d QSOs from %s in ADIF format." % (len(qsos), path))
         return qsos

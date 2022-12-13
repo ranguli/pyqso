@@ -238,8 +238,7 @@ class Log(Gtk.ListStore):
         if iter is not None and column_index is not None:
             self.set(iter, column_index, data)  # ...and then the ListStore.
         logging.debug(
-            "Successfully edited field '%s' in QSO %d in the log."
-            % (field_name, index)
+            "Successfully edited field '%s' in QSO %d in the log." % (field_name, index)
         )
         return
 
