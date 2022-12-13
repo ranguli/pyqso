@@ -19,9 +19,11 @@
 
 from gi.repository import Gtk
 import logging
+import os
+
+from pyqso import util
 
 import configparser
-import os.path
 import base64
 
 try:
@@ -51,9 +53,7 @@ class PreferencesDialog:
 
         self.application = application
         self.builder = self.application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("preferences_dialog",))
         self.dialog = self.builder.get_object("preferences_dialog")
 
