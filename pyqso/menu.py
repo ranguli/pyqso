@@ -19,12 +19,6 @@
 
 from gi.repository import Gtk
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-import os.path
-
 
 class Menu:
 

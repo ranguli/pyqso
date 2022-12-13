@@ -381,9 +381,7 @@ class ADIF:
         qsos = self.parse_adi(text)
 
         if qsos == []:
-            logging.warning(
-                "No QSOs found in the file. Empty file or wrong file type?"
-            )
+            logging.warning("No QSOs found in the file. Empty file or wrong file type?")
 
         logging.info("Read %d QSOs from %s in ADIF format." % (len(qsos), path))
         return qsos
@@ -430,7 +428,7 @@ class ADIF:
         n_eor = 0
         n_qso = 0
         qsos = []
-        pattern = re.compile("<(.*?):(\d*).*?>([^<]+)")
+        pattern = re.compile("<(.*?):(\d*).*?>([^<]+)")  # noqa: W605
 
         for t in tokens:
             if re.match("<eor>", t, flags=re.IGNORECASE) is not None:

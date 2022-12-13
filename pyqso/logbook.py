@@ -28,7 +28,12 @@ try:
 except ImportError:
     import ConfigParser as configparser
 
-from pyqso.adif import ADIF, AVAILABLE_FIELD_NAMES_ORDERED, AVAILABLE_FIELD_NAMES_FRIENDLY, AVAILABLE_FIELD_NAMES_TYPES
+from pyqso.adif import (
+    ADIF,
+    AVAILABLE_FIELD_NAMES_ORDERED,
+    AVAILABLE_FIELD_NAMES_FRIENDLY,
+    AVAILABLE_FIELD_NAMES_TYPES,
+)
 from pyqso.cabrillo import Cabrillo
 from pyqso.log import Log
 from pyqso.ui.popup_dialog import PopupDialog
@@ -317,6 +322,7 @@ class Logbook:
                         parent=ln.dialog,
                         message="Database error. Try another log name.",
                     )
+                    d.error()
                     exists = True
             else:
                 ln.dialog.destroy()
@@ -673,7 +679,9 @@ class Logbook:
             d.error()
             return
         except Exception as e:
-            d = PopupDialog(parent=self.application.window, message="Could not import the log.")
+            d = PopupDialog(
+                parent=self.application.window, message="Could not import the log."
+            )
             d.error()
             logging.exception(e)
             return
@@ -1069,9 +1077,7 @@ class Logbook:
             child_iter = self.filter[log_index].convert_iter_to_child_iter(filter_iter)
             row_index = log.get_value(child_iter, 0)
         except IndexError:
-            logging.debug(
-                "Trying to delete a QSO, but there are no QSOs in the log!"
-            )
+            logging.debug("Trying to delete a QSO, but there are no QSOs in the log!")
             return
 
         d = PopupDialog(
@@ -1303,7 +1309,9 @@ class Logbook:
             logging.error(e)
             return
 
-        self.application.clipboard.request_text(self.clipboard_text_received, log_object)
+        self.application.clipboard.request_text(
+            self.clipboard_text_received, log_object
+        )
 
         return
 

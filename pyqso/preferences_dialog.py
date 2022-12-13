@@ -20,10 +20,7 @@
 from gi.repository import Gtk
 import logging
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 import os.path
 import base64
 
@@ -34,16 +31,8 @@ try:
 except ImportError:
     logging.warning("Could not import the Hamlib module!")
     have_hamlib = False
-try:
-    import geocoder
-
-    have_geocoder = True
-except ImportError:
-    logging.warning("Could not import the geocoder module!")
-    have_geocoder = False
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED, MODES
-from pyqso.ui.popup_dialog import PopupDialog
 
 PREFERENCES_FILE = os.path.expanduser("~/.config/pyqso/preferences.ini")
 
@@ -524,7 +513,7 @@ class HamlibPage:
                 for item in dir(Hamlib):
                     if item.startswith("RIG_MODEL_"):
                         models.append(item)
-            #TODO: do not use bare 'except'
+            # TODO: do not use bare 'except'
             except:
                 logging.error("Could not obtain rig models list via Hamlib!")
         else:
@@ -565,4 +554,3 @@ class HamlibPage:
         data["RIG_PATHNAME"] = self.sources["RIG_PATHNAME"].get_text()
         data["RIG_MODEL"] = self.sources["RIG_MODEL"].get_active_text()
         return data
-
