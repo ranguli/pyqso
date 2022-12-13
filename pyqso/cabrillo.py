@@ -85,17 +85,17 @@ class Cabrillo:
         """Initialise class for I/O of files using the Cabrillo format."""
         return
 
-    def write(self, records, path, contest="", mycall=""):
-        """Write a list of QSO records to a file in the Cabrillo format.
+    def write(self, qsos, path, contest="", mycall=""):
+        """Write a list of QSOs to a file in the Cabrillo format.
 
-        :arg list records: The list of QSO records to write.
+        :arg list qsos: The list of QSOs to write.
         :arg str path: The desired path of the Cabrillo file to write to.
         :arg str contest: The name of the contest.
         :arg str mycall: The callsign used during the contest.
         :returns: None
         :raises IOError: If the Cabrillo file cannot be written (e.g. due to lack of write permissions)."""
 
-        logging.debug("Writing records to a Cabrillo file...")
+        logging.debug("Writing QSOs to a Cabrillo file...")
 
         with open(path, mode="w", errors="replace") as f:  # Open file for writing
 
@@ -105,8 +105,8 @@ class Cabrillo:
             f.write("""CALLSIGN: %s\n""" % (mycall))
             f.write("""CONTEST: %s\n""" % (contest))
 
-            # Write each record to the file.
-            for r in records:
+            # Write each QSO to the file.
+            for r in qsos:
 
                 # Frequency. Note that this must be in kHz. The frequency is stored in MHz in the database, so it's converted to kHz here.
                 try:
@@ -172,7 +172,7 @@ class Cabrillo:
             f.write("END-OF-LOG:")
 
             logging.info(
-                "Wrote %d QSOs to %s in Cabrillo format." % (len(records), path)
+                "Wrote %d QSOs to %s in Cabrillo format." % (len(qsos), path)
             )
 
         return

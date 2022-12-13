@@ -263,7 +263,7 @@ class Summary(object):
         """Update the information presented on the summary page."""
 
         self.items["LOG_COUNT"].set_label(str(self.logbook.log_count))
-        self.items["QSO_COUNT"].set_label(str(self.logbook.record_count))
+        self.items["QSO_COUNT"].set_label(str(self.logbook.qso_count))
         try:
             t = datetime.fromtimestamp(getmtime(self.logbook.path)).strftime(
                 "%d %B %Y @ %H:%M"

@@ -260,16 +260,16 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuItem" id="mitem_records">
+              <object class="GtkMenuItem" id="mitem_qsos">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Records</property>
                 <child type="submenu">
-                  <object class="GtkMenu" id="subm_records">
+                  <object class="GtkMenu" id="subm_qsos">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <child>
-                      <object class="GtkImageMenuItem" id="mitem_add_record">
+                      <object class="GtkImageMenuItem" id="mitem_add_qso">
                         <property name="label" translatable="yes">Add Record...</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -279,7 +279,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="mitem_edit_record">
+                      <object class="GtkImageMenuItem" id="mitem_edit_qso">
                         <property name="label" translatable="yes">Edit Selected Record...</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -289,7 +289,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkImageMenuItem" id="mitem_delete_record">
+                      <object class="GtkImageMenuItem" id="mitem_delete_qso">
                         <property name="label" translatable="yes">Delete Selected Record</property>
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
@@ -320,7 +320,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkMenuItem" id="mitem_record_count">
+                      <object class="GtkMenuItem" id="mitem_qso_count">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Record Count</property>
@@ -440,7 +440,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="toolbar_add_record">
+              <object class="GtkButton" id="toolbar_add_qso">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -461,7 +461,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="toolbar_edit_record">
+              <object class="GtkButton" id="toolbar_edit_qso">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -482,7 +482,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="toolbar_delete_record">
+              <object class="GtkButton" id="toolbar_delete_qso">
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
                 <property name="receives-default">True</property>
@@ -1687,30 +1687,30 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
               </packing>
             </child>
             <child>
-              <object class="GtkBox" id="preferences_records_vbox">
+              <object class="GtkBox" id="preferences_qsos_vbox">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="orientation">vertical</property>
                 <property name="spacing">2</property>
                 <child>
-                  <object class="GtkFrame" id="preferences_records_autocomplete">
+                  <object class="GtkFrame" id="preferences_qsos_autocomplete">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label-xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="preferences_records_autocomplete_alignment">
+                      <object class="GtkAlignment" id="preferences_qsos_autocomplete_alignment">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="left-padding">2</property>
                         <property name="right-padding">2</property>
                         <child>
-                          <object class="GtkBox" id="preferences_records_autocomplete_vbox">
+                          <object class="GtkBox" id="preferences_qsos_autocomplete_vbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
                             <property name="spacing">2</property>
                             <child>
-                              <object class="GtkCheckButton" id="records_autocomplete_band_checkbutton">
+                              <object class="GtkCheckButton" id="qsos_autocomplete_band_checkbutton">
                                 <property name="label" translatable="yes">Autocomplete the Band field</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
@@ -1727,7 +1727,7 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkCheckButton" id="records_autocomplete_utc_checkbutton">
+                              <object class="GtkCheckButton" id="qsos_autocomplete_utc_checkbutton">
                                 <property name="label" translatable="yes">Use UTC when autocompleting the Date and Time</property>
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
@@ -1748,7 +1748,7 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkLabel" id="preferences_records_autocomplete_label">
+                      <object class="GtkLabel" id="preferences_qsos_autocomplete_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Autocomplete</property>
@@ -1762,18 +1762,18 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="preferences_records_default_values">
+                  <object class="GtkFrame" id="preferences_qsos_default_values">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label-xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="preferences_records_default_values_alignment">
+                      <object class="GtkAlignment" id="preferences_qsos_default_values_alignment">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="left-padding">2</property>
                         <property name="right-padding">2</property>
                         <child>
-                          <object class="GtkBox" id="preferences_records_default_values_vbox">
+                          <object class="GtkBox" id="preferences_qsos_default_values_vbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
@@ -1942,7 +1942,7 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkLabel" id="preferences_records_default_values_label">
+                      <object class="GtkLabel" id="preferences_qsos_default_values_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Default values</property>
@@ -1956,18 +1956,18 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame" id="preferences_records_callsign_lookup">
+                  <object class="GtkFrame" id="preferences_qsos_callsign_lookup">
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="label-xalign">0</property>
                     <child>
-                      <object class="GtkAlignment" id="preferences_records_callsign_lookup_alignment">
+                      <object class="GtkAlignment" id="preferences_qsos_callsign_lookup_alignment">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="left-padding">2</property>
                         <property name="right-padding">2</property>
                         <child>
-                          <object class="GtkBox" id="preferences_records_callsign_lookup_vbox">
+                          <object class="GtkBox" id="preferences_qsos_callsign_lookup_vbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <property name="orientation">vertical</property>
@@ -2166,7 +2166,7 @@ Base64-encoded plain text in the configuration file.</property>
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkLabel" id="preferences_records_callsign_lookup_label">
+                      <object class="GtkLabel" id="preferences_qsos_callsign_lookup_label">
                         <property name="visible">True</property>
                         <property name="can-focus">False</property>
                         <property name="label" translatable="yes">Callsign lookup</property>
@@ -2185,7 +2185,7 @@ Base64-encoded plain text in the configuration file.</property>
               </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="preferences_records_label">
+              <object class="GtkLabel" id="preferences_qsos_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <property name="label" translatable="yes">Records</property>
@@ -2438,23 +2438,23 @@ Base64-encoded plain text in the configuration file.</property>
       <action-widget response="-5">preferences_ok_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkDialog" id="record_dialog">
+  <object class="GtkDialog" id="qso_dialog">
     <property name="can-focus">False</property>
     <property name="title" translatable="yes">Add Record</property>
     <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
     <property name="transient-for">pyqso</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="record_dialog_vbox">
+      <object class="GtkBox" id="qso_dialog_vbox">
         <property name="can-focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child internal-child="action_area">
-          <object class="GtkButtonBox" id="record_dialog_buttons">
+          <object class="GtkButtonBox" id="qso_dialog_buttons">
             <property name="can-focus">False</property>
             <property name="layout-style">end</property>
             <child>
-              <object class="GtkButton" id="record_cancel_button">
+              <object class="GtkButton" id="qso_cancel_button">
                 <property name="label">gtk-cancel</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -2469,7 +2469,7 @@ Base64-encoded plain text in the configuration file.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="record_ok_button">
+              <object class="GtkButton" id="qso_ok_button">
                 <property name="label">gtk-ok</property>
                 <property name="visible">True</property>
                 <property name="can-focus">True</property>
@@ -3748,8 +3748,8 @@ Base64-encoded plain text in the configuration file.</property>
       </object>
     </child>
     <action-widgets>
-      <action-widget response="-6">record_cancel_button</action-widget>
-      <action-widget response="-5">record_ok_button</action-widget>
+      <action-widget response="-6">qso_cancel_button</action-widget>
+      <action-widget response="-5">qso_ok_button</action-widget>
     </action-widgets>
   </object>
   <object class="GtkDialog" id="calendar_dialog">
@@ -3757,7 +3757,7 @@ Base64-encoded plain text in the configuration file.</property>
     <property name="title" translatable="yes">Select Date</property>
     <property name="destroy-with-parent">True</property>
     <property name="type-hint">dialog</property>
-    <property name="transient-for">record_dialog</property>
+    <property name="transient-for">qso_dialog</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="calendar_dialog_vbox">
         <property name="can-focus">False</property>

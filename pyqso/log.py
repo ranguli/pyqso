@@ -26,7 +26,7 @@ from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED
 
 class Log(Gtk.ListStore):
 
-    """A single log inside of the whole logbook. A Log object can store multiple records. This is"""
+    """A single log inside of the whole logbook. A Log object can store multiple QSOs. This is"""
 
     def __init__(self, connection, name):
         """Set up a new Log object.
@@ -54,9 +54,9 @@ class Log(Gtk.ListStore):
         self.clear()
 
         try:
-            records = self.records
+            qsos = self.qsos
 
-            for r in records:
+            for r in qsos:
                 liststore_entry = [r["id"]]
                 for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
                     # Note: r may contain column names that are not in AVAILABLE_FIELD_NAMES_ORDERED,
@@ -113,14 +113,14 @@ class Log(Gtk.ListStore):
         logging.debug("Finished adding any missing database columns.")
         return
 
-    def add_record(self, fields_and_data):
-        """Add a record (or multiple records) to the log.
+    def add_qso(self, fields_and_data):
+        """Add a QSO (or multiple QSOs) to the log.
 
         :arg fields_and_data: A list of dictionaries (or possibly just a single dictionary), with each dictionary representing a single QSO, to be added to the log.
         """
-        logging.debug("Adding record(s) to log...")
+        logging.debug("Adding QSO(s) to log...")
 
-        # If a dictionary is given, assume that we only have one record to add.
+        # If a dictionary is given, assume that we only have one QSO to add.
         if isinstance(fields_and_data, dict):
             fields_and_data = [fields_and_data]
 
@@ -131,11 +131,11 @@ class Log(Gtk.ListStore):
             c.execute("PRAGMA table_info(%s)" % self.name)
             column_names = c.fetchall()
 
-            # Get the index/rowid of the last inserted record in the database.
+            # Get the index/rowid of the last inserted QSO in the database.
             c.execute("SELECT max(id) FROM %s" % self.name)
             last_index = c.fetchone()[0]
             if last_index is None:
-                # Assume no records are currently present.
+                # Assume no QSOs are currently present.
                 last_index = 0
 
         # A list of all the database entries, to be inserted in one go into the database.
@@ -149,7 +149,7 @@ class Log(Gtk.ListStore):
             query = query + ",?"
         query = query + ")"
 
-        # Gather all the records (making sure that the entries of each record are in the correct order).
+        # Gather all the QSOs (making sure that the entries of each QSO are in the correct order).
         for r in range(len(fields_and_data)):
             # What if the database columns are not necessarily in the same order as (or even exist in) AVAILABLE_FIELD_NAMES_ORDERED?
             # PyQSO handles this here, but needs a separate list (called database_entry) to successfully perform the SQL query.
@@ -167,12 +167,12 @@ class Log(Gtk.ListStore):
                         database_entry.append("")
             database_entries.append(database_entry)
 
-        # Insert records in the database.
+        # Insert QSOs in the database.
         with self.connection:
             c = self.connection.cursor()
             c.executemany(query, database_entries)
 
-            # Get the indices/rowids of the newly-inserted records.
+            # Get the indices/rowids of the newly-inserted QSOs.
             query = "SELECT id FROM %s WHERE id > %s ORDER BY id ASC" % (
                 self.name,
                 last_index,
@@ -180,12 +180,12 @@ class Log(Gtk.ListStore):
             c.execute(query)
             inserted = c.fetchall()
 
-            # Check that the number of records we wanted to insert is the same as the number of records successfully inserted.
+            # Check that the number of QSOs we wanted to insert is the same as the number of QSOs successfully inserted.
             assert len(inserted) == len(database_entries)
 
-            # Add the records to the ListStore as well.
+            # Add the QSOs to the ListStore as well.
             for r in range(len(fields_and_data)):
-                liststore_entry = [inserted[r]["id"]]  # Add the record's index.
+                liststore_entry = [inserted[r]["id"]]  # Add the QSO's index.
                 field_names = AVAILABLE_FIELD_NAMES_ORDERED
                 for i in range(0, len(field_names)):
                     if field_names[i] in list(fields_and_data[r].keys()):
@@ -194,17 +194,17 @@ class Log(Gtk.ListStore):
                         liststore_entry.append("")
                 self.append(liststore_entry)
 
-        logging.debug("Successfully added the record(s) to the log.")
+        logging.debug("Successfully added the QSO(s) to the log.")
         return
 
-    def delete_record(self, index, iter=None):
-        """Delete a specified record from the log. The corresponding record is also deleted from the Gtk.ListStore data structure.
+    def delete_qso(self, index, iter=None):
+        """Delete a specified QSO from the log. The corresponding QSO is also deleted from the Gtk.ListStore data structure.
 
-        :arg int index: The index of the record in the SQL database.
-        :arg iter: The iterator pointing to the record to be deleted in the Gtk.ListStore. If the default value of None is used, only the database entry is deleted and the corresponding Gtk.ListStore is left alone.
-        :raises sqlite.Error, IndexError: If the record could not be deleted.
+        :arg int index: The index of the QSO in the SQL database.
+        :arg iter: The iterator pointing to the QSO to be deleted in the Gtk.ListStore. If the default value of None is used, only the database entry is deleted and the corresponding Gtk.ListStore is left alone.
+        :raises sqlite.Error, IndexError: If the QSO could not be deleted.
         """
-        logging.debug("Deleting record from log...")
+        logging.debug("Deleting QSO from log...")
 
         # Delete the selected row in database.
         with self.connection:
@@ -216,20 +216,20 @@ class Log(Gtk.ListStore):
         if iter is not None:
             self.remove(iter)
 
-        logging.debug("Successfully deleted the record from the log.")
+        logging.debug("Successfully deleted the QSO from the log.")
         return
 
-    def edit_record(self, index, field_name, data, iter=None, column_index=None):
-        """Edit a specified record by replacing the current data in a specified field with the data provided.
+    def edit_qso(self, index, field_name, data, iter=None, column_index=None):
+        """Edit a specified QSO by replacing the current data in a specified field with the data provided.
 
-        :arg int index: The index of the record in the SQL database.
+        :arg int index: The index of the QSO in the SQL database.
         :arg str field_name: The name of the field whose data should be modified.
         :arg str data: The data that should replace the current data in the field.
-        :arg iter: The iterator pointing to the record to be edited in the Gtk.ListStore. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
+        :arg iter: The iterator pointing to the QSO to be edited in the Gtk.ListStore. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
         :arg column_index: The index of the column in the Gtk.ListStore to be edited. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
-        :raises sqlite.Error, IndexError: If the record could not be edited.
+        :raises sqlite.Error, IndexError: If the QSO could not be edited.
         """
-        logging.debug("Editing field '%s' in record %d..." % (field_name, index))
+        logging.debug("Editing field '%s' in QSO %d..." % (field_name, index))
         with self.connection:
             c = self.connection.cursor()
             query = "UPDATE %s SET %s" % (self.name, field_name)
@@ -238,13 +238,13 @@ class Log(Gtk.ListStore):
         if iter is not None and column_index is not None:
             self.set(iter, column_index, data)  # ...and then the ListStore.
         logging.debug(
-            "Successfully edited field '%s' in record %d in the log."
+            "Successfully edited field '%s' in QSO %d in the log."
             % (field_name, index)
         )
         return
 
     def remove_duplicates(self):
-        """Remove any duplicate records from the log.
+        """Remove any duplicate QSOs from the log.
 
         :returns: The total number of duplicates, and the number of duplicates that were successfully removed. Hopefully these will be the same.
         :rtype: tuple
@@ -253,15 +253,15 @@ class Log(Gtk.ListStore):
         if len(duplicates) == 0:
             return (0, 0)  # Nothing to do here.
 
-        removed = 0  # Count the number of records that are removed. Hopefully this will be the same as len(duplicates).
+        removed = 0  # Count the number of QSOs that are removed. Hopefully this will be the same as len(duplicates).
         iter = self.get_iter_first()  # Start with the first row in the log.
         prev = iter  # Keep track of the previous iter (initially this will be the same as the first row in the log).
         while iter is not None:
             row_index = self.get_value(iter, 0)  # Get the index.
             if row_index in duplicates:  # Is this a duplicate row? If so, delete it.
-                self.delete_record(row_index, iter)
+                self.delete_qso(row_index, iter)
                 removed += 1
-                iter = prev  # Go back to the iter before the record that was just removed and continue from there.
+                iter = prev  # Go back to the iter before the QSO that was just removed and continue from there.
                 continue
             prev = iter
             iter = self.iter_next(
@@ -294,7 +294,7 @@ class Log(Gtk.ListStore):
     def get_duplicates(self):
         """Find the duplicates in the log, based on the CALL, QSO_DATE, and TIME_ON fields.
 
-        :returns: A list of indices/ids corresponding to the duplicate records.
+        :returns: A list of indices/ids corresponding to the duplicate QSOs.
         :rtype: list
         """
         duplicates = []
@@ -316,13 +316,13 @@ class Log(Gtk.ListStore):
             logging.exception(e)
         return duplicates
 
-    def get_record_by_index(self, index):
-        """Return a record with a given index in the log.
+    def get_qso_by_index(self, index):
+        """Return a QSO with a given index in the log.
 
-        :arg int index: The index of the record in the SQL database.
-        :returns: The desired record, represented by a dictionary of field-value pairs.
+        :arg int index: The index of the QSO in the SQL database.
+        :returns: The desired QSO, represented by a dictionary of field-value pairs.
         :rtype: dict
-        :raises sqlite.Error: If the record could not be retrieved from the database.
+        :raises sqlite.Error: If the QSO could not be retrieved from the database.
         """
         with self.connection:
             c = self.connection.cursor()
@@ -331,12 +331,12 @@ class Log(Gtk.ListStore):
             return c.fetchone()
 
     @property
-    def records(self):
-        """Return a list of all the records in the log.
+    def qsos(self):
+        """Return a list of all the QSOs in the log.
 
-        :returns: A list of all the records in the log. Each record is represented by a dictionary.
+        :returns: A list of all the QSOs in the log. Each QSO is represented by a dictionary.
         :rtype: dict
-        :raises sqlite.Error: If the records could not be retrieved from the database.
+        :raises sqlite.Error: If the QSOs could not be retrieved from the database.
         """
         with self.connection:
             c = self.connection.cursor()
@@ -344,12 +344,12 @@ class Log(Gtk.ListStore):
             return c.fetchall()
 
     @property
-    def record_count(self):
-        """Return the total number of records in the log.
+    def qso_count(self):
+        """Return the total number of QSOs in the log.
 
-        :returns: The total number of records in the log.
+        :returns: The total number of QSOs in the log.
         :rtype: int
-        :raises sqlite.Error: If the record count could not be determined due to a database error.
+        :raises sqlite.Error: If the QSO count could not be determined due to a database error.
         """
         with self.connection:
             c = self.connection.cursor()
