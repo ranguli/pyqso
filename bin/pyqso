@@ -18,10 +18,12 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 from gi import require_version
-require_version('Gtk', '3.0')
-require_version('PangoCairo', '1.0')
-from gi.repository import Gtk, Gdk, GdkPixbuf
+
+require_version("Gtk", "3.0")
+require_version("PangoCairo", "1.0")
+from gi.repository import Gtk, Gdk
 import argparse
+
 try:
     import configparser
 except ImportError:
@@ -33,6 +35,7 @@ import signal
 import pkg_resources
 
 import logging
+
 logging.basicConfig(level=logging.INFO)
 logging.info("PyQSO version 1.1.0")
 
@@ -41,37 +44,40 @@ pyqso_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), os.pardir
 sys.path.insert(0, pyqso_path)
 
 # PyQSO modules.
-from pyqso.adif import *
-from pyqso.logbook import *
-from pyqso.menu import *
+from pyqso.logbook import Logbook
+from pyqso.menu import Menu
 from pyqso.ui.context_menu import ContextMenu
-from pyqso.toolbar import *
-from pyqso.preferences_dialog import *
+from pyqso.toolbar import Toolbar
+from pyqso.preferences_dialog import PreferencesDialog
 
 
 class PyQSO:
 
-    """ The PyQSO application class. """
+    """The PyQSO application class."""
 
     def __init__(self, logbook_path=None):
-        """ Set up the main (root) window, start the event loop, and open a logbook (if the logbook's path is specified by the user in the command line).
+        """Set up the main (root) window, start the event loop, and open a logbook (if the logbook's path is specified by the user in the command line).
 
         :arg str logbook_path: An optional argument containing the path of the logbook file to open. If no value is provided, this defaults to None and no logbook is opened.
         """
 
         # Get the PyQSO main window defined in the Glade file.
         self.builder = Gtk.Builder()
-        glade_file_path = pkg_resources.resource_filename("pyqso", os.path.join("res", "pyqso.glade"))
+        glade_file_path = pkg_resources.resource_filename(
+            "pyqso", os.path.join("res", "pyqso.glade")
+        )
         self.builder.add_from_file(glade_file_path)
         self.window = self.builder.get_object("pyqso")
 
         # Check that the directory for holding PyQSO configuration files exists. If it doesn't, create it now.
-        config_directory = os.path.expanduser('~/.config/pyqso')
+        config_directory = os.path.expanduser("~/.config/pyqso")
         if not os.path.exists(config_directory):
             try:
                 os.makedirs(config_directory)
             except Exception as e:
-                logging.error("An error occurred whilst creating a directory for PyQSO configuration files. Try creating the directory '~/.config/pyqso' manually.")
+                logging.error(
+                    "An error occurred whilst creating a directory for PyQSO configuration files. Try creating the directory '~/.config/pyqso' manually."
+                )
                 logging.exception(e)
 
         # Get any application-specific preferences from the configuration file.
@@ -79,7 +85,7 @@ class PyQSO:
 
         # Check that the configuration file actually exists (and is readable)
         # otherwise, we will resort to the defaults.
-        have_config = (config.read(config_directory + "/preferences.ini") != [])
+        have_config = config.read(config_directory + "/preferences.ini") != []
 
         # Kills the application if the close button is clicked on the main window itself.
         self.window.connect("delete-event", Gtk.main_quit)
@@ -103,27 +109,29 @@ class PyQSO:
         # Show the main window.
         self.window.show_all()
 
-        if(logbook_path):
+        if logbook_path:
             logging.info("Opening logbook: %s" % logbook_path)
             self.logbook.open(path=logbook_path)
         else:
             # If no logbook path is specified at the command line,
             # then check if the user wants to open a default logbook.
             (section, option) = ("general", "default_logbook")
-            if(have_config and config.has_option(section, option)):
+            if have_config and config.has_option(section, option):
                 open_default_logbook = config.getboolean(section, option)
                 (section, option) = ("general", "default_logbook_path")
-                if(open_default_logbook and config.has_option(section, option)):
+                if open_default_logbook and config.has_option(section, option):
                     logbook_path = config.get(section, option)
-                    if(logbook_path is not None and logbook_path != ""):
+                    if logbook_path is not None and logbook_path != "":
                         logging.info("Opening the default logbook: %s" % logbook_path)
                         self.logbook.open(path=logbook_path)
 
         return
 
     def show_about(self, widget):
-        """ Show the About dialog, which includes license information. """
-        glade_file_path = pkg_resources.resource_filename("pyqso", os.path.join("res", "pyqso.glade"))
+        """Show the About dialog, which includes license information."""
+        glade_file_path = pkg_resources.resource_filename(
+            "pyqso", os.path.join("res", "pyqso.glade")
+        )
         self.builder.add_objects_from_file(glade_file_path, ("about_dialog",))
         about = self.builder.get_object("about_dialog")
         about.run()
@@ -131,36 +139,55 @@ class PyQSO:
         return
 
     def show_preferences(self, widget):
-        """ Show the Preferences dialog. Any changes made by the user after clicking the 'Ok' button are saved in the configuration file. """
+        """Show the Preferences dialog. Any changes made by the user after clicking the 'Ok' button are saved in the configuration file."""
         preferences = PreferencesDialog(self)
         response = preferences.dialog.run()
-        if(response == Gtk.ResponseType.OK):
+        if response == Gtk.ResponseType.OK:
             preferences.commit()
         preferences.dialog.destroy()
         return
 
-if(__name__ == "__main__"):
+
+if __name__ == "__main__":
     # Get any command line arguments.
     parser = argparse.ArgumentParser(prog="pyqso")
-    parser.add_argument("-d", "--debug", action="store_true", default=False, help="Enable debugging. All debugging messages will be written to pyqso.debug.")
-    parser.add_argument("-l", "--logbook", action="store", type=str, metavar="/path/to/my_logbook_file.db", default=None, help="Path to a Logbook file. If this file does not already exist, then it will be created.")
+    parser.add_argument(
+        "-d",
+        "--debug",
+        action="store_true",
+        default=False,
+        help="Enable debugging. All debugging messages will be written to pyqso.debug.",
+    )
+    parser.add_argument(
+        "-l",
+        "--logbook",
+        action="store",
+        type=str,
+        metavar="/path/to/my_logbook_file.db",
+        default=None,
+        help="Path to a Logbook file. If this file does not already exist, then it will be created.",
+    )
     args = parser.parse_args()
 
     # Output debugging messages to a file.
-    if(args.debug):
+    if args.debug:
         # Get the root logger.
         logger = logging.getLogger()
         logger.setLevel(logging.DEBUG)
         # Add a file handler.
         handler = logging.FileHandler("pyqso.debug", mode="w")
-        formatter = logging.Formatter(fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+        formatter = logging.Formatter(
+            fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        )
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
     # Enforce an absolute logbook file path.
-    if(args.logbook):
+    if args.logbook:
         args.logbook = os.path.abspath(args.logbook)
 
-    signal.signal(signal.SIGINT, signal.SIG_DFL)  # Exit PyQSO if a SIGINT signal is captured.
+    signal.signal(
+        signal.SIGINT, signal.SIG_DFL
+    )  # Exit PyQSO if a SIGINT signal is captured.
     application = PyQSO(args.logbook)  # Populate the main window and show it.
     Gtk.main()  # Start up the event loop!
