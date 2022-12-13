@@ -23,10 +23,7 @@ import sqlite3 as sqlite
 import json
 from os.path import expanduser
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 from pyqso.adif import (
     ADIF,

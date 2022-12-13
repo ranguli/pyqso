@@ -21,10 +21,7 @@ from gi.repository import Gtk, Gdk
 import logging
 import os
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 from datetime import datetime
 from os.path import expanduser
 import base64

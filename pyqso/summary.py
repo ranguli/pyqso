@@ -23,10 +23,7 @@ import pathlib
 from os.path import basename, getmtime, expanduser
 from datetime import datetime, date
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 try:
     import matplotlib
 
