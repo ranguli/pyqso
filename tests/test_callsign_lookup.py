@@ -23,7 +23,7 @@ try:
     import unittest.mock as mock
 except ImportError:
     import mock
-from pyqso.callsign_lookup import CallsignLookupQRZ, CallsignLookupHamQTH, strip, http_client
+from pyqso.callsign_lookup import CallsignLookupQRZ, strip, http_client
 
 
 class TestCallsignLookup(unittest.TestCase):
@@ -33,7 +33,6 @@ class TestCallsignLookup(unittest.TestCase):
     def setUp(self):
         """Set up the objects needed for the unit tests."""
         self.qrz = CallsignLookupQRZ(parent=None)
-        self.hamqth = CallsignLookupHamQTH(parent=None)
 
     def test_strip(self):
         """Check that a callsign with a prefix and a suffix is stripped correctly."""
@@ -102,41 +101,6 @@ class TestCallsignLookup(unittest.TestCase):
         assert fields_and_data["ADDRESS"] == "ADDRESS2"
         assert fields_and_data["COUNTRY"] == "COUNTRY"
 
-    def test_hamqth_connect(self):
-        """Check the example response from the hamqth.com server, and make sure the session ID has been correctly extracted."""
-
-        http_client.HTTPSConnection = mock.Mock(spec=http_client.HTTPSConnection)
-        http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
-        connection = http_client.HTTPSConnection()
-        response = http_client.HTTPResponse()
-
-        response.read.return_value = b'<?xml version="1.0"?>\n<HamQTH version="2.6" xmlns="https://www.hamqth.com">\n<session>\n<session_id>09b0ae90050be03c452ad235a1f2915ad684393c</session_id>\n</session>\n</HamQTH>\n'
-        connection.getresponse.return_value = response
-
-        result = self.hamqth.connect("hello", "world")
-        assert result
-        assert self.hamqth.session_id == "09b0ae90050be03c452ad235a1f2915ad684393c"
-
-    def test_hamqth_lookup(self):
-        """Check the example callsign lookup response from the hamqth.com server, and make sure the callsign information has been correctly extracted."""
-
-        http_client.HTTPSConnection = mock.Mock(spec=http_client.HTTPSConnection)
-        http_client.HTTPResponse = mock.Mock(spec=http_client.HTTPResponse)
-        connection = http_client.HTTPSConnection()
-        response = http_client.HTTPResponse()
-
-        response.read.return_value = b'<?xml version="1.0"?>\n<HamQTH version="2.6" xmlns="https://www.hamqth.com">\n<search>\n<callsign>MYCALL</callsign>\n<nick>NAME</nick>\n<country>COUNTRY</country>\n<itu>ITU</itu>\n<cq>CQ</cq>\n<iota>IOTA</iota>\n<adr_street1>ADDRESS</adr_street1>\n</search>\n</HamQTH>\n'
-        connection.getresponse.return_value = response
-
-        self.hamqth.connection = connection
-        self.hamqth.session_id = "09b0ae90050be03c452ad235a1f2915ad684393c"
-        fields_and_data = self.hamqth.lookup("MYCALL")
-        assert fields_and_data["NAME"] == "NAME"
-        assert fields_and_data["ADDRESS"] == "ADDRESS"
-        assert fields_and_data["COUNTRY"] == "COUNTRY"
-        assert fields_and_data["CQZ"] == "CQ"
-        assert fields_and_data["ITUZ"] == "ITU"
-        assert fields_and_data["IOTA"] == "IOTA"
 
 
 if __name__ == "__main__":
