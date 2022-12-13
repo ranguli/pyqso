@@ -18,7 +18,6 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 from gi.repository import Gtk
-import logging
 
 
 class PopupDialog:
@@ -27,14 +26,14 @@ class PopupDialog:
         self.message = message
 
     def error(self):
-        self.buttons = GtkButtonType.OK
+        self.buttons = Gtk.GtkButtonType.OK
         self.title = "Error"
         self.msgtype = Gtk.MessageType.ERROR
 
         return self.show()
 
     def question(self):
-        self.buttons = GtkButtonType.YES_NO
+        self.buttons = Gtk.GtkButtonType.YES_NO
         self.title = "Question"
         self.msgtype = Gtk.MessageType.QUESTION
 
@@ -52,7 +51,7 @@ class PopupDialog:
         :rtype: Gtk.ResponseType
         """
         dialog = Gtk.MessageDialog(
-            parent,
+            self.parent,
             Gtk.DialogFlags.DESTROY_WITH_PARENT,
             self.msgtype,
             self.buttons,
