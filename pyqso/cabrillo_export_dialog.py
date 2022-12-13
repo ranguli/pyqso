@@ -18,7 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-from pyqso.cabrillo import CONTESTS
+from pyqso.contest import CONTESTS
 from pyqso import util
 
 

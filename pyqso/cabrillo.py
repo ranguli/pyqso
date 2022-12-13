@@ -18,62 +18,11 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+from datetime import datetime
+
+import cabrillo
 
 CABRILLO_VERSION = "3.0"
-
-CONTESTS = [
-    "",
-    "AP-SPRINT",
-    "ARRL-10",
-    "ARRL-160",
-    "ARRL-222",
-    "ARRL-DX-CW",
-    "ARRL-DX-SSB",
-    "ARRL-RR-PH",
-    "ARRL-RR-DIG",
-    "ARRL-RR-CW",
-    "ARRL-SCR",
-    "ARRL-SS-CW",
-    "ARRL-SS-SSB",
-    "ARRL-UHF-AUG",
-    "ARRL-VHF-JAN",
-    "ARRL-VHF-JUN",
-    "ARRL-VHF-SEP",
-    "ARRL-RTTY",
-    "BARTG-RTTY",
-    "CQ-160-CW",
-    "CQ-160-SSB",
-    "CQ-WPX-CW",
-    "CQ-WPX-RTTY",
-    "CQ-WPX-SSB",
-    "CQ-VHF",
-    "CQ-WW-CW",
-    "CQ-WW-RTTY",
-    "CQ-WW-SSB",
-    "DARC-WAEDC-CW",
-    "DARC-WAEDC-RTTY",
-    "DARC-WAEDC-SSB",
-    "DL-DX-RTTY",
-    "DRCG-WW-RTTY",
-    "FCG-FQP",
-    "IARU-HF",
-    "JIDX-CW",
-    "JIDX-SSB",
-    "NAQP-CW",
-    "NAQP-SSB",
-    "NA-SPRINT-CW",
-    "NA-SPRINT-SSB",
-    "NCCC-CQP",
-    "NEQP",
-    "OCEANIA-DX-CW",
-    "OCEANIA-DX-SSB",
-    "RDXC",
-    "RSGB-IOTA",
-    "SAC-CW",
-    "SAC-SSB",
-    "STEW-PERRY",
-    "TARA-RTTY",
-]
 
 
 class Cabrillo:
@@ -84,6 +33,37 @@ class Cabrillo:
     def __init__(self):
         """Initialise class for I/O of files using the Cabrillo format."""
         return
+
+    def convert_date_and_time(self, date, time):
+        """Converts the date format used internally (YYYYMMDD, used due to ADIF) to
+        the format used by Cabrillo (YYYY-MM-DD)"""
+
+        return datetime.strptime(f"{date} {time}", "%Y%m%d %H%M")
+
+    def get_contest_exchange(self, r, contest):
+
+        # Just an example, needs to be dynamic and lookup contests from a data
+        # store
+
+        rst_sent = r["RST_SENT"]
+        rst_rcvd = r["RST_RCVD"]
+
+        if contest == "ARRL-10":
+            if r["DE_CONTEST_SERIAL"]:
+                de_qth_serial = r["DE_CONTEST_SERIAL"]
+            else:
+                de_qth_serial = r["DE_STATE"]
+
+            if r["DX_CONTEST_SERIAL"]:
+                dx_qth_serial = r["DX_CONTEST_SERIAL"]
+            else:
+                dx_qth_serial = r["DX_STATE"]
+
+            de_exchange = [rst_sent, de_qth_serial]
+            dx_exchange = [rst_sent, dx_qth_serial]
+
+        return de_exchange, dx_echange
+
 
     def write(self, qsos, path, contest="", mycall=""):
         """Write a list of QSOs to a file in the Cabrillo format.
@@ -97,80 +77,53 @@ class Cabrillo:
 
         logging.debug("Writing QSOs to a Cabrillo file...")
 
-        with open(path, mode="w", errors="replace") as f:  # Open file for writing
+        cabrillo_log = cabrillo.Cabrillo(version=CABRILLO_VERSION, callsign=mycall, contest=contest)
 
-            # Header
-            f.write("""START-OF-LOG: %s\n""" % (CABRILLO_VERSION))
-            f.write("""CREATED-BY: PyQSO v1.1.0\n""")
-            f.write("""CALLSIGN: %s\n""" % (mycall))
-            f.write("""CONTEST: %s\n""" % (contest))
+        # Write each QSO to the file.
+        for r in qsos:
 
-            # Write each QSO to the file.
-            for r in qsos:
+            # TODO: replace with a conversion function added to util.py
+            # Frequency. Note that this must be in kHz. The frequency is stored in MHz in the database, so it's converted to kHz here.
+            try:
+                freq = str(float(r["FREQ"]) * 1e3)
+            except ValueError:
+                freq = ""
 
-                # Frequency. Note that this must be in kHz. The frequency is stored in MHz in the database, so it's converted to kHz here.
-                try:
-                    freq = str(float(r["FREQ"]) * 1e3)
-                except ValueError:
-                    freq = ""
+            # Mode
+            if r["MODE"] == "SSB":
+                mode = "PH"
+            elif r["MODE"] == "CW":
+                mode = "CW"
+            elif r["MODE"] == "FM":
+                mode = "FM"
+            else:
+                # TODO: Github Issue #28 - This assumes that the mode is any other non-CW digital mode, which isn't always going to be the case (e.g. for AM).
+                mode = "RY"
 
-                # Mode
-                if r["MODE"] == "SSB":
-                    mo = "PH"
-                elif r["MODE"] == "CW":
-                    mo = "CW"
-                elif r["MODE"] == "FM":
-                    mo = "FM"
-                else:
-                    # FIXME: This assumes that the mode is any other non-CW digital mode, which isn't always going to be the case (e.g. for AM).
-                    mo = "RY"
+            # Transmitter ID (must be 0 or 1, if applicable).
+            # FIXME: For now this has been hard-coded to 0.
+            t = "0"
 
-                # Date in yyyy-mm-dd format.
-                date = (
-                    r["QSO_DATE"][0:4]
-                    + "-"
-                    + r["QSO_DATE"][4:6]
-                    + "-"
-                    + r["QSO_DATE"][6:8]
-                )
+            rst_sent = r["RST_SENT"]
+            rst_rcvd = r["RST_RCVD"]
 
-                # Time
-                time = r["TIME_ON"]
+            # The format of exchange that is sent and received varies based on
+            # the contest, and is left open-ended in the Cabrillo specification
+            # accordingly.
 
-                # The callsign that was used when operating the contest station.
-                call_sent = mycall
+            #if contest:
+            #    de_exch, dx_exch = self.get_contest_exchange(r, contest)
 
-                # Exchange (the part sent to the distant station)
-                exch_sent = r["RST_SENT"]
+            # If there isn't a contest, the default exchange is just an RST.
+            de_exch = [rst_sent]
+            dx_exch = [rst_rcvd]
 
-                # Callsign
-                call_rcvd = r["CALL"]
+            qso = cabrillo.QSO(freq, mode, self.convert_date_and_time(r["QSO_DATE"], r["TIME_ON"]), mycall, r["CALL"], de_exch, dx_exch, t)
+            cabrillo_log.append_qso(qso, ignore_order=True)
 
-                # Exchange (the part received from the distant station)
-                exch_rcvd = r["RST_RCVD"]
+        with open(path, mode='w', errors="replace") as f:
+            cabrillo_log.write(f)
 
-                # Transmitter ID (must be 0 or 1, if applicable).
-                # FIXME: For now this has been hard-coded to 0.
-                t = "0"
-
-                f.write(
-                    """QSO: %s %s %s %s %s %s %s %s %s\n"""
-                    % (
-                        freq,
-                        mo,
-                        date,
-                        time,
-                        call_sent,
-                        exch_sent,
-                        call_rcvd,
-                        exch_rcvd,
-                        t,
-                    )
-                )
-
-            # Footer
-            f.write("END-OF-LOG:")
-
-            logging.info("Wrote %d QSOs to %s in Cabrillo format." % (len(qsos), path))
+        logging.info("Wrote %d QSOs to %s in Cabrillo format." % (len(qsos), path))
 
         return

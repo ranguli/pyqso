@@ -83,6 +83,14 @@ jupyter = ["ipython (>=7.8.0)", "tokenize-rt (>=3.2.0)"]
 uvloop = ["uvloop (>=0.15.2)"]
 
 [[package]]
+name = "cabrillo"
+version = "0.1.0"
+description = "A Python library to parse Cabrillo-format amateur radio contest logs."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "cairocffi"
 version = "1.4.0"
 description = "cffi-based cairo bindings for Python"
@@ -934,7 +942,7 @@ testing = ["coverage (>=6.2)", "coverage-enable-subprocess (>=1)", "flaky (>=3.7
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "81a8f024cb92d9ef85d020541a00027a4ba687762046ae5701c05b449c1cb73f"
+content-hash = "edce9dab70e90f5ff223d20e9ac7fd0ec0ad315d94fc99c98fbe5b7904ba15c6"
 
 [metadata.files]
 alabaster = [
@@ -970,6 +978,10 @@ black = [
     {file = "black-22.12.0-cp39-cp39-win_amd64.whl", hash = "sha256:559c7a1ba9a006226f09e4916060982fd27334ae1998e7a38b3f33a37f7a2148"},
     {file = "black-22.12.0-py3-none-any.whl", hash = "sha256:436cc9167dd28040ad90d3b404aec22cedf24a6e4d7de221bec2730ec0c97bcf"},
     {file = "black-22.12.0.tar.gz", hash = "sha256:229351e5a18ca30f447bf724d007f890f97e13af070bb6ad4c0a441cd7596a2f"},
+]
+cabrillo = [
+    {file = "cabrillo-0.1.0-py3-none-any.whl", hash = "sha256:ced520983d283cd202b0ca5536538ef3c07b832014c902b72f3f87dbb0f8936a"},
+    {file = "cabrillo-0.1.0.tar.gz", hash = "sha256:b6798ac42919cd9ecf2c244966bb3e99f79f1db4f40487fde8793b1a6d44bb09"},
 ]
 cairocffi = [
     {file = "cairocffi-1.4.0.tar.gz", hash = "sha256:509339b32ccd8d7b00c2204c32736cde78db53a32e6a162d312478d25626cd9a"},
