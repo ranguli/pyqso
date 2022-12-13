@@ -18,16 +18,14 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import os
 
 from gi.repository import Gdk, Gtk
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 import base64
+from pyqso import util
+
 from datetime import datetime
 from os.path import expanduser
 
@@ -60,9 +58,7 @@ class AddQSODialog:
 
         self.application = application
         self.builder = self.application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("qso_dialog",))
         self.dialog = self.builder.get_object("qso_dialog")
         self.builder.get_object("qso_dialog").connect(
@@ -524,9 +520,6 @@ class AddQSODialog:
             if database == "qrz.com":
                 # QRZ.com
                 lookup = callsign_lookup.CallsignLookupQRZ(parent=self.dialog)
-            elif database == "hamqth.com":
-                # HamQTH.com
-                lookup = callsign_lookup.CallsignLookupHamQTH(parent=self.dialog)
             else:
                 raise ValueError("Unknown callsign database: %s" % database)
         except ValueError as e:
@@ -580,7 +573,7 @@ class AddQSODialog:
                 ignore_prefix_suffix = True
 
             # Perform the lookup.
-            fields_and_data = callsign_lookup.lookup(
+            fields_and_data = lookup.lookup(
                 full_callsign, ignore_prefix_suffix=ignore_prefix_suffix
             )
             for field_name in list(fields_and_data.keys()):

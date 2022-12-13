@@ -22,11 +22,7 @@ import logging
 import re
 from datetime import datetime
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-
+import configparser
 from os.path import expanduser
 
 # ADIF field names and their associated data types available in PyQSO.

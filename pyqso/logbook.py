@@ -23,11 +23,7 @@ import sqlite3 as sqlite
 from os.path import expanduser
 
 from gi.repository import Gtk
-
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 
 from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_FRIENDLY,
                         AVAILABLE_FIELD_NAMES_ORDERED,

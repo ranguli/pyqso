@@ -18,7 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import os.path
+from pyqso import util
 
 
 class LogNameDialog:
@@ -36,9 +36,7 @@ class LogNameDialog:
         logging.debug("Building new log name dialog...")
 
         self.builder = application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("log_name_dialog",))
         self.dialog = self.builder.get_object("log_name_dialog")
 

@@ -17,12 +17,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import base64
-import configparser
-import logging
-import os.path
-
 from gi.repository import Gtk
+import logging
+import os
+
+from pyqso import util
+
+import configparser
+import base64
 
 try:
     import Hamlib
@@ -51,9 +53,7 @@ class PreferencesDialog:
 
         self.application = application
         self.builder = self.application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("preferences_dialog",))
         self.dialog = self.builder.get_object("preferences_dialog")
 
@@ -370,7 +370,7 @@ class RecordsPage:
         self.sources["CALLSIGN_DATABASE"] = self.builder.get_object(
             "callsign_lookup_database_combo"
         )
-        callsign_database = ["", "qrz.com", "hamqth.com"]
+        callsign_database = ["", "qrz.com"]
         for database in callsign_database:
             self.sources["CALLSIGN_DATABASE"].append_text(database)
         (section, option) = ("qsos", "callsign_database")

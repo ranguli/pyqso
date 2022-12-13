@@ -26,14 +26,11 @@ import argparse
 
 from gi.repository import Gdk, Gtk
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
-
-import logging
+import configparser
 import os
 import os.path
+
+import logging
 import signal
 import sys
 

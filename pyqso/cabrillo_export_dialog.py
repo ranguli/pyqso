@@ -18,9 +18,9 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
-import os
 
-from pyqso.cabrillo import CONTESTS
+from pyqso.contest import CONTESTS
+from pyqso import util
 
 
 class CabrilloExportDialog:
@@ -36,9 +36,8 @@ class CabrilloExportDialog:
         logging.debug("Building new Cabrillo export dialog...")
 
         self.builder = application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("cabrillo_export_dialog",))
         self.dialog = self.builder.get_object("cabrillo_export_dialog")
 
