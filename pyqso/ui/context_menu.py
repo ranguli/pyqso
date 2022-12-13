@@ -18,7 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 
-class Popup:
+class ContextMenu:
 
     """The popup menu that appears when a QSO record is right-clicked."""
 
@@ -28,7 +28,7 @@ class Popup:
         self.application = application
         self.builder = self.application.builder
 
-        self.menu = self.builder.get_object("popup")
+        self.menu = self.builder.get_object("context_menu")
 
         # Collect Gtk menu items and connect signals.
         self.items = {}

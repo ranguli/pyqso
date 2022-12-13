@@ -44,7 +44,7 @@ sys.path.insert(0, pyqso_path)
 from pyqso.adif import *
 from pyqso.logbook import *
 from pyqso.menu import *
-from pyqso.popup import *
+from pyqso.ui.context_menu import ContextMenu
 from pyqso.toolbar import *
 from pyqso.preferences_dialog import *
 
@@ -94,7 +94,7 @@ class PyQSO:
 
         # Set up the menu and toolbar. These classes depend on the Logbook and Toolbox class.
         self.menu = Menu(self)
-        self.popup = Popup(self)
+        self.context_menu = ContextMenu(self)
         self.toolbar = Toolbar(self)
 
         # Clipboard for copy/paste operations.
