@@ -18,7 +18,8 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from pyqso.cabrillo import *
+from pyqso.cabrillo import Cabrillo
+from datetime import datetime
 
 
 class TestCabrillo(unittest.TestCase):
@@ -30,63 +31,14 @@ class TestCabrillo(unittest.TestCase):
         self.cabrillo = Cabrillo()
         return
 
-    def test_write(self):
-        """Check that QSOs are written correctly in Cabrillo format."""
-        records = [
-            {
-                "TIME_ON": "1955",
-                "BAND": "40m",
-                "CALL": "TEST",
-                "FREQ": "145.550",
-                "MODE": "FM",
-                "QSO_DATE": "20130322",
-                "RST_SENT": "59 001",
-                "RST_RCVD": "59 002",
-            },
-            {
-                "TIME_ON": "0820",
-                "BAND": "20m",
-                "CALL": "TEST2ABC",
-                "FREQ": "144.330",
-                "MODE": "SSB",
-                "QSO_DATE": "20150227",
-                "RST_SENT": "55 020",
-                "RST_RCVD": "57 003",
-            },
-            {
-                "TIME_ON": "0832",
-                "BAND": "2m",
-                "CALL": "HELLO",
-                "FREQ": "145.550",
-                "MODE": "FM",
-                "QSO_DATE": "20150227",
-                "RST_SENT": "59 001",
-                "RST_RCVD": "59 002",
-            },
-        ]
+    def test_convert_date_and_time_1(self):
+        c = Cabrillo()
+        date = "20220101"
+        time = "1457"
+        expected = datetime.strptime(f"{date} {time}", "%Y%m%d %H%M")
 
-        expected = """START-OF-LOG: 3.0
-CREATED-BY: PyQSO v1.1.0
-CALLSIGN: MYCALL
-CONTEST: MYCONTEST
-QSO: 145550.0 FM 2013-03-22 1955 MYCALL 59 001 TEST 59 002 0
-QSO: 144330.0 PH 2015-02-27 0820 MYCALL 55 020 TEST2ABC 57 003 0
-QSO: 145550.0 FM 2015-02-27 0832 MYCALL 59 001 HELLO 59 002 0
-END-OF-LOG:"""
-        print("Expected Cabrillo file contents: ", expected)
+        assert c.convert_date_and_time(date, time) == expected
 
-        mycall = "MYCALL"
-        mycontest = "MYCONTEST"
-        path = "Cabrillo.test_write.log"
-        self.cabrillo.write(records, path, contest=mycontest, mycall=mycall)
-
-        actual = ""
-        f = open(path, "r")
-        for line in f:
-            actual += line
-        f.close()
-        print("Actual Cabrillo file contents: ", actual)
-        assert expected == actual
 
 
 if __name__ == "__main__":
