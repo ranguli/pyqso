@@ -322,6 +322,7 @@ class Logbook:
                         parent=ln.dialog,
                         message="Database error. Try another log name.",
                     )
+                    d.error()
                     exists = True
             else:
                 ln.dialog.destroy()
