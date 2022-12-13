@@ -19,11 +19,11 @@
 
 import unittest
 
-from pyqso.cabrillo import Cabrillo
+from pyqso.cabrillo import CabrilloWrapper
 from datetime import datetime
 
 
-class TestCabrillo(unittest.TestCase):
+class TestCabrilloWrapper(unittest.TestCase):
 
     """The unit tests for the Cabrillo class."""
 
