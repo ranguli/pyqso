@@ -18,14 +18,13 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+import unittest.mock as mock
 
-try:
-    import unittest.mock as mock
-except ImportError:
-    import mock
 import os
 from shutil import copyfile
-from pyqso.logbook import *
+from pyqso.logbook import Logbook
+
+from gi.repository import Gtk
 
 
 class TestLogbook(unittest.TestCase):
