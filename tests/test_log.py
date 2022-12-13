@@ -97,38 +97,38 @@ class TestLog(unittest.TestCase):
         for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
             assert field_name in column_names_after
 
-    def test_add_record(self):
-        """Check that a single record can be successfully added."""
+    def test_add_qso(self):
+        """Check that a single qso can be successfully added."""
 
-        self.log.add_record(self.fields_and_data)
+        self.log.add_qso(self.fields_and_data)
 
         c = self.connection.cursor()
         c.execute("SELECT * FROM test")
-        records = c.fetchall()
-        assert len(records) == 1
+        qsos = c.fetchall()
+        assert len(qsos) == 1
 
         # Check that all the data has been added to all the fields.
         for field_name in self.field_names:
-            print(self.fields_and_data[field_name], records[0][field_name])
-            assert self.fields_and_data[field_name] == records[0][field_name]
+            print(self.fields_and_data[field_name], qsos[0][field_name])
+            assert self.fields_and_data[field_name] == qsos[0][field_name]
 
         # Check consistency of index between Gtk.ListStore and the database.
-        assert records[0]["id"] == 1
+        assert qsos[0]["id"] == 1
         iter = self.log.get_iter_first()
         row_index = self.log.get_value(iter, 0)
-        assert records[0]["id"] == row_index
+        assert qsos[0]["id"] == row_index
 
-    def test_add_record_multiple(self):
-        """Check that multiple records can be successfully added in one go."""
-        self.log.add_record([self.fields_and_data] * 5)
+    def test_add_qso_multiple(self):
+        """Check that multiple qsos can be successfully added in one go."""
+        self.log.add_qso([self.fields_and_data] * 5)
 
         c = self.connection.cursor()
         c.execute("SELECT * FROM test")
-        records = c.fetchall()
-        assert len(records) == 5
+        qsos = c.fetchall()
+        assert len(qsos) == 5
 
-    def test_delete_record(self):
-        """Check that a record can be successfully deleted."""
+    def test_delete_qso(self):
+        """Check that a qso can be successfully deleted."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
         c.execute(
@@ -146,18 +146,18 @@ class TestLog(unittest.TestCase):
         )
 
         c.execute("SELECT * FROM test")
-        records_before = c.fetchall()
+        qsos_before = c.fetchall()
 
-        self.log.delete_record(1)
+        self.log.delete_qso(1)
 
         c.execute("SELECT * FROM test")
-        records_after = c.fetchall()
+        qsos_after = c.fetchall()
 
-        assert len(records_before) == 1
-        assert len(records_after) == 0
+        assert len(qsos_before) == 1
+        assert len(qsos_after) == 0
 
-    def test_edit_record(self):
-        """Check that a record's fields can be successfully edited."""
+    def test_edit_qso(self):
+        """Check that a qso's fields can be successfully edited."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
         c.execute(
@@ -175,21 +175,21 @@ class TestLog(unittest.TestCase):
         )
 
         c.execute("SELECT * FROM test")
-        record_before = c.fetchall()[0]
+        qso_before = c.fetchall()[0]
 
-        self.log.edit_record(1, "CALL", "TEST456")
-        self.log.edit_record(1, "FREQ", "145.450")
+        self.log.edit_qso(1, "CALL", "TEST456")
+        self.log.edit_qso(1, "FREQ", "145.450")
 
         c.execute("SELECT * FROM test")
-        record_after = c.fetchall()[0]
+        qso_after = c.fetchall()[0]
 
-        assert record_before["CALL"] == "TEST123"
-        assert record_after["CALL"] == "TEST456"
-        assert record_before["FREQ"] == "145.500"
-        assert record_after["FREQ"] == "145.450"
+        assert qso_before["CALL"] == "TEST123"
+        assert qso_after["CALL"] == "TEST456"
+        assert qso_before["FREQ"] == "145.500"
+        assert qso_after["FREQ"] == "145.450"
 
-    def test_get_record_by_index(self):
-        """Check that a record can be retrieved using its index."""
+    def test_get_qso_by_index(self):
+        """Check that a qso can be retrieved using its index."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
         c.execute(
@@ -206,23 +206,23 @@ class TestLog(unittest.TestCase):
             ),
         )
 
-        record = self.log.get_record_by_index(1)
-        print("Contents of retrieved record: ", record)
-        for field_name in list(record.keys()):
+        qso = self.log.get_qso_by_index(1)
+        print("Contents of retrieved qso: ", qso)
+        for field_name in list(qso.keys()):
             if field_name.upper() == "ID":
                 continue
             else:
                 assert (
-                    record[field_name.upper()]
+                    qso[field_name.upper()]
                     == self.fields_and_data[field_name.upper()]
                 )
-        assert len(record) == len(self.fields_and_data) + 1
+        assert len(qso) == len(self.fields_and_data) + 1
 
-    def test_records(self):
-        """Check that all records in a log can be successfully retrieved."""
+    def test_qsos(self):
+        """Check that all qsos in a log can be successfully retrieved."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
-        # Add the same record twice
+        # Add the same qso twice
         c.execute(
             query,
             (
@@ -250,18 +250,18 @@ class TestLog(unittest.TestCase):
             ),
         )
 
-        records = self.log.records
-        print("Contents of all retrieved records: ", records)
-        assert len(records) == 2  # There should be 2 records
+        qsos = self.log.qsos
+        print("Contents of all retrieved qsos: ", qsos)
+        assert len(qsos) == 2  # There should be 2 qsos
         for field_name in self.field_names:
-            assert records[0][field_name] == self.fields_and_data[field_name]
-            assert records[1][field_name] == self.fields_and_data[field_name]
+            assert qsos[0][field_name] == self.fields_and_data[field_name]
+            assert qsos[1][field_name] == self.fields_and_data[field_name]
 
-    def test_record_count(self):
-        """Check that the total number of records in a log is calculated correctly."""
+    def test_qso_count(self):
+        """Check that the total number of qsos in a log is calculated correctly."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
-        # Add the same record twice
+        # Add the same qso twice
         c.execute(
             query,
             (
@@ -289,15 +289,15 @@ class TestLog(unittest.TestCase):
             ),
         )
 
-        record_count = self.log.record_count
-        print("Number of records in the log: ", record_count)
-        assert record_count == 2  # There should be 2 records
+        qso_count = self.log.qso_count
+        print("Number of qsos in the log: ", qso_count)
+        assert qso_count == 2  # There should be 2 qsos
 
     def test_get_duplicates(self):
-        """Insert n records, n-1 of which are duplicates, and check that the duplicates are successfully identified."""
+        """Insert n qsos, n-1 of which are duplicates, and check that the duplicates are successfully identified."""
         query = "INSERT INTO test VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?)"
         c = self.connection.cursor()
-        n = 5  # The total number of records to insert.
+        n = 5  # The total number of qsos to insert.
         for i in range(0, n):
             c.execute(
                 query,
@@ -315,10 +315,10 @@ class TestLog(unittest.TestCase):
         assert len(self.log.get_duplicates()) == n - 1  # Expecting n-1 duplicates.
 
     def test_remove_duplicates(self):
-        """Insert n records, n-1 of which are duplicates, and check that the duplicates are successfully removed."""
-        n = 5  # The total number of records to insert.
+        """Insert n qsos, n-1 of which are duplicates, and check that the duplicates are successfully removed."""
+        n = 5  # The total number of qsos to insert.
         for i in range(0, n):
-            self.log.add_record(self.fields_and_data)
+            self.log.add_qso(self.fields_and_data)
         (
             number_of_duplicates,
             number_of_duplicates_removed,
@@ -327,7 +327,7 @@ class TestLog(unittest.TestCase):
         print("Number of duplicates removed: %d" % number_of_duplicates_removed)
         assert number_of_duplicates == number_of_duplicates_removed
         assert number_of_duplicates == 4
-        assert self.log.record_count == 1
+        assert self.log.qso_count == 1
 
     def test_rename(self):
         """Check that a log can be successfully renamed."""
