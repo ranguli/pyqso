@@ -3823,7 +3823,7 @@ Base64-encoded plain text in the configuration file.</property>
       <action-widget response="-5">calendar_ok_button</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkMenu" id="popup">
+  <object class="GtkMenu" id="context_menu">
     <property name="visible">True</property>
     <property name="can-focus">False</property>
     <child>
