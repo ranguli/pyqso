@@ -26,14 +26,21 @@ class PopupDialog:
         self.message = message
 
     def error(self):
-        self.buttons = Gtk.GtkButtonType.OK
+        self.buttons = Gtk.ButtonsType.OK
         self.title = "Error"
         self.msgtype = Gtk.MessageType.ERROR
 
         return self.show()
 
+    def info(self):
+        self.buttons = Gtk.ButtonsType.OK
+        self.title = "Info"
+        self.msgtype = Gtk.MessageType.INFO
+
+        return self.show()
+
     def question(self):
-        self.buttons = Gtk.GtkButtonType.YES_NO
+        self.buttons = Gtk.ButtonsType.YES_NO
         self.title = "Question"
         self.msgtype = Gtk.MessageType.QUESTION
 

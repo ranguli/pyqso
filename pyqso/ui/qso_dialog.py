@@ -314,6 +314,29 @@ class AddQSODialog:
 
         return
 
+    def get_all_data(self):
+        # Return the data from the QSO Dialog form, formatted in a usable way
+        data = self.sources
+
+        dropdown_fields = ["MODE", "SUBMODE", "PROP_MODE", "BAND", "QSL_SENT", "QSL_RCVD"]
+
+        for field in dropdown_fields:
+
+            data[field] = data[field].get_active_text()
+
+        other_fields = [key for key in data.keys() if key not in dropdown_fields]
+
+        for field in other_fields:
+            if field == "CALL":
+                data["CALL"] = data["CALL"].get_text().upper()
+            elif field == "NOTES":
+                (start, end) = data["NOTES"].get_bounds()
+                data["NOTES"] = data["NOTES"].get_text(start, end, True)
+            else:
+                data[field] = data[field].get_text()
+
+        return data
+
     def get_data(self, field_name):
         """Return the data for a specified field from the
         Gtk.Entry/Gtk.ComboBoxText/etc boxes in the QSO dialog.
