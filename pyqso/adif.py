@@ -17,10 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import logging
-from datetime import datetime
 import calendar
+import logging
+import re
+from datetime import datetime
 
 import configparser
 from os.path import expanduser

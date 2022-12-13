@@ -17,9 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import unittest
 import os
-from pyqso.adif import *
+import unittest
+
+from pyqso.adif import ADIF
 
 
 class TestADIF(unittest.TestCase):
@@ -214,8 +215,8 @@ class TestADIF(unittest.TestCase):
 
     def test_write_sqlite3_Row(self):
         """Check that records can be written to an ADIF file from a test database file."""
-        import sqlite3
         import os.path
+        import sqlite3
 
         path_to_test_database = os.path.join(
             os.path.realpath(os.path.dirname(__file__)), "res", "test.db"

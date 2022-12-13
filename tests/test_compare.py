@@ -17,9 +17,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 import unittest
-from pyqso.compare import *
+
+from gi.repository import Gtk
+
+from pyqso.compare import compare_default, compare_date_and_time
 
 
 class TestCompare(unittest.TestCase):

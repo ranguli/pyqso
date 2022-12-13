@@ -18,6 +18,7 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
+
 from pyqso.cabrillo import Cabrillo
 from datetime import datetime
 
@@ -38,7 +39,6 @@ class TestCabrillo(unittest.TestCase):
         expected = datetime.strptime(f"{date} {time}", "%Y%m%d %H%M")
 
         assert c.convert_date_and_time(date, time) == expected
-
 
 
 if __name__ == "__main__":

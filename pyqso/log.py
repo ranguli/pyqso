@@ -17,9 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 import logging
 import sqlite3 as sqlite
+
+from gi.repository import Gtk
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED
 
