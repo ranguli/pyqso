@@ -728,6 +728,11 @@ class Logbook:
 
         return
 
+    def validate_form(self, form_input):
+        #TODO: no-op
+        return True, "No error message"
+
+
     def add_qso_callback(self, widget):
         """A callback function used to add a particular QSO."""
         # Get the index of the selected tab in the logbook.
@@ -752,8 +757,6 @@ class Logbook:
         else:
             keep_open = False
 
-        adif = ADIF()
-
         exit = False
         while not exit:
             rd = AddQSODialog(application=self.application, log=log, index=None)
@@ -773,32 +776,23 @@ class Logbook:
                 all_valid = True
                 response = rd.dialog.run()
                 if response == Gtk.ResponseType.OK:
-                    fields_and_data = {}
-                    field_names = AVAILABLE_FIELD_NAMES_ORDERED
-                    for i in range(0, len(field_names)):
-                        # Validate user input.
-                        fields_and_data[field_names[i]] = rd.get_data(field_names[i])
-                        if not (
-                            adif.is_valid(
-                                field_names[i],
-                                fields_and_data[field_names[i]],
-                                AVAILABLE_FIELD_NAMES_TYPES[field_names[i]],
-                            )
-                        ):
-                            # Data is not valid - inform the user.
-                            d = PopupDialog(
-                                parent=rd.dialog,
-                                message='The data in field "%s" is not valid!'
-                                % field_names[i],
-                            )
-                            d.error()
-                            all_valid = False
-                            break  # Don't check the other data until the user has fixed the current one.
+                    form_input = rd.get_all_data()
+                    valid, error_msg = self.validate_form(form_input)
+
+                    if not self.validate_form(form_input):
+                        # Data is not valid - inform the user.
+                        d = PopupDialog(
+                            parent=rd.dialog,
+                            message=error_msg
+                        )
+                        d.error()
+                        all_valid = False
+                        break  # Don't check the other data until the user has fixed the current one.
 
                     if all_valid:
                         # All data has been validated, so we can go ahead and add the new QSO.
                         try:
-                            log.add_qso(fields_and_data)
+                            log.add_qso(form_input)
                         except (sqlite.Error, IndexError) as e:
                             logging.exception(e)
                             d = PopupDialog(
