@@ -19,7 +19,6 @@
 
 import logging
 
-from pyqso.contest import CONTESTS
 from pyqso import util
 from cabrillo import data as cabrillo_data
 

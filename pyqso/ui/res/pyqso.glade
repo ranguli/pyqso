@@ -2249,6 +2249,23 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="qsos_autocomplete_other_exchange_sent_checkbutton">
+                                <property name="label" translatable="yes">Autocomplete Other Exchange Sent with auto-incrementing serial (overrides default value)</property>
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="receives-default">False</property>
+                                <property name="tooltip-markup" translatable="yes">Add a serial number automatically for contesting. Overriden by setting a default value for Exchange Sent.</property>
+                                <property name="xalign">0</property>
+                                <property name="active">True</property>
+                                <property name="draw-indicator">True</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
@@ -2363,6 +2380,46 @@ along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</pro
                                 <property name="fill">True</property>
                                 <property name="padding">2</property>
                                 <property name="position">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox" id="default_values_exchange_sent_hbox">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <child>
+                                  <object class="GtkLabel" id="default_values_exchange_sent_label">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">False</property>
+                                    <property name="label" translatable="yes">Exchange Sent</property>
+                                    <property name="width-chars">15</property>
+                                    <property name="xalign">0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="padding">2</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkEntry" id="default_values_exchange_sent_entry">
+                                    <property name="visible">True</property>
+                                    <property name="can-focus">True</property>
+                                    <property name="width-chars">15</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="padding">2</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">2</property>
                               </packing>
                             </child>
                             <child>
@@ -2697,7 +2754,7 @@ Base64-encoded plain text in the configuration file.</property>
               <object class="GtkLabel" id="preferences_qsos_label">
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
-                <property name="label" translatable="yes">Records</property>
+                <property name="label" translatable="yes">QSOs</property>
               </object>
               <packing>
                 <property name="position">2</property>
@@ -3464,6 +3521,7 @@ Base64-encoded plain text in the configuration file.</property>
                           <object class="GtkBox" id="qso_rst_sent_hbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
                             <child>
                               <object class="GtkLabel" id="qso_rst_sent_label">
                                 <property name="visible">True</property>
@@ -3501,9 +3559,51 @@ Base64-encoded plain text in the configuration file.</property>
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkBox" id="qso_other_exchange_sent_hbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel" id="qso_other_exchange_sent_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">Other Exchange Sent</property>
+                                <property name="width-chars">15</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkEntry" id="qso_other_exchange_sent_entry">
+                                <property name="visible">True</property>
+                                <property name="can-focus">True</property>
+                                <property name="width-chars">15</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="padding">2</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkBox" id="qso_rst_received_hbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
                             <child>
                               <object class="GtkLabel" id="qso_rst_received_label">
                                 <property name="visible">True</property>
@@ -3537,57 +3637,19 @@ Base64-encoded plain text in the configuration file.</property>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="padding">2</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="qso_qsl_sent_hbox">
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <child>
-                              <object class="GtkLabel" id="qso_qsl_sent_label">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">QSL Sent</property>
-                                <property name="width-chars">15</property>
-                                <property name="xalign">0</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="padding">2</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBoxText" id="qso_qsl_sent_combo">
-                                <property name="visible">True</property>
-                                <property name="can-focus">False</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="padding">2</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="padding">2</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="qso_qsl_received_hbox">
+                          <object class="GtkBox" id="qso_other_exchange_received_hbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
                             <child>
-                              <object class="GtkLabel" id="qso_qsl_received_label">
+                              <object class="GtkLabel" id="qso_other_exchange_received_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
-                                <property name="label" translatable="yes">QSL Received</property>
+                                <property name="label" translatable="yes">Other Exchange Received</property>
                                 <property name="width-chars">15</property>
                                 <property name="xalign">0</property>
                               </object>
@@ -3599,9 +3661,10 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_qsl_received_combo">
+                              <object class="GtkEntry" id="qso_other_exchange_received_entry">
                                 <property name="visible">True</property>
-                                <property name="can-focus">False</property>
+                                <property name="can-focus">True</property>
+                                <property name="width-chars">15</property>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -3663,6 +3726,86 @@ Base64-encoded plain text in the configuration file.</property>
                             <property name="fill">True</property>
                             <property name="padding">2</property>
                             <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="qso_qsl_sent_hbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel" id="qso_qsl_sent_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">QSL Sent</property>
+                                <property name="width-chars">15</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="qso_qsl_sent_combo">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="padding">2</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkBox" id="qso_qsl_received_hbox">
+                            <property name="visible">True</property>
+                            <property name="can-focus">False</property>
+                            <property name="homogeneous">True</property>
+                            <child>
+                              <object class="GtkLabel" id="qso_qsl_received_label">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                                <property name="label" translatable="yes">QSL Received</property>
+                                <property name="width-chars">15</property>
+                                <property name="xalign">0</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkComboBoxText" id="qso_qsl_received_combo">
+                                <property name="visible">True</property>
+                                <property name="can-focus">False</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
+                                <property name="padding">2</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="padding">2</property>
+                            <property name="position">6</property>
                           </packing>
                         </child>
                       </object>
