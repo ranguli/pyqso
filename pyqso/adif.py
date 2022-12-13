@@ -428,7 +428,7 @@ class ADIF:
         n_eor = 0
         n_qso = 0
         qsos = []
-        pattern = re.compile("<(.*?):(\d*).*?>([^<]+)")
+        pattern = re.compile("<(.*?):(\d*).*?>([^<]+)")  # noqa: W605
 
         for t in tokens:
             if re.match("<eor>", t, flags=re.IGNORECASE) is not None:
