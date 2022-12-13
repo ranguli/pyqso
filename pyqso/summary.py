@@ -21,13 +21,10 @@ from gi.repository import Gtk
 import logging
 from os.path import basename, getmtime, expanduser
 from datetime import datetime, date
+import configparser
 
 from pyqso import util
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 try:
     import matplotlib
 

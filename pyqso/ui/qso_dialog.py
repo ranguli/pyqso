@@ -22,10 +22,7 @@ import logging
 
 from pyqso import util
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 from datetime import datetime
 from os.path import expanduser
 import base64
