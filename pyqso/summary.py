@@ -19,11 +19,12 @@
 
 from gi.repository import Gtk
 import logging
-import pathlib
 from os.path import basename, getmtime, expanduser
 from datetime import datetime, date
-
 import configparser
+
+from pyqso import util
+
 try:
     import matplotlib
 
@@ -55,13 +56,8 @@ class Summary(object):
         self.logbook = self.application.logbook
         self.builder = self.application.builder
 
-        # TODO: Both summary.py and bin/pyqso are independently importing the
-        # glade file, so if the path changes it has to change twice in the
-        # code.
-        glade_file_path = str(
-            pathlib.Path(__file__).parent.resolve() / "ui" / "res" / "pyqso.glade"
-        )
-        self.builder.add_objects_from_file(glade_file_path, ("summary_page",))
+        glade_file_path = util.get_glade_path()
+        self.builder.add_objects_from_file(str(glade_file_path), ("summary_page",))
         self.summary_page = self.builder.get_object("summary_page")
 
         self.items = {}

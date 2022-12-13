@@ -19,7 +19,8 @@
 
 from gi.repository import Gtk, Gdk
 import logging
-import os
+
+from pyqso import util
 
 import configparser
 from datetime import datetime
@@ -56,9 +57,7 @@ class AddQSODialog:
 
         self.application = application
         self.builder = self.application.builder
-        glade_file_path = os.path.join(
-            os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
-        )
+        glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("qso_dialog",))
         self.dialog = self.builder.get_object("qso_dialog")
         self.builder.get_object("qso_dialog").connect(
