@@ -370,7 +370,7 @@ class RecordsPage:
         self.sources["CALLSIGN_DATABASE"] = self.builder.get_object(
             "callsign_lookup_database_combo"
         )
-        callsign_database = ["", "qrz.com", "hamqth.com"]
+        callsign_database = ["", "qrz.com"]
         for database in callsign_database:
             self.sources["CALLSIGN_DATABASE"].append_text(database)
         (section, option) = ("qsos", "callsign_database")

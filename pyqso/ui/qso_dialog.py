@@ -519,9 +519,6 @@ class AddQSODialog:
             if database == "qrz.com":
                 # QRZ.com
                 lookup = callsign_lookup.CallsignLookupQRZ(parent=self.dialog)
-            elif database == "hamqth.com":
-                # HamQTH.com
-                lookup = callsign_lookup.CallsignLookupHamQTH(parent=self.dialog)
             else:
                 raise ValueError("Unknown callsign database: %s" % database)
         except ValueError as e:
@@ -575,7 +572,7 @@ class AddQSODialog:
                 ignore_prefix_suffix = True
 
             # Perform the lookup.
-            fields_and_data = callsign_lookup.lookup(
+            fields_and_data = lookup.lookup(
                 full_callsign, ignore_prefix_suffix=ignore_prefix_suffix
             )
             for field_name in list(fields_and_data.keys()):
