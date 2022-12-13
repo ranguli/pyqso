@@ -192,7 +192,6 @@ class GeneralPage:
     def data(self):
         """User preferences regarding General settings."""
         data = {}
-        data["SHOW_TOOLBOX"] = self.sources["SHOW_TOOLBOX"].get_active()
         data["SHOW_YEARLY_STATISTICS"] = self.sources[
             "SHOW_YEARLY_STATISTICS"
         ].get_active()
