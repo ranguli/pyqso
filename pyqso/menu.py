@@ -64,18 +64,6 @@ class Menu:
             "activate", self.application.logbook.rename_log
         )
 
-        # Import log
-        self.items["IMPORT_LOG"] = self.builder.get_object("mitem_import_log")
-        self.items["IMPORT_LOG"].connect(
-            "activate", self.application.logbook.import_log
-        )
-
-        # Export the current log as ADIF
-        self.items["EXPORT_LOG_ADIF"] = self.builder.get_object("mitem_export_log_adif")
-        self.items["EXPORT_LOG_ADIF"].connect(
-            "activate", self.application.logbook.export_log_adif
-        )
-
         # Export the current log as Cabrillo
         self.items["EXPORT_LOG_CABRILLO"] = self.builder.get_object(
             "mitem_export_log_cabrillo"
@@ -155,8 +143,6 @@ class Menu:
             "NEW_LOG",
             "DELETE_LOG",
             "RENAME_LOG",
-            "IMPORT_LOG",
-            "EXPORT_LOG_ADIF",
             "EXPORT_LOG_CABRILLO",
         ]:
             self.items[item_name].set_sensitive(sensitive)

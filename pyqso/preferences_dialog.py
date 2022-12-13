@@ -461,18 +461,6 @@ class ImportExportPage:
 
         # Remember that the have_config conditional in the PyQSO class may be out-of-date the next time the user opens up the preferences dialog
         # because a configuration file may have been created after launching the application. Let's check to see if one exists again...
-        config = configparser.ConfigParser()
-        have_config = config.read(PREFERENCES_FILE) != []
-
-        # Import
-        self.sources["MERGE_COMMENT"] = self.builder.get_object(
-            "adif_import_merge_comment_checkbutton"
-        )
-        (section, option) = ("import_export", "merge_comment")
-        if have_config and config.has_option(section, option):
-            self.sources["MERGE_COMMENT"].set_active(config.getboolean(section, option))
-        else:
-            self.sources["MERGE_COMMENT"].set_active(False)
 
         return
 
