@@ -20,21 +20,24 @@
 from gi import require_version
 
 require_version("Gtk", "3.0")
+require_version('Gdk', '3.0')
 require_version("PangoCairo", "1.0")
-from gi.repository import Gtk, Gdk
 import argparse
+
+from gi.repository import Gdk, Gtk
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
-import os
-import os.path
-import sys
-import signal
-import pkg_resources
 
 import logging
+import os
+import os.path
+import signal
+import sys
+
+import pkg_resources
 
 logging.basicConfig(level=logging.INFO)
 logging.info("PyQSO version 1.1.0")
@@ -48,9 +51,9 @@ import pathlib
 # PyQSO modules.
 from pyqso.logbook import Logbook
 from pyqso.menu import Menu
-from pyqso.ui.context_menu import ContextMenu
-from pyqso.toolbar import Toolbar
 from pyqso.preferences_dialog import PreferencesDialog
+from pyqso.toolbar import Toolbar
+from pyqso.ui.context_menu import ContextMenu
 
 
 class PyQSO:

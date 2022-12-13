@@ -19,13 +19,15 @@
 
 import os
 import unittest
+from datetime import datetime
 
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
-from pyqso.summary import *
+
 from pyqso.logbook import Logbook
+from pyqso.summary import Summary
 
 
 class TestSummary(unittest.TestCase):

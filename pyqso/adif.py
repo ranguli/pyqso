@@ -17,15 +17,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import re
-import logging
-from datetime import datetime
 import calendar
+import logging
+import re
+from datetime import datetime
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
+
 from os.path import expanduser
 
 # ADIF field names and their associated data types available in PyQSO.

@@ -18,7 +18,9 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from pyqso.log import *
+
+from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED
+from pyqso.log import sqlite, Log
 
 
 class TestLog(unittest.TestCase):

@@ -17,17 +17,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk, Gdk
 import logging
 import os
+
+from gi.repository import Gdk, Gtk
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
+
+import base64
 from datetime import datetime
 from os.path import expanduser
-import base64
 
 try:
     import Hamlib
@@ -37,10 +39,9 @@ except ImportError:
     logging.warning("Could not import the Hamlib module!")
     have_hamlib = False
 
-from pyqso import adif
-from pyqso import callsign_lookup
-from pyqso.ui.popup_dialog import PopupDialog
+from pyqso import adif, callsign_lookup
 from pyqso.calendar_dialog import CalendarDialog
+from pyqso.ui.popup_dialog import PopupDialog
 
 
 class AddQSODialog:

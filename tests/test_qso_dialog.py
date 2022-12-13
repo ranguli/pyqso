@@ -17,14 +17,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 import unittest
+
+from gi.repository import Gtk
 
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
+
 from pyqso.ui.qso_dialog import AddQSODialog
+from pyqso.adif import MODES, BANDS
 
 
 class TestRecordDialog(unittest.TestCase):

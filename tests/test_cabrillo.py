@@ -18,7 +18,8 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import unittest
-from pyqso.cabrillo import *
+
+from pyqso.cabrillo import Cabrillo
 
 
 class TestCabrillo(unittest.TestCase):

@@ -17,14 +17,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 import unittest
+
+from gi.repository import Gtk
 
 try:
     import unittest.mock as mock
 except ImportError:
     import mock
-from pyqso.calendar_dialog import *
+
+from pyqso.calendar_dialog import CalendarDialog
 
 
 class TestCalendarDialog(unittest.TestCase):

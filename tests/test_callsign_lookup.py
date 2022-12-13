@@ -23,7 +23,7 @@ try:
     import unittest.mock as mock
 except ImportError:
     import mock
-from pyqso.callsign_lookup import *
+from pyqso.callsign_lookup import CallsignLookupQRZ, CallsignLookupHamQTH, strip, http_client
 
 
 class TestCallsignLookup(unittest.TestCase):

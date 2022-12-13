@@ -17,32 +17,30 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+import json
 import logging
 import sqlite3 as sqlite
-import json
 from os.path import expanduser
+
+from gi.repository import Gtk
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
 
-from pyqso.adif import (
-    ADIF,
-    AVAILABLE_FIELD_NAMES_ORDERED,
-    AVAILABLE_FIELD_NAMES_FRIENDLY,
-    AVAILABLE_FIELD_NAMES_TYPES,
-)
-from pyqso.cabrillo import Cabrillo
-from pyqso.log import Log
-from pyqso.ui.popup_dialog import PopupDialog
-from pyqso.log_name_dialog import LogNameDialog
-from pyqso.ui.qso_dialog import AddQSODialog
-from pyqso.cabrillo_export_dialog import CabrilloExportDialog
-from pyqso.summary import Summary
+from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_FRIENDLY,
+                        AVAILABLE_FIELD_NAMES_ORDERED,
+                        AVAILABLE_FIELD_NAMES_TYPES)
 from pyqso.blank import Blank
+from pyqso.cabrillo import Cabrillo
+from pyqso.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.compare import compare_date_and_time, compare_default
+from pyqso.log import Log
+from pyqso.log_name_dialog import LogNameDialog
+from pyqso.summary import Summary
+from pyqso.ui.popup_dialog import PopupDialog
+from pyqso.ui.qso_dialog import AddQSODialog
 
 
 class Logbook:
@@ -463,7 +461,7 @@ class Logbook:
         vbox.pack_start(sw, True, True, 0)
 
         # Add a close button to the tab
-        hbox = Gtk.HBox(homogeneous=False, spacing=0)
+        hbox = Gtk.Box(homogeneous=False, orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         label = Gtk.Label(label=self.logs[index].name)
         hbox.pack_start(label, False, False, 0)
         hbox.show_all()

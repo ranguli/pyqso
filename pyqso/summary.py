@@ -17,11 +17,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
 import logging
 import pathlib
-from os.path import basename, getmtime, expanduser
-from datetime import datetime, date
+from datetime import date, datetime
+from os.path import basename, expanduser, getmtime
+
+from gi.repository import Gtk
 
 try:
     import configparser
@@ -32,11 +33,10 @@ try:
 
     matplotlib.use("Agg")
     matplotlib.rcParams["font.size"] = 10.0
-    from matplotlib.backends.backend_gtk3cairo import (
-        FigureCanvasGTK3Cairo as FigureCanvas,
-    )
-    from matplotlib.figure import Figure
+    from matplotlib.backends.backend_gtk3cairo import \
+        FigureCanvasGTK3Cairo as FigureCanvas
     from matplotlib.dates import DateFormatter, MonthLocator
+    from matplotlib.figure import Figure
 
     have_matplotlib = True
 except ImportError as e:
