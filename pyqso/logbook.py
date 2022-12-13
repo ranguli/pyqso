@@ -29,7 +29,7 @@ from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_FRIENDLY,
                         AVAILABLE_FIELD_NAMES_ORDERED,
                         AVAILABLE_FIELD_NAMES_TYPES)
 from pyqso.blank import Blank
-from pyqso.cabrillo import Cabrillo
+from pyqso.cabrillo import CabrilloWrapper
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.compare import compare_date_and_time, compare_default
 from pyqso.log import Log
@@ -900,15 +900,14 @@ class Logbook:
             logging.debug("No file path specified.")
         else:
             # Get Cabrillo-specific fields, such as the callsign used during a contest and the contest's name.
-            ced = CabrilloExportDialog(self.application)
-            response = ced.dialog.run()
+            cabrillo_dialog = CabrilloExportDialog(self.application)
+            response = cabrillo_dialog.dialog.run()
             if response == Gtk.ResponseType.OK:
-                contest = ced.contest
-                mycall = ced.mycall
+                self.form_data = cabrillo_dialog.get_form_fields()
             else:
-                ced.dialog.destroy()
+                cabrillo_dialog.dialog.destroy()
                 return
-            ced.dialog.destroy()
+            cabrillo_dialog.dialog.destroy()
 
             # Retrieve the log's QSOs from the database.
             try:
@@ -923,9 +922,9 @@ class Logbook:
                 return
 
             # Write the QSOs.
-            cabrillo = Cabrillo()
+            cabrillo = CabrilloWrapper()
             try:
-                cabrillo.write(qsos, path, contest=contest, mycall=mycall)
+                cabrillo.write(qsos, path, self.form_data)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Exported %d QSOs to %s in Cabrillo format."

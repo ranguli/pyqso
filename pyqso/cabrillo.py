@@ -25,9 +25,10 @@ import cabrillo
 CABRILLO_VERSION = "3.0"
 
 
-class Cabrillo:
+class CabrilloWrapper:
 
-    """The Cabrillo class supplies methods for writing log files in the Cabrillo format (v3.0).
+    """The CabrilloWrapper  class supplies some extra functionality to plug our
+    data into the cabrillo Python library.
     For more information, visit http://wwrof.org/cabrillo/"""
 
     def __init__(self):
@@ -39,6 +40,12 @@ class Cabrillo:
         the format used by Cabrillo (YYYY-MM-DD)"""
 
         return datetime.strptime(f"{date} {time}", "%Y%m%d %H%M")
+
+    @staticmethod
+    def get_cabrillo_mode(mode):
+        """Converts specific modes (like FT8 or SSB) to Cabrillo-supported
+        modes (like DG or PH)"""
+        pass
 
     def get_contest_exchange(self, r, contest):
 
@@ -65,19 +72,19 @@ class Cabrillo:
         return de_exchange, dx_echange
 
 
-    def write(self, qsos, path, contest="", mycall=""):
+    def write(self, qsos, path, form_data):
         """Write a list of QSOs to a file in the Cabrillo format.
 
         :arg list qsos: The list of QSOs to write.
         :arg str path: The desired path of the Cabrillo file to write to.
         :arg str contest: The name of the contest.
         :arg str mycall: The callsign used during the contest.
-        :returns: None
+
         :raises IOError: If the Cabrillo file cannot be written (e.g. due to lack of write permissions)."""
 
         logging.debug("Writing QSOs to a Cabrillo file...")
 
-        cabrillo_log = cabrillo.Cabrillo(version=CABRILLO_VERSION, callsign=mycall, contest=contest)
+        cabrillo_log = cabrillo.Cabrillo(version=CABRILLO_VERSION, **form_data)
 
         # Write each QSO to the file.
         for r in qsos:
@@ -89,7 +96,7 @@ class Cabrillo:
             except ValueError:
                 freq = ""
 
-            # Mode
+            # TODO: Github Issue #28 - This assumes that the mode is any other non-CW digital mode, which isn't always going to be the case (e.g. for AM).
             if r["MODE"] == "SSB":
                 mode = "PH"
             elif r["MODE"] == "CW":
@@ -97,7 +104,6 @@ class Cabrillo:
             elif r["MODE"] == "FM":
                 mode = "FM"
             else:
-                # TODO: Github Issue #28 - This assumes that the mode is any other non-CW digital mode, which isn't always going to be the case (e.g. for AM).
                 mode = "RY"
 
             # Transmitter ID (must be 0 or 1, if applicable).
@@ -118,7 +124,7 @@ class Cabrillo:
             de_exch = [rst_sent]
             dx_exch = [rst_rcvd]
 
-            qso = cabrillo.QSO(freq, mode, self.convert_date_and_time(r["QSO_DATE"], r["TIME_ON"]), mycall, r["CALL"], de_exch, dx_exch, t)
+            qso = cabrillo.QSO(freq, mode, self.convert_date_and_time(r["QSO_DATE"], r["TIME_ON"]), form_data.get("callsign"), r["CALL"], de_exch, dx_exch, t)
             cabrillo_log.append_qso(qso, ignore_order=True)
 
         with open(path, mode='w', errors="replace") as f:
