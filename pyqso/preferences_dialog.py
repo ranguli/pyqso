@@ -20,10 +20,7 @@
 from gi.repository import Gtk
 import logging
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
+import configparser
 import os.path
 import base64
 
@@ -34,16 +31,8 @@ try:
 except ImportError:
     logging.warning("Could not import the Hamlib module!")
     have_hamlib = False
-try:
-    import geocoder
-
-    have_geocoder = True
-except ImportError:
-    logging.warning("Could not import the geocoder module!")
-    have_geocoder = False
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED, MODES
-from pyqso.ui.popup_dialog import PopupDialog
 
 PREFERENCES_FILE = os.path.expanduser("~/.config/pyqso/preferences.ini")
 
