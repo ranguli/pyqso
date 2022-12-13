@@ -33,7 +33,7 @@ from pyqso.cabrillo import Cabrillo
 from pyqso.log import Log
 from pyqso.ui.popup_dialog import PopupDialog
 from pyqso.log_name_dialog import LogNameDialog
-from pyqso.record_dialog import RecordDialog
+from pyqso.ui.qso_dialog import AddQSODialog
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.summary import Summary
 from pyqso.blank import Blank
@@ -266,17 +266,17 @@ class Logbook:
         ):  # The last (right-most) tab is the "New Log" tab.
             self.notebook.stop_emission("switch-page")
 
-        # Disable the record buttons if a log page is not selected.
+        # Disable the QSO buttons if a log page is not selected.
         if new_page == 0:
-            self.application.toolbar.set_record_buttons_sensitive(False)
-            self.application.menu.set_record_items_sensitive(False)
+            self.application.toolbar.set_qso_buttons_sensitive(False)
+            self.application.menu.set_qso_items_sensitive(False)
         else:
-            self.application.toolbar.set_record_buttons_sensitive(True)
-            self.application.menu.set_record_items_sensitive(True)
+            self.application.toolbar.set_qso_buttons_sensitive(True)
+            self.application.menu.set_qso_items_sensitive(True)
         return
 
     def on_button_release_event(self, treeview, event):
-        """Show a popup menu when the user right-clicks a record in the logbook."""
+        """Show a popup menu when the user right-clicks a QSO in the logbook."""
 
         if event.button == 3:
             self.application.popup.menu.popup(
@@ -411,14 +411,14 @@ class Logbook:
         :arg Gtk.TreeModel model: The model used to filter the log data.
         :arg Gtk.TreeIter iter: A pointer to a particular row in the model.
         :arg data: The user-defined expression to filter by.
-        :returns: True if a record matches the expression, or if there is nothing to filter. Otherwise, returns False.
+        :returns: True if a QSO matches the expression, or if there is nothing to filter. Otherwise, returns False.
         :rtype: bool
         """
         value = model.get_value(iter, 1)
         callsign = self.application.toolbar.filter_source.get_text()
 
         if callsign is None or callsign == "":
-            # If there is nothing to filter with, then show all the records!
+            # If there is nothing to filter with, then show all the QSOs!
             return True
         else:
             # This should be case insensitive.
@@ -438,7 +438,7 @@ class Logbook:
 
         self.treeview.append(Gtk.TreeView(model=self.sorter[index]))
         self.treeview[index].set_grid_lines(Gtk.TreeViewGridLines.BOTH)
-        self.treeview[index].connect("row-activated", self.edit_record_callback)
+        self.treeview[index].connect("row-activated", self.edit_qso_callback)
         self.treeview[index].connect(
             "button-release-event", self.on_button_release_event
         )
@@ -466,7 +466,7 @@ class Logbook:
             vbox, hbox, index + 1
         )  # Append the new log as a new tab.
 
-        # The first column of the logbook will always be the unique record index.
+        # The first column of the logbook will always be the unique QSO index.
         # Let's append this separately to the field names.
         renderer = Gtk.CellRendererText()
         column = Gtk.TreeViewColumn("Index", renderer, text=0)
@@ -660,10 +660,10 @@ class Logbook:
             logging.debug("No file path specified.")
             return
 
-        # Read the records.
+        # Read the QSOs.
         adif = ADIF()
         try:
-            records = adif.read(path)
+            qsos = adif.read(path)
         except IOError as e:
             d = PopupDialog(
                 parent=self.application.window,
@@ -741,7 +741,7 @@ class Logbook:
         ln.dialog.destroy()
 
         # Update new or existing Log object.
-        log_object.add_record(records)
+        log_object.add_qso(qsos)
         log_object.populate()
 
         if not exists:
@@ -753,7 +753,7 @@ class Logbook:
 
         d = PopupDialog(
             parent=self.application.window,
-            message="Imported %d QSOs into log '%s'." % (len(records), log_object.name),
+            message="Imported %d QSOs into log '%s'." % (len(qsos), log_object.name),
         )
         d.info()
 
@@ -809,32 +809,32 @@ class Logbook:
             logging.debug("No file path specified.")
         else:
 
-            # Retrieve the log's records from the database.
+            # Retrieve the log's QSOs from the database.
             try:
-                records = log.records
+                qsos = log.qsos
             except sqlite.Error as e:
                 logging.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not retrieve the records from the SQL database. No records have been exported.",
+                    message="Could not retrieve the QSOs from the SQL database. No QSOs have been exported.",
                 )
                 d.error()
                 return
 
-            # Write the records.
+            # Write the QSOs.
             adif = ADIF()
             try:
-                adif.write(records, path)
+                adif.write(qsos, path)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Exported %d QSOs to %s in ADIF format."
-                    % (len(records), path),
+                    % (len(qsos), path),
                 )
                 d.info()
             except IOError as e:
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not export the records. I/O error %d: %s"
+                    message="Could not export the QSOs. I/O error %d: %s"
                     % (e.errno, e.strerror),
                 )
                 d.error()
@@ -842,7 +842,7 @@ class Logbook:
                 logging.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not export the records.",
+                    message="Could not export the QSOs.",
                 )
                 d.error()
 
@@ -908,32 +908,32 @@ class Logbook:
                 return
             ced.dialog.destroy()
 
-            # Retrieve the log's records from the database.
+            # Retrieve the log's QSOs from the database.
             try:
-                records = log.records
+                qsos = log.qsos
             except sqlite.Error as e:
                 logging.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not retrieve the records from the SQL database. No records have been exported.",
+                    message="Could not retrieve the QSOs from the SQL database. No QSOs have been exported.",
                 )
                 d.error()
                 return
 
-            # Write the records.
+            # Write the QSOs.
             cabrillo = Cabrillo()
             try:
-                cabrillo.write(records, path, contest=contest, mycall=mycall)
+                cabrillo.write(qsos, path, contest=contest, mycall=mycall)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Exported %d QSOs to %s in Cabrillo format."
-                    % (len(records), path),
+                    % (len(qsos), path),
                 )
                 d.info()
             except IOError as e:
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not export the records. I/O error %d: %s"
+                    message="Could not export the QSOs. I/O error %d: %s"
                     % (e.errno, e.strerror),
                 )
                 d.error()
@@ -941,14 +941,14 @@ class Logbook:
                 logging.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not export the records.",
+                    message="Could not export the QSOs.",
                 )
                 d.error()
 
         return
 
-    def add_record_callback(self, widget):
-        """A callback function used to add a particular record/QSO."""
+    def add_qso_callback(self, widget):
+        """A callback function used to add a particular QSO."""
         # Get the index of the selected tab in the logbook.
         try:
             log_index = self.get_log_index()
@@ -962,7 +962,7 @@ class Logbook:
             return
         log = self.logs[log_index]
 
-        # Keep the dialog open after adding a record?
+        # Keep the dialog open after adding a QSO?
         config = configparser.ConfigParser()
         have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
         (section, option) = ("general", "keep_open")
@@ -975,7 +975,7 @@ class Logbook:
 
         exit = False
         while not exit:
-            rd = RecordDialog(application=self.application, log=log, index=None)
+            rd = AddQSODialog(application=self.application, log=log, index=None)
 
             all_valid = False  # Are all the field entries valid?
 
@@ -987,7 +987,7 @@ class Logbook:
 
             while not all_valid:
                 # This while loop gives the user infinite attempts at giving valid data.
-                # The add/edit record window will stay open until the user gives valid data,
+                # The add/edit QSO window will stay open until the user gives valid data,
                 # or until the Cancel button is clicked.
                 all_valid = True
                 response = rd.dialog.run()
@@ -1015,21 +1015,21 @@ class Logbook:
                             break  # Don't check the other data until the user has fixed the current one.
 
                     if all_valid:
-                        # All data has been validated, so we can go ahead and add the new record.
+                        # All data has been validated, so we can go ahead and add the new QSO.
                         try:
-                            log.add_record(fields_and_data)
+                            log.add_qso(fields_and_data)
                         except (sqlite.Error, IndexError) as e:
                             logging.exception(e)
                             d = PopupDialog(
                                 parent=self.application.window,
-                                message="Could not add the record to the log.",
+                                message="Could not add the QSO to the log.",
                             )
                             d.error()
 
-                        # Scroll to the new record's row in the treeview (but don't select it).
+                        # Scroll to the new QSO's row in the treeview (but don't select it).
                         try:
-                            record_count = log.record_count
-                            treepath = Gtk.TreePath(record_count - 1)
+                            qso_count = log.qso_count
+                            treepath = Gtk.TreePath(qso_count - 1)
                             self.treeview[log_index].scroll_to_cell(treepath)
                         except (sqlite.Error, IndexError) as e:
                             logging.exception(e)
@@ -1043,8 +1043,8 @@ class Logbook:
             rd.dialog.destroy()
         return
 
-    def delete_record_callback(self, widget):
-        """A callback function used to delete a particular record/QSO."""
+    def delete_qso_callback(self, widget):
+        """A callback function used to delete a particular QSO."""
 
         # Get the log index.
         try:
@@ -1070,24 +1070,24 @@ class Logbook:
             row_index = log.get_value(child_iter, 0)
         except IndexError:
             logging.debug(
-                "Trying to delete a record, but there are no records in the log!"
+                "Trying to delete a QSO, but there are no QSOs in the log!"
             )
             return
 
         d = PopupDialog(
             parent=self.application.window,
-            message="Are you sure you want to delete record %d?" % row_index,
+            message="Are you sure you want to delete QSO %d?" % row_index,
         )
         if d.question() == Gtk.ResponseType.YES:
-            # Deletes the record with index 'row_index' from the Records list.
-            # 'iter' is needed to remove the record from the ListStore itself.
+            # Deletes the QSO with index 'row_index' from the Records list.
+            # 'iter' is needed to remove the QSO from the ListStore itself.
             try:
-                log.delete_record(row_index, iter=child_iter)
+                log.delete_qso(row_index, iter=child_iter)
             except (sqlite.Error, IndexError) as e:
                 logging.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
-                    message="Could not delete the record from the log.",
+                    message="Could not delete the QSO from the log.",
                 )
                 d.error()
 
@@ -1096,11 +1096,11 @@ class Logbook:
 
         return
 
-    def edit_record_callback(self, widget, path=None, view_column=None):
-        """A callback function used to edit a particular record/QSO.
+    def edit_qso_callback(self, widget, path=None, view_column=None):
+        """A callback function used to edit a particular QSO.
         Note that the widget, path and view_column arguments are not used,
         but need to be passed in since they are associated with the row-activated signal
-        which is generated when the user double-clicks on a record."""
+        which is generated when the user double-clicks on a QSO."""
 
         # Get the log index.
         try:
@@ -1128,7 +1128,7 @@ class Logbook:
             logging.debug("Could not find the selected row's index!")
             return
 
-        rd = RecordDialog(
+        rd = AddQSODialog(
             application=self.application, log=self.logs[log_index], index=row_index
         )
         all_valid = False  # Are all the field entries valid?
@@ -1136,7 +1136,7 @@ class Logbook:
         adif = ADIF()
         while not all_valid:
             # This while loop gives the user infinite attempts at giving valid data.
-            # The add/edit record window will stay open until the user gives valid data,
+            # The add/edit QSO window will stay open until the user gives valid data,
             # or until the Cancel button is clicked.
             all_valid = True
             response = rd.dialog.run()
@@ -1165,17 +1165,17 @@ class Logbook:
 
                 if all_valid:
                     try:
-                        # Get the record in its current state from the database.
-                        record = log.get_record_by_index(row_index)
+                        # Get the QSO in its current state from the database.
+                        qso = log.get_qso_by_index(row_index)
                         # Iterate over all fields and check whether the data has actually changed. Database updates can be expensive.
                         for i in range(0, len(field_names)):
                             if (
-                                record[field_names[i].lower()]
+                                qso[field_names[i].lower()]
                                 != fields_and_data[field_names[i]]
                             ):
-                                # Update the record in the database and then in the ListStore.
+                                # Update the QSO in the database and then in the ListStore.
                                 # We add 1 onto the column_index here because we don't want to consider the index column.
-                                log.edit_record(
+                                log.edit_qso(
                                     row_index,
                                     field_names[i],
                                     fields_and_data[field_names[i]],
@@ -1186,7 +1186,7 @@ class Logbook:
                         logging.exception(e)
                         d = PopupDialog(
                             parent=rd.dialog,
-                            message="Could not edit record %d." % row_index,
+                            message="Could not edit QSO %d." % row_index,
                         )
                         d.error()
 
@@ -1197,9 +1197,9 @@ class Logbook:
         return
 
     def remove_duplicates_callback(self, widget=None):
-        """A callback function used to remove duplicate records in a log.
-        Detecting duplicate records is done based on the CALL, QSO_DATE, and TIME_ON fields."""
-        logging.debug("Removing duplicate records...")
+        """A callback function used to remove duplicate QSOs in a log.
+        Detecting duplicate QSOs is done based on the CALL, QSO_DATE, and TIME_ON fields."""
+        logging.debug("Removing duplicate QSOs...")
 
         # Get the log index.
         try:
@@ -1229,8 +1229,8 @@ class Logbook:
 
         return
 
-    def record_count_callback(self, widget=None):
-        """A callback function used to show the record count for the selected log."""
+    def qso_count_callback(self, widget=None):
+        """A callback function used to show the QSO count for the selected log."""
 
         # Get the log index.
         try:
@@ -1244,20 +1244,20 @@ class Logbook:
             d.error()
             return
 
-        # Get the number of records.
+        # Get the number of QSOs.
         log = self.logs[log_index]
         try:
-            record_count = log.record_count
+            qso_count = log.qso_count
             d = PopupDialog(
                 parent=self.application.window,
-                message="Log '%s' contains %d records." % (log.name, record_count),
+                message="Log '%s' contains %d QSOs." % (log.name, qso_count),
             )
             d.info()
         except sqlite.Error as e:
             logging.exception(e)
             d = PopupDialog(
                 parent=self.application.window,
-                message="Could not get the record count for '%s' because of a database error."
+                message="Could not get the QSO count for '%s' because of a database error."
                 % log.name,
             )
             d.error()
@@ -1269,10 +1269,10 @@ class Logbook:
 
         try:
             log_index = self.get_log_index()
-            row_index = self.get_record_index()
+            row_index = self.get_qso_index()
             if log_index is None or row_index is None:
-                raise ValueError("Could not determine the log and/or record index.")
-            r = self.logs[log_index].get_record_by_index(row_index)
+                raise ValueError("Could not determine the log and/or QSO index.")
+            r = self.logs[log_index].get_qso_by_index(row_index)
         except ValueError as e:
             logging.error(e)
             return
@@ -1288,7 +1288,7 @@ class Logbook:
 
     def clipboard_text_received(self, clipboard, text, log):
         r = json.loads(text)
-        log.add_record(r)
+        log.add_qso(r)
         return
 
     def paste_callback(self, widget=None, path=None):
@@ -1317,13 +1317,13 @@ class Logbook:
         return len(self.logs)
 
     @property
-    def record_count(self):
-        """Return the total number of QSOs/records in the whole logbook.
+    def qso_count(self):
+        """Return the total number of QSOs/QSOs in the whole logbook.
 
-        :returns: The total number of QSOs/records in the whole logbook.
+        :returns: The total number of QSOs/QSOs in the whole logbook.
         :rtype: int
         """
-        return sum([log.record_count for log in self.logs])
+        return sum([log.qso_count for log in self.logs])
 
     def log_name_exists(self, table_name):
         """Determine whether a Log object with a given name exists in the SQL database.
@@ -1372,10 +1372,10 @@ class Logbook:
                 break
         return log_index
 
-    def get_record_index(self):
-        """Return the index of the currently selected record.
+    def get_qso_index(self):
+        """Return the index of the currently selected QSO.
 
-        :returns: The index of the currently selected record in the currently selected log. Returns None if the record or log cannot be found.
+        :returns: The index of the currently selected QSO in the currently selected log. Returns None if the QSO or log cannot be found.
         :rtype: int
         """
 

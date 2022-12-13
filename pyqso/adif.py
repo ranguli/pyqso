@@ -378,15 +378,15 @@ class ADIF:
         with open(path, mode="r", errors="replace") as f:
             text = f.read()
 
-        records = self.parse_adi(text)
+        qsos = self.parse_adi(text)
 
-        if records == []:
+        if qsos == []:
             logging.warning(
-                "No records found in the file. Empty file or wrong file type?"
+                "No QSOs found in the file. Empty file or wrong file type?"
             )
 
-        logging.info("Read %d QSOs from %s in ADIF format." % (len(records), path))
-        return records
+        logging.info("Read %d QSOs from %s in ADIF format." % (len(qsos), path))
+        return qsos
 
     def parse_adi(self, text):
         """Parse some raw text (defined in the 'text' argument) for ADIF field data.
@@ -398,7 +398,7 @@ class ADIF:
 
         logging.debug("Parsing text from the ADIF file...")
 
-        records = []
+        qsos = []
 
         # ADIF-related configuration options
         config = configparser.ConfigParser()
@@ -417,7 +417,7 @@ class ADIF:
         tokens = re.split("(<eor>|<eoh>)", text, flags=re.IGNORECASE)
         tokens.pop()  # Anything after the final <eor> marker should be ignored.
 
-        # The header might tell us the number of records, but let's not assume
+        # The header might tell us the number of QSOs, but let's not assume
         # this and simply ignore it instead (if it exists).
         if re.search("<eoh>", text, flags=re.IGNORECASE) is not None:
             # There is a header present, so let's ignore everything
@@ -428,8 +428,8 @@ class ADIF:
                     break
 
         n_eor = 0
-        n_record = 0
-        records = []
+        n_qso = 0
+        qsos = []
         pattern = re.compile("<(.*?):(\d*).*?>([^<]+)")
 
         for t in tokens:
@@ -437,8 +437,8 @@ class ADIF:
                 n_eor += 1
                 continue
             else:
-                n_record += 1
-                # Each record will have field names and corresponding
+                n_qso += 1
+                # Each QSO will have field names and corresponding
                 # data entries. Store this in a dictionary.
                 # Note: This is based on the code written by OK4BX.
                 # (http://web.bxhome.org/blog/ok4bx/2012/05/adif-parser-python)
@@ -487,48 +487,48 @@ class ADIF:
                         fields_and_data_dictionary["NOTES"] = comment
                     else:
                         pass
-                records.append(fields_and_data_dictionary)
+                qsos.append(fields_and_data_dictionary)
 
-        assert n_eor == n_record
+        assert n_eor == n_qso
 
         logging.debug("Finished parsing text.")
 
-        return records
+        return qsos
 
-    def write(self, records, path):
-        """Write an ADIF file containing all the QSOs in the 'records' list.
+    def write(self, qsos, path):
+        """Write an ADIF file containing all the QSOs in the 'QSOs' list.
 
-        :arg list records: The list of QSO records to write.
+        :arg list qsos: The list of QSOs to write.
         :arg str path: The desired path of the ADIF file to write to.
         :returns: None
         :raises IOError: If the ADIF file cannot be written (e.g. due to lack of write permissions).
         """
 
-        logging.debug("Writing records to an ADIF file...")
+        logging.debug("Writing QSOs to an ADIF file...")
 
         with open(path, mode="w", errors="replace") as f:  # Open file for writing
 
-            # First write a header containing program version, number of records, etc.
+            # First write a header containing program version, number of QSOs, etc.
             dt = datetime.now()
 
             f.write(
-                """Amateur radio log file. Generated on %s. Contains %d record(s).
+                """Amateur radio log file. Generated on %s. Contains %d QSO(s).
 
 <adif_ver:%d>%s
 <programid:5>PyQSO
 <programversion:5>1.1.0
 <eoh>\n"""
-                % (dt, len(records), len(str(ADIF_VERSION)), ADIF_VERSION)
+                % (dt, len(qsos), len(str(ADIF_VERSION)), ADIF_VERSION)
             )
 
-            # Then write each record to the file.
-            for r in records:
+            # Then write each QSO to the file.
+            for r in qsos:
                 for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
                     if not (
                         field_name.lower() in list(r.keys())
                         or field_name.upper() in list(r.keys())
                     ):
-                        # If the field_name does not exist in the record, then skip past it.
+                        # If the field_name does not exist in the QSO, then skip past it.
                         # Only write out the fields that exist and that have some data in them.
                         continue
                     else:
@@ -543,10 +543,10 @@ class ADIF:
                             )
                 f.write("<eor>\n")
 
-            logging.debug("Finished writing records to the ADIF file.")
+            logging.debug("Finished writing QSOs to the ADIF file.")
             f.close()
 
-            logging.info("Wrote %d QSOs to %s in ADIF format." % (len(records), path))
+            logging.info("Wrote %d QSOs to %s in ADIF format." % (len(qsos), path))
 
         return
 

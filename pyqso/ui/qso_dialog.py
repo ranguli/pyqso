@@ -43,28 +43,28 @@ from pyqso.ui.popup_dialog import PopupDialog
 from pyqso.calendar_dialog import CalendarDialog
 
 
-class RecordDialog:
+class AddQSODialog:
 
-    """A dialog through which users can enter information about a QSO/record."""
+    """A dialog through which users can enter information about a QSO."""
 
     def __init__(self, application, log, index=None):
-        """Set up the layout of the record dialog, populate the various fields with the QSO details (if the record already exists), and show the dialog to the user.
+        """Set up the layout of the QSO dialog, populate the various fields with the QSO details (if the already exists), and show the dialog to the user.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
-        :arg log: The log to which the record belongs (or will belong).
-        :arg int index: If specified, then the dialog turns into 'edit record mode' and fills the data sources (e.g. the Gtk.Entry boxes) with the existing data in the log. If not specified (i.e. index is None), then the dialog starts off with nothing in the data sources.
+        :arg log: The log to which the qso belongs (or will belong).
+        :arg int index: If specified, then the dialog turns into 'edit QSO mode' and fills the data sources (e.g. the Gtk.Entry boxes) with the existing data in the log. If not specified (i.e. index is None), then the dialog starts off with nothing in the data sources.
         """
 
-        logging.debug("Setting up the record dialog...")
+        logging.debug("Setting up the QSO dialog...")
 
         self.application = application
         self.builder = self.application.builder
         glade_file_path = os.path.join(
             os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
         )
-        self.builder.add_objects_from_file(glade_file_path, ("record_dialog",))
-        self.dialog = self.builder.get_object("record_dialog")
-        self.builder.get_object("record_dialog").connect(
+        self.builder.add_objects_from_file(glade_file_path, ("add_qso_dialog",))
+        self.dialog = self.builder.get_object("add_qso_dialog")
+        self.builder.get_object("add_qso_dialog").connect(
             "key-press-event", self.on_key_press
         )
 
@@ -103,7 +103,7 @@ class RecordDialog:
 
         # FREQ
         self.sources["FREQ"] = self.builder.get_object("qso_frequency_entry")
-        (section, option) = ("records", "default_frequency_unit")
+        (section, option) = ("qsos", "default_frequency_unit")
         if have_config and config.has_option(section, option):
             self.frequency_unit = config.get(section, option)
             self.builder.get_object("qso_frequency_label").set_label(
@@ -213,11 +213,11 @@ class RecordDialog:
 
         # Populate various fields, if possible.
         if index is not None:
-            # The record already exists, so display its current data in the input boxes.
-            record = log.get_record_by_index(index)
+            # The already exists, so display its current data in the input boxes.
+            qso = log.get_qso_by_index(index)
             field_names = adif.AVAILABLE_FIELD_NAMES_ORDERED
             for i in range(0, len(field_names)):
-                data = record[field_names[i].lower()]
+                data = qso[field_names[i].lower()]
                 if data is None:
                     data = ""
                 if field_names[i] == "BAND":
@@ -232,7 +232,7 @@ class RecordDialog:
                         sorted(adif.MODES.keys()).index(data)
                     )
                     # Handle SUBMODE at the same time.
-                    submode_data = record["submode"]
+                    submode_data = qso["submode"]
                     if submode_data is None:
                         submode_data = ""
                     self.sources["SUBMODE"].set_active(adif.MODES[data].index(submode_data))
@@ -259,7 +259,7 @@ class RecordDialog:
 
             # Set up default field values
             # Mode
-            (section, option) = ("records", "default_mode")
+            (section, option) = ("qsos", "default_mode")
             if have_config and config.has_option(section, option):
                 mode = config.get(section, option)
             else:
@@ -267,7 +267,7 @@ class RecordDialog:
             self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
 
             # Submode
-            (section, option) = ("records", "default_submode")
+            (section, option) = ("qsos", "default_submode")
             if have_config and config.has_option(section, option):
                 submode = config.get(section, option)
             else:
@@ -275,7 +275,7 @@ class RecordDialog:
             self.sources["SUBMODE"].set_active(adif.MODES[mode].index(submode))
 
             # Power
-            (section, option) = ("records", "default_power")
+            (section, option) = ("qsos", "default_power")
             if have_config and config.has_option(section, option):
                 power = config.get(section, option)
             else:
@@ -297,7 +297,7 @@ class RecordDialog:
                         self.hamlib_autofill(rig_model, rig_pathname)
 
         # Do we want PyQSO to autocomplete the Band field based on the Frequency field?
-        (section, option) = ("records", "autocomplete_band")
+        (section, option) = ("qsos", "autocomplete_band")
         if have_config and config.has_option(section, option):
             autocomplete_band = config.getboolean(section, option)
             if autocomplete_band:
@@ -313,14 +313,15 @@ class RecordDialog:
         return
 
     def get_data(self, field_name):
-        """Return the data for a specified field from the Gtk.Entry/Gtk.ComboBoxText/etc boxes in the record dialog.
+        """Return the data for a specified field from the
+        Gtk.Entry/Gtk.ComboBoxText/etc boxes in the QSO dialog.
 
         :arg str field_name: The name of the field containing the desired data.
         :returns: The data in the specified field.
         :rtype: str
         """
         logging.debug(
-            "Retrieving the data in field %s from the record dialog..." % field_name
+            "Retrieving the data in field %s from the QSO dialog..." % field_name
         )
         if field_name == "CALL":
             # Always show the callsigns in upper case.
@@ -476,8 +477,8 @@ class RecordDialog:
         config = configparser.ConfigParser()
         have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
         try:
-            if have_config and config.has_option("records", "callsign_database"):
-                database = config.get("records", "callsign_database")
+            if have_config and config.has_option("qsos", "callsign_database"):
+                database = config.get("qsos", "callsign_database")
                 if database == "":
                     raise ValueError
             else:
@@ -508,12 +509,12 @@ class RecordDialog:
         # Get username and password from configuration file.
         if (
             have_config
-            and config.has_option("records", "callsign_database_username")
-            and config.has_option("records", "callsign_database_password")
+            and config.has_option("qsos", "callsign_database_username")
+            and config.has_option("qsos", "callsign_database_password")
         ):
-            username = config.get("records", "callsign_database_username")
+            username = config.get("qsos", "callsign_database_username")
             password = base64.b64decode(
-                config.get("records", "callsign_database_password")
+                config.get("qsos", "callsign_database_password")
             ).decode("utf-8")
             if not username or not password:
                 details_given = False
@@ -542,9 +543,9 @@ class RecordDialog:
         if connected:
             # Check whether we want to ignore any prefixes (e.g. "IA/") or suffixes "(e.g. "/M") in the callsign
             # before performing the lookup.
-            if have_config and config.has_option("records", "ignore_prefix_suffix"):
+            if have_config and config.has_option("qsos", "ignore_prefix_suffix"):
                 ignore_prefix_suffix = config.getboolean(
-                    "records", "ignore_prefix_suffix"
+                    "qsos", "ignore_prefix_suffix"
                 )
             else:
                 ignore_prefix_suffix = True
@@ -574,7 +575,7 @@ class RecordDialog:
         have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
 
         # Do we want to use UTC or the computer's local time?
-        (section, option) = ("records", "use_utc")
+        (section, option) = ("qsos", "use_utc")
         if have_config and config.has_option(section, option):
             use_utc = config.getboolean(section, option)
             if use_utc:

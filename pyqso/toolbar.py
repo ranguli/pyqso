@@ -45,22 +45,22 @@ class Toolbar:
         self.buttons["CLOSE_LOGBOOK"] = self.builder.get_object("toolbar_close_logbook")
         self.buttons["CLOSE_LOGBOOK"].connect("clicked", self.application.logbook.close)
 
-        # Add record
-        self.buttons["ADD_RECORD"] = self.builder.get_object("toolbar_add_record")
+        # Add qso
+        self.buttons["ADD_RECORD"] = self.builder.get_object("toolbar_add_qso")
         self.buttons["ADD_RECORD"].connect(
-            "clicked", self.application.logbook.add_record_callback
+            "clicked", self.application.logbook.add_qso_callback
         )
 
-        # Edit record
-        self.buttons["EDIT_RECORD"] = self.builder.get_object("toolbar_edit_record")
+        # Edit qso
+        self.buttons["EDIT_RECORD"] = self.builder.get_object("toolbar_edit_qso")
         self.buttons["EDIT_RECORD"].connect(
-            "clicked", self.application.logbook.edit_record_callback
+            "clicked", self.application.logbook.edit_qso_callback
         )
 
-        # Delete record
-        self.buttons["DELETE_RECORD"] = self.builder.get_object("toolbar_delete_record")
+        # Delete qso
+        self.buttons["DELETE_RECORD"] = self.builder.get_object("toolbar_delete_qso")
         self.buttons["DELETE_RECORD"].connect(
-            "clicked", self.application.logbook.delete_record_callback
+            "clicked", self.application.logbook.delete_qso_callback
         )
 
         # Filter log
@@ -71,7 +71,7 @@ class Toolbar:
 
         # Set sensitivities.
         self.set_logbook_button_sensitive(True)
-        self.set_record_buttons_sensitive(False)
+        self.set_qso_buttons_sensitive(False)
         self.filter_source.set_sensitive(False)
 
         return
@@ -86,10 +86,10 @@ class Toolbar:
         self.buttons["CLOSE_LOGBOOK"].set_sensitive(not sensitive)
         return
 
-    def set_record_buttons_sensitive(self, sensitive):
-        """Enable/disable record-related toolbar items.
+    def set_qso_buttons_sensitive(self, sensitive):
+        """Enable/disable qso-related toolbar items.
 
-        :arg bool sensitive: If True, enable all the record-related toolbar items. If False, disable them all.
+        :arg bool sensitive: If True, enable all the QSO-related toolbar items. If False, disable them all.
         """
         for button_name in ["ADD_RECORD", "EDIT_RECORD", "DELETE_RECORD"]:
             self.buttons[button_name].set_sensitive(sensitive)

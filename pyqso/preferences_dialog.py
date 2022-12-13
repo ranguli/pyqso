@@ -70,7 +70,7 @@ class PreferencesDialog:
 
         self.general = GeneralPage(self.dialog, self.builder)
         self.view = ViewPage(self.dialog, self.builder)
-        self.records = RecordsPage(self.dialog, self.builder)
+        self.qsos = RecordsPage(self.dialog, self.builder)
         self.import_export = ImportExportPage(self.dialog, self.builder)
         self.hamlib = HamlibPage(self.dialog, self.builder)
 
@@ -98,9 +98,9 @@ class PreferencesDialog:
             config.set("view", key.lower(), str(self.view.data[key]))
 
         # Records
-        config.add_section("records")
-        for key in list(self.records.data.keys()):
-            config.set("records", key.lower(), str(self.records.data[key]))
+        config.add_section("qsos")
+        for key in list(self.qsos.data.keys()):
+            config.set("qsos", key.lower(), str(self.qsos.data[key]))
 
         # Import/Export
         config.add_section("import_export")
@@ -289,7 +289,7 @@ class ViewPage:
 
 class RecordsPage:
 
-    """The section of the preferences dialog containing record-related preferences."""
+    """The section of the preferences dialog containing QSO-related preferences."""
 
     def __init__(self, parent, builder):
         """Set up the Record page of the Preferences dialog."""
@@ -305,9 +305,9 @@ class RecordsPage:
 
         # Autocomplete
         self.sources["AUTOCOMPLETE_BAND"] = self.builder.get_object(
-            "records_autocomplete_band_checkbutton"
+            "qsos_autocomplete_band_checkbutton"
         )
-        (section, option) = ("records", "autocomplete_band")
+        (section, option) = ("qsos", "autocomplete_band")
         if have_config and config.has_option(section, option):
             self.sources["AUTOCOMPLETE_BAND"].set_active(
                 config.getboolean(section, option)
@@ -316,9 +316,9 @@ class RecordsPage:
             self.sources["AUTOCOMPLETE_BAND"].set_active(True)
 
         self.sources["USE_UTC"] = self.builder.get_object(
-            "records_autocomplete_utc_checkbutton"
+            "qsos_autocomplete_utc_checkbutton"
         )
-        (section, option) = ("records", "use_utc")
+        (section, option) = ("qsos", "use_utc")
         if have_config and config.has_option(section, option):
             self.sources["USE_UTC"].set_active(config.getboolean(section, option))
         else:
@@ -332,7 +332,7 @@ class RecordsPage:
         )
         for mode in sorted(MODES.keys()):
             self.sources["DEFAULT_MODE"].append_text(mode)
-        (section, option) = ("records", "default_mode")
+        (section, option) = ("qsos", "default_mode")
         if have_config and config.has_option(section, option):
             mode = config.get(section, option)
         else:
@@ -346,7 +346,7 @@ class RecordsPage:
         )
         for submode in MODES[mode]:
             self.sources["DEFAULT_SUBMODE"].append_text(submode)
-        (section, option) = ("records", "default_submode")
+        (section, option) = ("qsos", "default_submode")
         if have_config and config.has_option(section, option):
             submode = config.get(section, option)
         else:
@@ -357,7 +357,7 @@ class RecordsPage:
         self.sources["DEFAULT_POWER"] = self.builder.get_object(
             "default_values_tx_power_entry"
         )
-        (section, option) = ("records", "default_power")
+        (section, option) = ("qsos", "default_power")
         if have_config and config.has_option(section, option):
             self.sources["DEFAULT_POWER"].set_text(config.get(section, option))
         else:
@@ -370,7 +370,7 @@ class RecordsPage:
         units = ["Hz", "kHz", "MHz", "GHz"]
         for unit in units:
             self.sources["DEFAULT_FREQUENCY_UNIT"].append_text(unit)
-        (section, option) = ("records", "default_frequency_unit")
+        (section, option) = ("qsos", "default_frequency_unit")
         if have_config and config.has_option(section, option):
             self.sources["DEFAULT_FREQUENCY_UNIT"].set_active(
                 units.index(config.get(section, option))
@@ -385,7 +385,7 @@ class RecordsPage:
         callsign_database = ["", "qrz.com", "hamqth.com"]
         for database in callsign_database:
             self.sources["CALLSIGN_DATABASE"].append_text(database)
-        (section, option) = ("records", "callsign_database")
+        (section, option) = ("qsos", "callsign_database")
         if have_config and config.has_option(section, option):
             self.sources["CALLSIGN_DATABASE"].set_active(
                 callsign_database.index(config.get(section, option))
@@ -397,7 +397,7 @@ class RecordsPage:
         self.sources["CALLSIGN_DATABASE_USERNAME"] = self.builder.get_object(
             "callsign_lookup_login_details_username_entry"
         )
-        (section, option) = ("records", "callsign_database_username")
+        (section, option) = ("qsos", "callsign_database_username")
         if have_config and config.has_option(section, option):
             self.sources["CALLSIGN_DATABASE_USERNAME"].set_text(
                 config.get(section, option)
@@ -406,7 +406,7 @@ class RecordsPage:
         self.sources["CALLSIGN_DATABASE_PASSWORD"] = self.builder.get_object(
             "callsign_lookup_login_details_password_entry"
         )
-        (section, option) = ("records", "callsign_database_password")
+        (section, option) = ("qsos", "callsign_database_password")
         if have_config and config.has_option(section, option):
             password = base64.b64decode(config.get(section, option)).decode("utf-8")
             self.sources["CALLSIGN_DATABASE_PASSWORD"].set_text(password)
@@ -414,7 +414,7 @@ class RecordsPage:
         self.sources["IGNORE_PREFIX_SUFFIX"] = self.builder.get_object(
             "callsign_lookup_ignore_prefix_suffix_checkbutton"
         )
-        (section, option) = ("records", "ignore_prefix_suffix")
+        (section, option) = ("qsos", "ignore_prefix_suffix")
         if have_config and config.has_option(section, option):
             self.sources["IGNORE_PREFIX_SUFFIX"].set_active(
                 config.getboolean(section, option)

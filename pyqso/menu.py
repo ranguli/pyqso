@@ -98,22 +98,22 @@ class Menu:
         self.items["QUIT"] = self.builder.get_object("mitem_quit")
         self.items["QUIT"].connect("activate", Gtk.main_quit)
 
-        # Add record
-        self.items["ADD_RECORD"] = self.builder.get_object("mitem_add_record")
-        self.items["ADD_RECORD"].connect(
-            "activate", self.application.logbook.add_record_callback
+        # Add qso
+        self.items["ADD_QSO"] = self.builder.get_object("mitem_add_qso")
+        self.items["ADD_QSO"].connect(
+            "activate", self.application.logbook.add_qso_callback
         )
 
-        # Edit selected record
-        self.items["EDIT_RECORD"] = self.builder.get_object("mitem_edit_record")
-        self.items["EDIT_RECORD"].connect(
-            "activate", self.application.logbook.edit_record_callback
+        # Edit selected qso
+        self.items["EDIT_QSO"] = self.builder.get_object("mitem_edit_qso")
+        self.items["EDIT_QSO"].connect(
+            "activate", self.application.logbook.edit_qso_callback
         )
 
-        # Delete selected record
-        self.items["DELETE_RECORD"] = self.builder.get_object("mitem_delete_record")
-        self.items["DELETE_RECORD"].connect(
-            "activate", self.application.logbook.delete_record_callback
+        # Delete selected qso
+        self.items["DELETE_QSO"] = self.builder.get_object("mitem_delete_qso")
+        self.items["DELETE_QSO"].connect(
+            "activate", self.application.logbook.delete_qso_callback
         )
 
         # Remove duplicates
@@ -125,9 +125,9 @@ class Menu:
         )
 
         # Record count
-        self.items["RECORD_COUNT"] = self.builder.get_object("mitem_record_count")
-        self.items["RECORD_COUNT"].connect(
-            "activate", self.application.logbook.record_count_callback
+        self.items["QSO_COUNT"] = self.builder.get_object("mitem_qso_count")
+        self.items["QSO_COUNT"].connect(
+            "activate", self.application.logbook.qso_count_callback
         )
 
         # About
@@ -136,7 +136,7 @@ class Menu:
 
         self.set_logbook_item_sensitive(True)
         self.set_log_items_sensitive(False)
-        self.set_record_items_sensitive(False)
+        self.set_qso_items_sensitive(False)
 
         return
 
@@ -168,18 +168,18 @@ class Menu:
             self.items[item_name].set_sensitive(sensitive)
         return
 
-    def set_record_items_sensitive(self, sensitive):
-        """Enable/disable record-related menu items.
+    def set_qso_items_sensitive(self, sensitive):
+        """Enable/disable qso-related menu items.
 
-        :arg bool sensitive: If True, enable all the record-related menu items. If False, disable them all.
+        :arg bool sensitive: If True, enable all the QSO-related menu items. If False, disable them all.
         """
 
         for item_name in [
-            "ADD_RECORD",
-            "EDIT_RECORD",
-            "DELETE_RECORD",
+            "ADD_QSO",
+            "EDIT_QSO",
+            "DELETE_QSO",
             "REMOVE_DUPLICATES",
-            "RECORD_COUNT",
+            "QSO_COUNT",
         ]:
             self.items[item_name].set_sensitive(sensitive)
         return
