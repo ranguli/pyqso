@@ -29,10 +29,8 @@ except ImportError:
     import ConfigParser as configparser
 
 from pyqso.adif import (
-    ADIF,
     AVAILABLE_FIELD_NAMES_ORDERED,
-    AVAILABLE_FIELD_NAMES_FRIENDLY,
-    AVAILABLE_FIELD_NAMES_TYPES,
+    AVAILABLE_FIELD_NAMES_FRIENDLY
 )
 from pyqso.cabrillo import Cabrillo
 from pyqso.log import Log
@@ -906,7 +904,6 @@ class Logbook:
         )
         all_valid = False  # Are all the field entries valid?
 
-        adif = ADIF()
         while not all_valid:
             # This while loop gives the user infinite attempts at giving valid data.
             # The add/edit QSO window will stay open until the user gives valid data,
@@ -916,42 +913,40 @@ class Logbook:
             if response == Gtk.ResponseType.OK:
                 fields_and_data = {}
                 field_names = AVAILABLE_FIELD_NAMES_ORDERED
-                for i in range(0, len(field_names)):
-                    # Validate user input.
-                    fields_and_data[field_names[i]] = rd.get_data(field_names[i])
-                    if not (
-                        adif.is_valid(
-                            field_names[i],
-                            fields_and_data[field_names[i]],
-                            AVAILABLE_FIELD_NAMES_TYPES[field_names[i]],
-                        )
-                    ):
-                        # Data is not valid - inform the user.
-                        d = PopupDialog(
-                            parent=rd.dialog,
-                            message='The data in field "%s" is not valid!'
-                            % field_names[i],
-                        )
-                        d.error()
-                        all_valid = False
-                        break  # Don't check the other fields until the user has fixed the current field's data.
+
+                form_input = rd.get_all_data()
+                valid, error_msg = self.validate_form(form_input)
+
+                if not self.validate_form(form_input):
+                    # Data is not valid - inform the user.
+                    d = PopupDialog(
+                        parent=rd.dialog,
+                        message=error_msg
+                    )
+                    d.error()
+                    all_valid = False
+                    break  # Don't check the other data until the user has fixed the current one.
 
                 if all_valid:
                     try:
                         # Get the QSO in its current state from the database.
                         qso = log.get_qso_by_index(row_index)
+
+                        # TODO: Do away with this, rewrite log.edit_qso() so we
+                        # don't need to iterate field by field
+
                         # Iterate over all fields and check whether the data has actually changed. Database updates can be expensive.
-                        for i in range(0, len(field_names)):
+                        for i in range(0, len(form_input.keys())):
                             if (
-                                qso[field_names[i].lower()]
-                                != fields_and_data[field_names[i]]
+                                qso[list(form_input.keys())[i].lower()]
+                                != form_input[list(form_input.keys())[i]]
                             ):
                                 # Update the QSO in the database and then in the ListStore.
                                 # We add 1 onto the column_index here because we don't want to consider the index column.
                                 log.edit_qso(
                                     row_index,
-                                    field_names[i],
-                                    fields_and_data[field_names[i]],
+                                    list(form_input.keys())[i],
+                                    form_input[list(form_input.keys())[i]],
                                     iter=child_iter,
                                     column_index=i + 1,
                                 )
