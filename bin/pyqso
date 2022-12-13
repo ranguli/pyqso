@@ -43,6 +43,8 @@ logging.info("PyQSO version 1.1.0")
 pyqso_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), os.pardir)
 sys.path.insert(0, pyqso_path)
 
+import pathlib
+
 # PyQSO modules.
 from pyqso.logbook import Logbook
 from pyqso.menu import Menu
@@ -63,9 +65,8 @@ class PyQSO:
 
         # Get the PyQSO main window defined in the Glade file.
         self.builder = Gtk.Builder()
-        glade_file_path = pkg_resources.resource_filename(
-            "pyqso", os.path.join("res", "pyqso.glade")
-        )
+        glade_file_path = str(pathlib.Path(__file__).parent.parent.resolve() / "pyqso" / "ui" / "res" / "pyqso.glade")
+
         self.builder.add_from_file(glade_file_path)
         self.window = self.builder.get_object("pyqso")
 

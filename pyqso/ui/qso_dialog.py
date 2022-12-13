@@ -62,9 +62,9 @@ class AddQSODialog:
         glade_file_path = os.path.join(
             os.path.realpath(os.path.dirname(__file__)), "res", "pyqso.glade"
         )
-        self.builder.add_objects_from_file(glade_file_path, ("add_qso_dialog",))
-        self.dialog = self.builder.get_object("add_qso_dialog")
-        self.builder.get_object("add_qso_dialog").connect(
+        self.builder.add_objects_from_file(glade_file_path, ("qso_dialog",))
+        self.dialog = self.builder.get_object("qso_dialog")
+        self.builder.get_object("qso_dialog").connect(
             "key-press-event", self.on_key_press
         )
 
