@@ -164,7 +164,6 @@ class Menu:
             "IMPORT_LOG",
             "EXPORT_LOG_ADIF",
             "EXPORT_LOG_CABRILLO",
-            "PRINT_LOG",
         ]:
             self.items[item_name].set_sensitive(sensitive)
         return
