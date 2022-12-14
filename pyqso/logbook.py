@@ -54,7 +54,6 @@ class Logbook:
         self.application = application
         self.builder = self.application.builder
         self.notebook = self.builder.get_object("logbook")
-        self.connection = None
         self.logs = []
 
         return
@@ -193,26 +192,21 @@ class Logbook:
         :rtype: bool
         """
 
-        disconnected = self.db_disconnect()
-        if disconnected:
-            logging.debug("Closing all logs in the logbook...")
-            while self.notebook.get_n_pages() > 0:
-                # Once a page is removed, the other pages get re-numbered,
-                # so a 'for' loop isn't the best option here.
-                self.notebook.remove_page(0)
-            logging.debug("All logs now closed.")
+        self.db.close()
 
-            context_id = self.application.statusbar.get_context_id("Status")
-            self.application.statusbar.push(context_id, "No logbook is currently open.")
-            self.application.toolbar.set_logbook_button_sensitive(True)
-            self.application.menu.set_logbook_item_sensitive(True)
-            self.application.menu.set_log_items_sensitive(False)
-            self.application.toolbar.filter_source.set_sensitive(False)
-        else:
-            logging.debug(
-                "Unable to disconnect from the database. No logs were closed."
-            )
-            return False
+        logging.debug("Closing all logs in the logbook...")
+        while self.notebook.get_n_pages() > 0:
+            # Once a page is removed, the other pages get re-numbered,
+            # so a 'for' loop isn't the best option here.
+            self.notebook.remove_page(0)
+        logging.debug("All logs now closed.")
+
+        context_id = self.application.statusbar.get_context_id("Status")
+        self.application.statusbar.push(context_id, "No logbook is currently open.")
+        self.application.toolbar.set_logbook_button_sensitive(True)
+        self.application.menu.set_logbook_item_sensitive(True)
+        self.application.menu.set_log_items_sensitive(False)
+        self.application.toolbar.filter_source.set_sensitive(False)
 
         return True
 
@@ -225,9 +219,7 @@ class Logbook:
         logging.debug("Attempting to connect to the logbook database...")
         # Try setting up the SQL database connection.
         try:
-            self.db_disconnect()  # Destroy any existing connections first.
-            self.connection = sqlite.connect(path)
-            self.connection.row_factory = sqlite.Row
+            self.db = dataset.connect(f"sqlite:///{path}")
         except sqlite.Error as e:
             # Cannot connect to the database.
             logging.exception(e)
@@ -239,24 +231,6 @@ class Logbook:
             return False
 
         logging.debug("Database connection created successfully!")
-        return True
-
-    def db_disconnect(self):
-        """Destroy the connection to the Logbook's data source.
-
-        :returns: True if the connection was successfully destroyed, and False otherwise.
-        :rtype: bool
-        """
-
-        logging.debug("Cleaning up any existing database connections...")
-        if self.connection:
-            try:
-                self.connection.close()
-            except sqlite.Error as e:
-                logging.exception(e)
-                return False
-        else:
-            logging.debug("Already disconnected. Nothing to do here.")
         return True
 
     def on_switch_page(self, widget, label, new_page):
@@ -289,8 +263,6 @@ class Logbook:
     def new_log(self, widget=None):
         """Create a new log in the logbook."""
 
-        if self.connection is None:
-            return
         exists = True
         ln = LogNameDialog(self.application)
         while exists:
@@ -298,19 +270,8 @@ class Logbook:
             if response == Gtk.ResponseType.OK:
                 log_name = ln.name
                 try:
-                    with self.connection:
-                        c = self.connection.cursor()
-                        # NOTE: "id" is simply an alias for the "rowid" column here.
-                        query = (
-                            "CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT"
-                            % log_name
-                        )
-                        for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
-                            s = ", %s TEXT" % field_name.lower()
-                            query = query + s
-                        query = query + ")"
-                        c.execute(query)
-                        exists = False
+                    self.db.create_table(log_name)
+                    exists = False
                 except sqlite.Error as e:
                     logging.exception(e)
                     # Data is not valid - inform the user.
@@ -327,7 +288,7 @@ class Logbook:
         ln.dialog.destroy()
 
         # Instantiate and populate a new Log object.
-        log_object = Log(self.connection, log_name)
+        log_object = Log(self.db, log_name)
         log_object.populate()
 
         self.logs.append(log_object)
@@ -342,8 +303,6 @@ class Logbook:
 
         :arg Gtk.Widget page: An optional argument corresponding to the currently-selected page/tab.
         """
-        if self.connection is None:
-            return
 
         if page is None:
             page_index = (
@@ -376,9 +335,7 @@ class Logbook:
         )
         if d.question() == Gtk.ResponseType.YES:
             try:
-                with self.connection:
-                    c = self.connection.cursor()
-                    c.execute("DROP TABLE %s" % log.name)
+                self.db.drop(log.name)
             except sqlite.Error as e:
                 logging.exception(e)
                 d = PopupDialog(
@@ -576,8 +533,6 @@ class Logbook:
 
     def rename_log(self, widget=None):
         """Rename the log that is currently selected."""
-        if self.connection is None:
-            return
         page_index = self.notebook.get_current_page()
         if page_index == 0:  # If we are on the Summary page...
             logging.debug("No log currently selected!")
@@ -717,19 +672,9 @@ class Logbook:
                 else:
                     # Create a new log with the name the user supplies.
                     try:
-                        with self.connection:
-                            c = self.connection.cursor()
-                            query = (
-                                "CREATE TABLE %s (id INTEGER PRIMARY KEY AUTOINCREMENT"
-                                % log_name
-                            )
-                            for field_name in AVAILABLE_FIELD_NAMES_ORDERED:
-                                s = ", %s TEXT" % field_name.lower()
-                                query = query + s
-                            query = query + ")"
-                            c.execute(query)
-                            log_object = Log(self.connection, log_name)
-                            break
+                        self.db.create_table(log_name)
+                        log_object = Log(self.db, log_name)
+                        break
                     except sqlite.Error as e:
                         logging.exception(e)
                         # Data is not valid - inform the user.
@@ -1334,18 +1279,12 @@ class Logbook:
         :arg str table_name: The name of the log (i.e. the name of the table in the SQL database).
         :returns: True if the log name already exists in the logbook; False if it does not already exist.
         :rtype: bool
-        :raises sqlite.Error: If a database error occurs.
         """
 
-        with self.connection:
-            c = self.connection.cursor()
-            c.execute(
-                "SELECT EXISTS(SELECT 1 FROM sqlite_master WHERE name=?)", [table_name]
-            )
-            exists = c.fetchone()
-        if exists[0] == 1:
+        try:
+            self.db[table_name]
             return True
-        else:
+        except KeyError:
             return False
 
     def get_log_index(self, name=None):
@@ -1416,13 +1355,16 @@ class Logbook:
         :raises sqlite.Error: If the log names could not be determined from the sqlite_master table in the database.
         """
         logs = []
-        with self.connection:
-            c = self.connection.cursor()
-            c.execute(
-                "SELECT name FROM sqlite_master WHERE type='table' AND name NOT GLOB 'sqlite_*'"
-            )
-            for name in c:
-                log_object = Log(self.connection, name[0])
-                log_object.populate()
-                logs.append(log_object)
+
+        for table in self.db.tables:
+            if table.startswith("sqlite_"):
+                continue
+
+            print(table)
+            print(type(table))
+
+            log_object = Log(self.db, table)
+            log_object.populate()
+            logs.append(log_object)
+
         return logs
