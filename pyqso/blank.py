@@ -43,7 +43,7 @@ class Blank(object):
         page.pack_start(sw, True, True, 0)
 
         # Add a "+" button to the tab
-        tab = Gtk.HBox(homogeneous=False, spacing=0)
+        tab = Gtk.Box(homogeneous=False, orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_ADD, Gtk.IconSize.MENU)
         button = Gtk.Button()
         button.set_relief(Gtk.ReliefStyle.NONE)

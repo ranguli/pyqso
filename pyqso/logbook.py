@@ -38,6 +38,8 @@ from pyqso.summary import Summary
 from pyqso.ui.popup_dialog import PopupDialog
 from pyqso.ui.qso_dialog import AddQSODialog
 
+import dataset
+
 
 class Logbook:
 
@@ -611,7 +613,7 @@ class Logbook:
         page.set_name(new_log_name)
 
         # ... and update the tab's label.
-        hbox = Gtk.HBox(homogeneous=False, spacing=0)
+        hbox = Gtk.Box(homogeneous=False, orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         label = Gtk.Label(label=new_log_name)
         hbox.pack_start(label, False, False, 0)
         hbox.show_all()

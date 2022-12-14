@@ -79,7 +79,7 @@ class Summary(object):
                 config.getboolean("general", "show_yearly_statistics")
                 and have_matplotlib
             ):
-                hbox = Gtk.HBox()
+                hbox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
                 label = Gtk.Label(
                     label="Display statistics for year: ", halign=Gtk.Align.START
                 )
@@ -101,7 +101,7 @@ class Summary(object):
                 self.summary_page.pack_start(canvas, True, True, 0)
 
         # Summary tab label and icon.
-        tab = Gtk.HBox(homogeneous=False, spacing=0)
+        tab = Gtk.Box(homogeneous=False, orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
         label = Gtk.Label(label="Summary  ")
         icon = Gtk.Image.new_from_icon_name(Gtk.STOCK_INDEX, Gtk.IconSize.MENU)
         tab.pack_start(label, False, False, 0)

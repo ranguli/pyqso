@@ -25,15 +25,15 @@ from datetime import datetime
 
 class TestCabrilloWrapper(unittest.TestCase):
 
-    """The unit tests for the Cabrillo class."""
+    """The unit tests for the CabrilloWrapper class."""
 
     def setUp(self):
-        """Set up the Cabrillo object needed for the unit tests."""
-        self.cabrillo = Cabrillo()
+        """Set up the CabrilloWrapper object needed for the unit tests."""
+        self.cabrillo = CabrilloWrapper()
         return
 
     def test_convert_date_and_time_1(self):
-        c = Cabrillo()
+        c = CabrilloWrapper()
         date = "20220101"
         time = "1457"
         expected = datetime.strptime(f"{date} {time}", "%Y%m%d %H%M")
