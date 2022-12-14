@@ -64,7 +64,7 @@ class TestLogbook(unittest.TestCase):
         disconnected = self.logbook.db_disconnect()
         assert disconnected
 
-    @mock.patch("pyqso.auxiliary_dialogs.handle_gtk_dialog")
+    @mock.patch("pyqso.ui.popup_dialog.PopupDialog.show")
     @mock.patch("gi.repository.Gtk.FileChooserDialog")
     def test_new(self, mock_FileChooserDialog, mock_handle_gtk_dialog):
         """Check that a new logbook can be created."""
@@ -73,7 +73,7 @@ class TestLogbook(unittest.TestCase):
         self.logbook.new()
         assert os.path.isfile("Logbook.test_new.db")
 
-    @mock.patch("pyqso.auxiliary_dialogs.handle_gtk_dialog")
+    @mock.patch("pyqso.ui.popup_dialog.PopupDialog.show")
     def test_open_invalid_logbook(self, mock_handle_gtk_dialog):
         """Open an invalid database file (comprising only one line of plain text) and check that an error occurs."""
         invalid_logbook = Logbook(application=mock.MagicMock())
@@ -85,7 +85,7 @@ class TestLogbook(unittest.TestCase):
         assert not invalid_logbook.logs
 
     @mock.patch("pyqso.logbook.Logbook.render_log")
-    @mock.patch("pyqso.auxiliary_dialogs.handle_gtk_dialog")
+    @mock.patch("pyqso.ui.popup_dialog.PopupDialog.show")
     @mock.patch("pyqso.logbook.LogNameDialog")
     def test_new_log(self, mock_LogNameDialog, mock_handle_gtk_dialog, mock_render_log):
         """Create an empty logbook file, open it, and check that a new log can successfully be added."""
@@ -114,9 +114,9 @@ class TestLogbook(unittest.TestCase):
         """Check the log count."""
         assert self.logbook.log_count == 2
 
-    def test_record_count(self):
-        """Check the total number of records over all the logs in the logbook."""
-        assert self.logbook.record_count == 7
+    def test_qso_count(self):
+        """Check the total number of QSOs over all the logs in the logbook."""
+        assert self.logbook.qso_count == 7
 
     def test_filter_by_callsign(self):
         """Check that callsigns are filtered correctly."""

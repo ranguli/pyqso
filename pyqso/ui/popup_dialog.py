@@ -26,27 +26,20 @@ class PopupDialog:
         self.message = message
 
     def error(self):
-        self.buttons = Gtk.ButtonsType.OK
-        self.title = "Error"
-        self.msgtype = Gtk.MessageType.ERROR
-
-        return self.show()
+        return self.show(self.parent, Gtk.MessageType.ERROR, Gtk.ButtonsType.OK, self.message, "Error")
 
     def info(self):
         self.buttons = Gtk.ButtonsType.OK
         self.title = "Info"
         self.msgtype = Gtk.MessageType.INFO
 
-        return self.show()
+        return self.show(self.parent, Gtk.MessageType.INFO, Gtk.ButtonsType.OK, self.message, "Information")
 
     def question(self):
-        self.buttons = Gtk.ButtonsType.YES_NO
-        self.title = "Question"
-        self.msgtype = Gtk.MessageType.QUESTION
+        return self.show(self.parent, Gtk.MessageType.QUESTION, Gtk.ButtonsType.YES_NO, self.message, "Question")
 
-        return self.show()
-
-    def show(self):
+    @staticmethod
+    def show(parent, msgtype, buttons, message, title):
         """
         Instantiate and present a dialog to the user.
 
@@ -58,12 +51,12 @@ class PopupDialog:
         :rtype: Gtk.ResponseType
         """
         dialog = Gtk.MessageDialog(
-            self.parent,
+            parent,
             Gtk.DialogFlags.DESTROY_WITH_PARENT,
-            self.msgtype,
-            self.buttons,
-            self.message,
-            self.title,
+            msgtype,
+            buttons,
+            message,
+            title,
         )
         response = dialog.run()
         dialog.destroy()
