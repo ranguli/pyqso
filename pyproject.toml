@@ -15,6 +15,7 @@ cairocffi = "^1.4.0"
 cartopy = "^0.21.0"
 pygobject = "^3.42.2"
 cabrillo = {git = "ssh://git@github.com/ranguli/cabrillo.git"}
+loguru = "^0.6.0"
 
 
 [tool.poetry.group.dev.dependencies]

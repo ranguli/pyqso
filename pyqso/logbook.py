@@ -18,16 +18,17 @@
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
 import json
-import logging
 import sqlite3 as sqlite
+
+from loguru import logger
 from os.path import expanduser
+
+from pyqso.data import Data
 
 from gi.repository import Gtk
 import configparser
 
-from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_FRIENDLY,
-                        AVAILABLE_FIELD_NAMES_ORDERED,
-                        AVAILABLE_FIELD_NAMES_TYPES)
+from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_ORDERED, AVAILABLE_FIELD_NAMES_TYPES)
 from pyqso.blank import Blank
 from pyqso.cabrillo import CabrilloWrapper
 from pyqso.cabrillo_export_dialog import CabrilloExportDialog
@@ -89,7 +90,7 @@ class Logbook:
         if (
             path is None
         ):  # If the Cancel button has been clicked, path will still be None.
-            logging.debug("No file path specified.")
+            logger.debug("No file path specified.")
             return
         else:
             # Clear the contents of the file, in case the file exists already.
@@ -128,7 +129,7 @@ class Logbook:
             if (
                 path is None
             ):  # If the Cancel button has been clicked, path will still be None.
-                logging.debug("No file path specified.")
+                logger.debug("No file path specified.")
                 return False
 
         connected = self.db_connect(path)
@@ -137,11 +138,11 @@ class Logbook:
 
             self.path = path
 
-            logging.debug("Retrieving all the logs in the logbook...")
+            logger.debug("Retrieving all the logs in the logbook...")
             try:
                 self.logs = self.get_logs()
             except (sqlite.Error, IndexError) as e:
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not open logbook. Something went wrong when trying to retrieve the logs. Perhaps the logbook file is encrypted, corrupted, or in the wrong format?",
@@ -149,9 +150,9 @@ class Logbook:
                 d.error()
                 return False
 
-            logging.debug("All logs retrieved successfully.")
+            logger.debug("All logs retrieved successfully.")
 
-            logging.debug("Rendering logs...")
+            logger.debug("Rendering logs...")
             # For rendering the logs. One treeview and one treeselection per Log.
             self.treeview = []
             self.treeselection = []
@@ -166,7 +167,7 @@ class Logbook:
 
             for i in range(len(self.logs)):
                 self.render_log(i)
-            logging.debug("All logs rendered successfully.")
+            logger.debug("All logs rendered successfully.")
 
             self.summary.update()
 
@@ -180,7 +181,7 @@ class Logbook:
             self.notebook.show_all()
 
         else:
-            logging.debug("Not connected to a logbook. No logs were opened.")
+            logger.debug("Not connected to a logbook. No logs were opened.")
             return False
 
         return True
@@ -194,12 +195,12 @@ class Logbook:
 
         self.db.close()
 
-        logging.debug("Closing all logs in the logbook...")
+        logger.debug("Closing all logs in the logbook...")
         while self.notebook.get_n_pages() > 0:
             # Once a page is removed, the other pages get re-numbered,
             # so a 'for' loop isn't the best option here.
             self.notebook.remove_page(0)
-        logging.debug("All logs now closed.")
+        logger.debug("All logs now closed.")
 
         context_id = self.application.statusbar.get_context_id("Status")
         self.application.statusbar.push(context_id, "No logbook is currently open.")
@@ -216,13 +217,13 @@ class Logbook:
         :arg str path: The path of the database file.
         """
 
-        logging.debug("Attempting to connect to the logbook database...")
+        logger.debug("Attempting to connect to the logbook database...")
         # Try setting up the SQL database connection.
         try:
             self.db = dataset.connect(f"sqlite:///{path}")
         except sqlite.Error as e:
             # Cannot connect to the database.
-            logging.exception(e)
+            logger.exception(e)
             d = PopupDialog(
                 parent=self.application.window,
                 message="Cannot connect to the database. Check file permissions?",
@@ -230,7 +231,7 @@ class Logbook:
             d.error()
             return False
 
-        logging.debug("Database connection created successfully!")
+        logger.debug("Database connection created successfully!")
         return True
 
     def on_switch_page(self, widget, label, new_page):
@@ -273,7 +274,7 @@ class Logbook:
                     self.db.create_table(log_name)
                     exists = False
                 except sqlite.Error as e:
-                    logging.exception(e)
+                    logger.exception(e)
                     # Data is not valid - inform the user.
                     d = PopupDialog(
                         parent=ln.dialog,
@@ -309,7 +310,7 @@ class Logbook:
                 self.notebook.get_current_page()
             )  # Get the index of the selected tab in the logbook.
             if page_index == 0:  # If we are on the Summary page...
-                logging.debug("No log currently selected!")
+                logger.debug("No log currently selected!")
                 return
             else:
                 page = self.notebook.get_nth_page(
@@ -326,7 +327,7 @@ class Logbook:
         if (
             page_index == 0 or page_index == self.notebook.get_n_pages() - 1
         ):  # Only the "New Log" tab is present (i.e. no actual logs in the logbook).
-            logging.debug("No logs to delete!")
+            logger.debug("No logs to delete!")
             return
 
         d = PopupDialog(
@@ -337,7 +338,7 @@ class Logbook:
             try:
                 self.db.drop(log.name)
             except sqlite.Error as e:
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Database error. Could not delete the log.",
@@ -373,6 +374,7 @@ class Logbook:
         :returns: True if a QSO matches the expression, or if there is nothing to filter. Otherwise, returns False.
         :rtype: bool
         """
+        logger.debug(f"Searching GTK model for iter {iter} and data {data}")
         value = model.get_value(iter, 1)
         callsign = self.application.toolbar.filter_source.get_text()
 
@@ -438,22 +440,24 @@ class Logbook:
         self.treeview[index].append_column(column)
 
         # Set up column names for each selected field
-        field_names = AVAILABLE_FIELD_NAMES_ORDERED
+        field_names = self.db[self.logs[index].name].columns
         for i in range(0, len(field_names)):
+
             renderer = Gtk.CellRendererText()
 
             # Keep each row to a single line.
             renderer.set_property("single-paragraph-mode", True)
 
-            column = Gtk.TreeViewColumn(
-                AVAILABLE_FIELD_NAMES_FRIENDLY[field_names[i]], renderer, text=i + 1
-            )
+            if field_names[i] == "id":
+                continue
+
+            column = Gtk.TreeViewColumn(Data.get_friendly_field_name(field_names[i]), renderer, text=i)
             column.set_resizable(True)
             column.set_min_width(50)
             column.set_clickable(True)
 
             # Special cases
-            if field_names[i] == "NOTES":
+            if field_names[i] == "notes":
                 # Give the 'Notes' column some extra space, since this is likely to contain some long sentences ...
                 column.set_min_width(300)
                 # ... but not too much extra space ...
@@ -467,7 +471,9 @@ class Logbook:
             have_config = (
                 config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
             )
-            (section, option) = ("view", AVAILABLE_FIELD_NAMES_ORDERED[i].lower())
+
+            logger.debug(f"Getting config value {field_names[i]} from config")
+            (section, option) = ("view", Data.get_friendly_field_name(field_names[i]))
             if have_config and config.has_option(section, option):
                 column.set_visible(config.getboolean(section, option))
             self.treeview[index].append_column(column)
@@ -535,7 +541,7 @@ class Logbook:
         """Rename the log that is currently selected."""
         page_index = self.notebook.get_current_page()
         if page_index == 0:  # If we are on the Summary page...
-            logging.debug("No log currently selected!")
+            logger.debug("No log currently selected!")
             return
         page = self.notebook.get_nth_page(
             page_index
@@ -614,7 +620,7 @@ class Logbook:
         dialog.destroy()
 
         if path is None:
-            logging.debug("No file path specified.")
+            logger.debug("No file path specified.")
             return
 
         # Read the QSOs.
@@ -634,7 +640,7 @@ class Logbook:
                 parent=self.application.window, message="Could not import the log."
             )
             d.error()
-            logging.exception(e)
+            logger.exception(e)
             return
 
         # Get the new log's name (or the name of the existing log the user wants to import into).
@@ -649,7 +655,7 @@ class Logbook:
                     exists = self.log_name_exists(log_name)
                 except (sqlite.Error, IndexError) as e:
                     # Could not determine if the log name exists. It's safer to stop here than to try to add a new log.
-                    logging.exception(e)
+                    logger.exception(e)
 
                     d = PopupDialog(
                         parent=ln.dialog,
@@ -676,7 +682,7 @@ class Logbook:
                         log_object = Log(self.db, log_name)
                         break
                     except sqlite.Error as e:
-                        logging.exception(e)
+                        logger.exception(e)
                         # Data is not valid - inform the user.
                         d = PopupDialog(
                             parent=ln.dialog,
@@ -755,14 +761,14 @@ class Logbook:
         dialog.destroy()
 
         if path is None:
-            logging.debug("No file path specified.")
+            logger.debug("No file path specified.")
         else:
 
             # Retrieve the log's QSOs from the database.
             try:
                 qsos = log.qsos
             except sqlite.Error as e:
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not retrieve the QSOs from the SQL database. No QSOs have been exported.",
@@ -788,7 +794,7 @@ class Logbook:
                 )
                 d.error()
             except Exception as e:  # All other exceptions.
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not export the QSOs.",
@@ -844,7 +850,7 @@ class Logbook:
         dialog.destroy()
 
         if path is None:
-            logging.debug("No file path specified.")
+            logger.debug("No file path specified.")
         else:
             # Get Cabrillo-specific fields, such as the callsign used during a contest and the contest's name.
             cabrillo_dialog = CabrilloExportDialog(self.application)
@@ -860,7 +866,7 @@ class Logbook:
             try:
                 qsos = log.qsos
             except sqlite.Error as e:
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not retrieve the QSOs from the SQL database. No QSOs have been exported.",
@@ -886,7 +892,7 @@ class Logbook:
                 )
                 d.error()
             except Exception as e:  # All other exceptions.
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not export the QSOs.",
@@ -923,7 +929,7 @@ class Logbook:
 
         exit = False
         while not exit:
-            rd = AddQSODialog(application=self.application, log=log, index=None)
+            rd = AddQSODialog(application=self.application, log=log, db=self.db, index=None)
 
             all_valid = False  # Are all the field entries valid?
 
@@ -940,34 +946,50 @@ class Logbook:
                 all_valid = True
                 response = rd.dialog.run()
                 if response == Gtk.ResponseType.OK:
+
+                    #TODO: holy refactor batman
+
                     fields_and_data = {}
-                    field_names = AVAILABLE_FIELD_NAMES_ORDERED
+                    field_names = self.db[log.name].columns
                     for i in range(0, len(field_names)):
                         # Validate user input.
-                        fields_and_data[field_names[i]] = rd.get_data(field_names[i])
-                        if not (
-                            adif.is_valid(
-                                field_names[i],
-                                fields_and_data[field_names[i]],
-                                AVAILABLE_FIELD_NAMES_TYPES[field_names[i]],
-                            )
-                        ):
-                            # Data is not valid - inform the user.
-                            d = PopupDialog(
-                                parent=rd.dialog,
-                                message='The data in field "%s" is not valid!'
-                                % field_names[i],
-                            )
-                            d.error()
-                            all_valid = False
-                            break  # Don't check the other data until the user has fixed the current one.
+
+                        if field_names[i] == "id":
+                            continue
+
+                        logger.debug(f"Asking QSODialog.get_form_field_text() for {field_names[i]}")
+                        fields_and_data[field_names[i]] = rd.get_form_field_text(field_names[i])
+                        logger.debug(f"QSODialog.get_form_field_text() gave us back '{fields_and_data[field_names[i]]}'")
+
+                        # TODO: replace
+
+                        # Only perform ADIF validation on standard ADIF fields
+                        adif_field_name = field_names[i].upper()
+                        if field_names[i] in AVAILABLE_FIELD_NAMES_ORDERED:
+                            if not (
+                                adif.is_valid(
+                                    adif_field_name,
+                                    fields_and_data[field_names[i]],
+                                    AVAILABLE_FIELD_NAMES_TYPES[adif_field_name],
+                                )
+                            ):
+                                # Data is not valid - inform the user.
+                                d = PopupDialog(
+                                    parent=rd.dialog,
+                                    message='The data in field "%s" is not valid!'
+                                    % field_names[i],
+                                )
+                                d.error()
+                                all_valid = False
+                                break  # Don't check the other data until the user has fixed the current one.
 
                     if all_valid:
                         # All data has been validated, so we can go ahead and add the new QSO.
                         try:
+                            logger.debug(f"Passing {fields_and_data} to Log.add_qso()")
                             log.add_qso(fields_and_data)
                         except (sqlite.Error, IndexError) as e:
-                            logging.exception(e)
+                            logger.exception(e)
                             d = PopupDialog(
                                 parent=self.application.window,
                                 message="Could not add the QSO to the log.",
@@ -980,7 +1002,7 @@ class Logbook:
                             treepath = Gtk.TreePath(qso_count - 1)
                             self.treeview[log_index].scroll_to_cell(treepath)
                         except (sqlite.Error, IndexError) as e:
-                            logging.exception(e)
+                            logger.exception(e)
 
                         # Update summary, etc.
                         self.summary.update()
@@ -1017,7 +1039,7 @@ class Logbook:
             child_iter = self.filter[log_index].convert_iter_to_child_iter(filter_iter)
             row_index = log.get_value(child_iter, 0)
         except IndexError:
-            logging.debug("Trying to delete a QSO, but there are no QSOs in the log!")
+            logger.debug("Trying to delete a QSO, but there are no QSOs in the log!")
             return
 
         d = PopupDialog(
@@ -1030,7 +1052,7 @@ class Logbook:
             try:
                 log.delete_qso(row_index, iter=child_iter)
             except (sqlite.Error, IndexError) as e:
-                logging.exception(e)
+                logger.exception(e)
                 d = PopupDialog(
                     parent=self.application.window,
                     message="Could not delete the QSO from the log.",
@@ -1071,12 +1093,10 @@ class Logbook:
             child_iter = self.filter[log_index].convert_iter_to_child_iter(filter_iter)
             row_index = log.get_value(child_iter, 0)
         except IndexError:
-            logging.debug("Could not find the selected row's index!")
+            logger.debug("Could not find the selected row's index!")
             return
 
-        rd = AddQSODialog(
-            application=self.application, log=self.logs[log_index], index=row_index
-        )
+        rd = AddQSODialog(application=self.application, log=self.logs[log_index], db=self.db, index=row_index)
         all_valid = False  # Are all the field entries valid?
 
         adif = ADIF()
@@ -1091,7 +1111,7 @@ class Logbook:
                 field_names = AVAILABLE_FIELD_NAMES_ORDERED
                 for i in range(0, len(field_names)):
                     # Validate user input.
-                    fields_and_data[field_names[i]] = rd.get_data(field_names[i])
+                    fields_and_data[field_names[i]] = rd.get_form_field_text(field_names[i])
                     if not (
                         adif.is_valid(
                             field_names[i],
@@ -1116,7 +1136,7 @@ class Logbook:
                         # Iterate over all fields and check whether the data has actually changed. Database updates can be expensive.
                         for i in range(0, len(field_names)):
                             if (
-                                qso[field_names[i].lower()]
+                                qso[field_names[i]]
                                 != fields_and_data[field_names[i]]
                             ):
                                 # Update the QSO in the database and then in the ListStore.
@@ -1129,7 +1149,7 @@ class Logbook:
                                     column_index=i + 1,
                                 )
                     except (sqlite.Error, IndexError) as e:
-                        logging.exception(e)
+                        logger.exception(e)
                         d = PopupDialog(
                             parent=rd.dialog,
                             message="Could not edit QSO %d." % row_index,
@@ -1145,7 +1165,7 @@ class Logbook:
     def remove_duplicates_callback(self, widget=None):
         """A callback function used to remove duplicate QSOs in a log.
         Detecting duplicate QSOs is done based on the CALL, QSO_DATE, and TIME_ON fields."""
-        logging.debug("Removing duplicate QSOs...")
+        logger.debug("Removing duplicate QSOs...")
 
         # Get the log index.
         try:
@@ -1200,7 +1220,7 @@ class Logbook:
             )
             d.info()
         except sqlite.Error as e:
-            logging.exception(e)
+            logger.exception(e)
             d = PopupDialog(
                 parent=self.application.window,
                 message="Could not get the QSO count for '%s' because of a database error."
@@ -1220,7 +1240,7 @@ class Logbook:
                 raise ValueError("Could not determine the log and/or QSO index.")
             r = self.logs[log_index].get_qso_by_index(row_index)
         except ValueError as e:
-            logging.error(e)
+            logger.error(e)
             return
 
         d = {}
@@ -1246,7 +1266,7 @@ class Logbook:
                 raise ValueError("Could not determine the log index.")
             log_object = self.logs[log_index]
         except ValueError as e:
-            logging.error(e)
+            logger.error(e)
             return
 
         self.application.clipboard.request_text(
@@ -1301,7 +1321,7 @@ class Logbook:
             )  # Get the index of the selected tab in the logbook.
             if page_index == 0 or page_index == self.notebook.get_n_pages() - 1:
                 # We either have the Summary page, or the "+" (add log) blank/dummy page.
-                logging.debug("No log currently selected!")
+                logger.debug("No log currently selected!")
                 return None
             name = self.notebook.get_nth_page(page_index).get_name()
         # If a page of the logbook (and therefore a Log object) gets deleted,
@@ -1329,7 +1349,7 @@ class Logbook:
                     "The log index could not be determined. Perhaps the Summary page is selected?"
                 )
         except ValueError as e:
-            logging.error(e)
+            logger.error(e)
             return None
         log = self.logs[log_index]
 
@@ -1342,7 +1362,7 @@ class Logbook:
             child_iter = self.filter[log_index].convert_iter_to_child_iter(filter_iter)
             row_index = log.get_value(child_iter, 0)
         except IndexError:
-            logging.error("Could not find the selected row's index!")
+            logger.error("Could not find the selected row's index!")
             return None
 
         return row_index
@@ -1359,9 +1379,6 @@ class Logbook:
         for table in self.db.tables:
             if table.startswith("sqlite_"):
                 continue
-
-            print(table)
-            print(type(table))
 
             log_object = Log(self.db, table)
             log_object.populate()

@@ -17,10 +17,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 import sqlite3 as sqlite
 
 from gi.repository import Gtk
+from loguru import logger
 
 from pyqso.adif import AVAILABLE_FIELD_NAMES_ORDERED
 
@@ -50,7 +50,7 @@ class Log(Gtk.ListStore):
     def populate(self):
         """Remove everything in the Gtk.ListStore that is rendered already (via the TreeView), and start afresh."""
 
-        logging.debug("Populating '%s'..." % self.name)
+        logger.debug("Populating '%s'..." % self.name)
         self.clear()
 
         try:
@@ -58,13 +58,13 @@ class Log(Gtk.ListStore):
 
             for r in qsos:
                 self.append(r.values())
-            logging.debug("Finished populating '%s'." % self.name)
+            logger.debug("Finished populating '%s'." % self.name)
 
         except sqlite.Error as e:
-            logging.error(
+            logger.error(
                 "Could not populate '%s' because of a database error." % self.name
             )
-            logging.exception(e)
+            logger.exception(e)
 
         return
 
@@ -74,11 +74,11 @@ class Log(Gtk.ListStore):
         :arg fields_and_data: A list of dictionaries (or possibly just a single dictionary), with each dictionary representing a single QSO, to be added to the log.
         """
 
-        logging.debug("Adding QSO(s) to log...")
+        logger.debug("Adding QSO(s) to log...")
 
+        logger.debug(f"Fields and data received by Log.add_qso() to be added to the database: {fields_and_data}")
 
-        # TODO: for now we have to .lower() each item bc legacy
-        self.db[self.name].insert({k.lower(): v for k, v in fields_and_data.items() if v})
+        #self.db[self.name].insert({k.lower(): v for k, v in fields_and_data.items() if v})
         index = self.db[self.name].insert(fields_and_data)
 
         # Add the QSOs to the ListStore as well.
@@ -92,11 +92,12 @@ class Log(Gtk.ListStore):
             # Note: r may contain column names that are not in AVAILABLE_FIELD_NAMES_ORDERED,
             # so we need to loop over and only select those that are, since the ListStore will
             # expect a specific number of columns.
-            liststore_entry.append(fields_and_data[field_name.upper()])
+            liststore_entry.append(fields_and_data[field_name])
 
+        logger.debug(f"Asking Gtk to append '{liststore_entry}'")
         self.append(liststore_entry)
 
-        logging.debug("Successfully added the QSO(s) to the log.")
+        logger.debug("Successfully added the QSO(s) to the log.")
         return
 
     def delete_qso(self, index, iter=None):
@@ -106,7 +107,7 @@ class Log(Gtk.ListStore):
         :arg iter: The iterator pointing to the QSO to be deleted in the Gtk.ListStore. If the default value of None is used, only the database entry is deleted and the corresponding Gtk.ListStore is left alone.
         :raises sqlite.Error, IndexError: If the QSO could not be deleted.
         """
-        logging.debug("Deleting QSO from log...")
+        logger.debug("Deleting QSO from log...")
 
         # Delete the selected row in database.
         self.db[self.name].delete(id=index)
@@ -115,7 +116,7 @@ class Log(Gtk.ListStore):
         if iter is not None:
             self.remove(iter)
 
-        logging.debug("Successfully deleted the QSO from the log.")
+        logger.debug("Successfully deleted the QSO from the log.")
         return
 
     def edit_qso(self, index, field_name, data, iter=None, column_index=None):
@@ -128,16 +129,15 @@ class Log(Gtk.ListStore):
         :arg column_index: The index of the column in the Gtk.ListStore to be edited. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
         :raises sqlite.Error, IndexError: If the QSO could not be edited.
         """
-        logging.debug("Editing field '%s' in QSO %d..." % (field_name, index))
+        logger.debug("Editing field '%s' in QSO %d..." % (field_name, index))
 
         qso = self.db[self.name].find(id=index)
-        print(qso)
 
         #self.db[self.name].update(dict(id=index, field_name))
 
         if iter is not None and column_index is not None:
             self.set(iter, column_index, data)  # ...and then the ListStore.
-        logging.debug(
+        logger.debug(
             "Successfully edited field '%s' in QSO %d in the log." % (field_name, index)
         )
         return
@@ -183,7 +183,7 @@ class Log(Gtk.ListStore):
             self.name = new_name
             success = True
         except sqlite.Error as e:
-            logging.exception(e)
+            logger.exception(e)
             success = False
         return success
 

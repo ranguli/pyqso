@@ -17,7 +17,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with PyQSO.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
 
 from gi.repository import Gdk, Gtk
 
@@ -29,24 +28,28 @@ from pyqso import util
 from datetime import datetime
 from os.path import expanduser
 
+from dataclasses import dataclass
+
+
+from loguru import logger
+
 try:
     import Hamlib
 
     have_hamlib = True
 except ImportError:
-    logging.warning("Could not import the Hamlib module!")
+    logger.warning("Could not import the Hamlib module!")
     have_hamlib = False
 
 from pyqso import adif, callsign_lookup
 from pyqso.calendar_dialog import CalendarDialog
 from pyqso.ui.popup_dialog import PopupDialog
 
-
 class AddQSODialog:
 
     """A dialog through which users can enter information about a QSO."""
 
-    def __init__(self, application, log, index=None):
+    def __init__(self, application, log, db, index=None):
         """Set up the layout of the QSO dialog, populate the various fields with the QSO details (if the already exists), and show the dialog to the user.
 
         :arg application: The PyQSO application containing the main Gtk window, etc.
@@ -54,7 +57,7 @@ class AddQSODialog:
         :arg int index: If specified, then the dialog turns into 'edit QSO mode' and fills the data sources (e.g. the Gtk.Entry boxes) with the existing data in the log. If not specified (i.e. index is None), then the dialog starts off with nothing in the data sources.
         """
 
-        logging.debug("Setting up the QSO dialog...")
+        logger.debug("Setting up the QSO dialog...")
 
         self.application = application
         self.builder = self.application.builder
@@ -64,6 +67,8 @@ class AddQSODialog:
         self.builder.get_object("qso_dialog").connect(
             "key-press-event", self.on_key_press
         )
+
+        self.db_table = db[log.name]
 
         # Set dialog title
         if index is not None:
@@ -76,30 +81,30 @@ class AddQSODialog:
         have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
 
         # Create label:entry pairs and store them in a dictionary
-        self.sources = {}
+        self.form_data = {}
 
         # QSO INFORMATION
 
         # CALL
-        self.sources["CALL"] = self.builder.get_object("qso_call_entry")
+        self.form_data["call"] = self.builder.get_object("qso_call_entry")
         self.builder.get_object("callsign_lookup").connect(
             "clicked", self.callsign_lookup_callback
         )
 
         # DATE
-        self.sources["QSO_DATE"] = self.builder.get_object("qso_date_entry")
+        self.form_data["QSO_DATE"] = self.builder.get_object("qso_date_entry")
         self.builder.get_object("select_date").connect(
             "clicked", self.calendar_callback
         )
 
         # TIME
-        self.sources["TIME_ON"] = self.builder.get_object("qso_time_entry")
+        self.form_data["TIME_ON"] = self.builder.get_object("qso_time_entry")
         self.builder.get_object("current_datetime").connect(
             "clicked", self.set_current_datetime_callback
         )
 
-        # FREQ
-        self.sources["FREQ"] = self.builder.get_object("qso_frequency_entry")
+        # freq
+        self.form_data["freq"] = self.builder.get_object("qso_frequency_entry")
         (section, option) = ("qsos", "default_frequency_unit")
         if have_config and config.has_option(section, option):
             self.frequency_unit = config.get(section, option)
@@ -109,131 +114,89 @@ class AddQSODialog:
         else:
             self.frequency_unit = "MHz"
 
-        # BAND
-        self.sources["BAND"] = self.builder.get_object("qso_band_combo")
+        # band
+        band_field = self.builder.get_object("band_combo")
         for band in adif.BANDS:
-            self.sources["BAND"].append_text(band)
-        self.sources["BAND"].set_active(0)  # Set an empty string as the default option.
+            band_field.append_text(band)
+        band_field.set_active(0)  # Set an empty string as the default option.
 
-        # MODE
-        self.sources["MODE"] = self.builder.get_object("qso_mode_combo")
+        # mode
+        mode_field = self.builder.get_object("mode_combo")
         for mode in sorted(adif.MODES.keys()):
-            self.sources["MODE"].append_text(mode)
-        self.sources["MODE"].set_active(0)  # Set an empty string as the default option.
-        self.sources["MODE"].connect("changed", self.on_mode_changed)
+            mode_field.append_text(mode.lower())
+
+        mode_field.set_active(0)
+        mode_field.connect("changed", self.on_mode_changed)
 
         # SUBMODE
-        self.sources["SUBMODE"] = self.builder.get_object("qso_submode_combo")
-        self.sources["SUBMODE"].append_text("")
-        self.sources["SUBMODE"].set_active(
-            0
-        )  # Set an empty string initially. As soon as the user selects a particular MODE, the available SUBMODES will appear.
+        submode_field = self.builder.get_object("mode_combo")
+        submode_field.append_text("")
+        submode_field.set_active(0)  # Set an empty string as the default option.
 
         # PROP_MODE
-        self.sources["PROP_MODE"] = self.builder.get_object(
-            "qso_propagation_mode_combo"
-        )
+        prop_mode_field = self.builder.get_object("prop_mode_combo")
         for propagation_mode in adif.PROPAGATION_MODES:
-            self.sources["PROP_MODE"].append_text(propagation_mode)
-        self.sources["PROP_MODE"].set_active(
-            0
-        )  # Set an empty string as the default option.
+            prop_mode_field.append_text(propagation_mode)
+        prop_mode_field.set_active(0)
 
         # POWER
-        self.sources["TX_PWR"] = self.builder.get_object("qso_power_entry")
+        #self.form_data["tx_pwr"] = self.builder.get_object("qso_power_entry")
 
         # RST_SENT
-        self.sources["RST_SENT"] = self.builder.get_object("qso_rst_sent_entry")
+        #self.form_data["RST_SENT"] = self.builder.get_object("qso_rst_sent_entry")
 
         # RST_RCVD
-        self.sources["RST_RCVD"] = self.builder.get_object("qso_rst_received_entry")
+        #self.form_data["RST_RCVD"] = self.builder.get_object("qso_rst_received_entry")
+
+
+        # TODO: the dropdown options for the QSL combo boxes should be defined # elswhere
 
         # QSL_SENT
-        self.sources["QSL_SENT"] = self.builder.get_object("qso_qsl_sent_combo")
+        qsl_sent_field = self.builder.get_object("qsl_sent_combo")
         qsl_sent_options = ["", "Y", "N", "R", "Q", "I"]
         for option in qsl_sent_options:
-            self.sources["QSL_SENT"].append_text(option)
-        self.sources["QSL_SENT"].set_active(
-            0
-        )  # Set an empty string as the default option.
+            qsl_sent_field.append_text(option)
+
+        qsl_sent_field.set_active(0)
+
+        # TODO: the dropdown options for the QSL combo boxes should be defined # elswhere
 
         # QSL_RCVD
-        self.sources["QSL_RCVD"] = self.builder.get_object("qso_qsl_received_combo")
+        qsl_rcvd_field = self.builder.get_object("qsl_rcvd_combo")
         qsl_rcvd_options = ["", "Y", "N", "R", "I", "V"]
         for option in qsl_rcvd_options:
-            self.sources["QSL_RCVD"].append_text(option)
-        self.sources["QSL_RCVD"].set_active(
-            0
-        )  # Set an empty string as the default option.
-
-        # NOTES
-        self.sources["NOTES"] = self.builder.get_object(
-            "qso_notes_textview"
-        ).get_buffer()
-
-        # STATION INFORMATION
-
-        # NAME
-        self.sources["NAME"] = self.builder.get_object("station_name_entry")
-
-        # ADDRESS
-        self.sources["ADDRESS"] = self.builder.get_object("station_address_entry")
-
-        # STATE
-        self.sources["STATE"] = self.builder.get_object("station_state_entry")
-
-        # COUNTRY
-        self.sources["COUNTRY"] = self.builder.get_object("station_country_entry")
-
-        # DXCC
-        self.sources["DXCC"] = self.builder.get_object("station_dxcc_entry")
-
-        # CQZ
-        self.sources["CQZ"] = self.builder.get_object("station_cq_entry")
-
-        # ITUZ
-        self.sources["ITUZ"] = self.builder.get_object("station_itu_entry")
-
-        # IOTA
-        self.sources["IOTA"] = self.builder.get_object("station_iota_entry")
-
-        # GRIDSQUARE
-        self.sources["GRIDSQUARE"] = self.builder.get_object("station_gridsquare_entry")
-
-        # SATELLITE INFORMATION
-
-        # SAT_NAME
-        self.sources["SAT_NAME"] = self.builder.get_object("satellite_name_entry")
-
-        # SAT_MODE
-        self.sources["SAT_MODE"] = self.builder.get_object("satellite_mode_entry")
+            qsl_rcvd_field.append_text(option)
+        qsl_rcvd_field.set_active(0)
 
         # Populate various fields, if possible.
         if index is not None:
             # If we're editing an existing QSO, display its current data in the input boxes.
             qso = log.get_qso_by_index(index)
 
+            logger.debug(f"qso.items() from QSODialog.add(): {qso.items()}")
+
             for field, data in qso.items():
+                field_entry = f"{field}_entry"
 
                 if not data:
                     continue
 
-                print(f"{field} - {data}")
                 if field == "id":
                     continue
-
                 elif field == "band":
-                    self.sources[field.upper()].set_active(adif.BANDS.index(data))
+                    # TODO: replace
+                    self.set_form_field(field_entry, adif.BANDS.index(data))
                 elif field == "mode":
-                    self.sources[field.upper()].set_active(sorted(adif.MODES.keys()).index(data))
+                    self.set_form_field(field_entry, sorted(adif.MODES.keys()).index(data))
                 elif field == "submode":
-                    self.sources[field.upper()].set_active(adif.MODES[data].index(data))
+                    submode = qso.get("submode")
+                    if submode:
+                        self.set_form_field(field_entry, adif.MODES[data].index(data))
                 else:
                     try:
-                        self.sources[field.upper()].set_active(adif.AVAILABLE_FIELD_NAMES_ORDERED.index(field.upper()))
+                        self.set_form_field(f"{field}_combo", self.db_table.columns.index(field))
                     except AttributeError:
-                        #self.sources[field.upper()].set_text(adif.AVAILABLE_FIELD_NAMES_ORDERED.index(data))
-                        self.sources[field.upper()].set_text(data)
+                        self.set_form_field(field_entry, data)
 
         else:
             # Automatically fill in the current date and time
@@ -246,7 +209,9 @@ class AddQSODialog:
                 mode = config.get(section, option)
             else:
                 mode = ""
-            self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
+
+            # TODO: replace with set_field()
+            self.builder.get_object("mode_combo").set_active(sorted(adif.MODES.keys()).index(mode))
 
             # Submode
             (section, option) = ("qsos", "default_submode")
@@ -254,7 +219,8 @@ class AddQSODialog:
                 submode = config.get(section, option)
             else:
                 submode = ""
-            self.sources["SUBMODE"].set_active(adif.MODES[mode].index(submode))
+
+            self.set_form_field("submode_combo", adif.MODES[mode].index(submode))
 
             # Power
             (section, option) = ("qsos", "default_power")
@@ -262,7 +228,8 @@ class AddQSODialog:
                 power = config.get(section, option)
             else:
                 power = ""
-            self.sources["TX_PWR"].set_text(power)
+
+            self.set_form_field("tx_pwr_entry", power)
 
             # If the Hamlib module is present, then use it to fill in various fields if desired.
             if have_hamlib:
@@ -279,89 +246,30 @@ class AddQSODialog:
                         self.hamlib_autofill(rig_model, rig_pathname)
 
         # Do we want PyQSO to autocomplete the Band field based on the Frequency field?
+
+        # TODO: refactor
         (section, option) = ("qsos", "autocomplete_band")
         if have_config and config.has_option(section, option):
             autocomplete_band = config.getboolean(section, option)
             if autocomplete_band:
-                self.sources["FREQ"].connect("changed", self.autocomplete_band)
+                self.builder.get_object("freq_entry").connect("changed", self.autocomplete_band)
         else:
             # If no configuration file exists, autocomplete the Band field by default.
-            self.sources["FREQ"].connect("changed", self.autocomplete_band)
+            self.builder.get_object("freq_entry").connect("changed", self.autocomplete_band)
 
         self.dialog.show_all()
 
-        logging.debug("Record dialog ready!")
+        logger.debug("Record dialog ready!")
 
         return
 
-    def get_all_data(self):
-        # Return the data from the QSO Dialog form, formatted in a usable way
-        data = self.sources
-
-        dropdown_fields = ["MODE", "SUBMODE", "PROP_MODE", "BAND", "QSL_SENT", "QSL_RCVD"]
-
-        for field in dropdown_fields:
-
-            data[field] = data[field].get_active_text()
-
-        other_fields = [key for key in data.keys() if key not in dropdown_fields]
-
-        for field in other_fields:
-            if field == "CALL":
-                data["CALL"] = data["CALL"].get_text().upper()
-            elif field == "NOTES":
-                (start, end) = data["NOTES"].get_bounds()
-                data["NOTES"] = data["NOTES"].get_text(start, end, True)
-            else:
-                data[field] = data[field].get_text()
-
-        return data
-
-    def get_data(self, field_name):
-        """Return the data for a specified field from the
-        Gtk.Entry/Gtk.ComboBoxText/etc boxes in the QSO dialog.
-
-        :arg str field_name: The name of the field containing the desired data.
-        :returns: The data in the specified field.
-        :rtype: str
-        """
-        logging.debug(
-            "Retrieving the data in field %s from the QSO dialog..." % field_name
-        )
-        if field_name == "CALL":
-            # Always show the callsigns in upper case.
-            return self.sources[field_name].get_text().upper()
-        elif field_name == "FREQ" and self.frequency_unit != "MHz":
-            converted = self.convert_frequency(
-                self.sources[field_name].get_text(),
-                from_unit=self.frequency_unit,
-                to_unit="MHz",
-            )
-            return str(converted)
-        elif field_name == "MODE":
-            return self.sources["MODE"].get_active_text()
-        elif field_name == "SUBMODE":
-            return self.sources["SUBMODE"].get_active_text()
-        elif field_name == "PROP_MODE":
-            return self.sources["PROP_MODE"].get_active_text()
-        elif (
-            field_name == "BAND" or field_name == "QSL_SENT" or field_name == "QSL_RCVD"
-        ):
-            return self.sources[field_name].get_active_text()
-        elif field_name == "NOTES":
-            (start, end) = self.sources[field_name].get_bounds()
-            text = self.sources[field_name].get_text(start, end, True)
-            return text
-        else:
-            return self.sources[field_name].get_text()
-
     def on_mode_changed(self, combo):
-        """If the MODE field has changed its value, then fill the SUBMODE field with all the available SUBMODE options for that new MODE."""
-        self.sources["SUBMODE"].get_model().clear()
+        """If the mode field has changed its value, then fill the submode field with all the available submode options for that new MODE."""
+        self.form_data["submode"].get_model().clear()
         mode = combo.get_active_text()
         for submode in adif.MODES[mode]:
-            self.sources["SUBMODE"].append_text(submode)
-        self.sources["SUBMODE"].set_active(
+            self.form_data["submode"].append_text(submode)
+        self.form_data["submode"].set_active(
             adif.MODES[mode].index("")
         )  # Set the submode to an empty string.
         return
@@ -383,13 +291,13 @@ class AddQSODialog:
     def autocomplete_band(self, widget=None):
         """If a value for the Frequency is entered, this function autocompletes the Band field."""
 
-        frequency = self.sources["FREQ"].get_text()
+        frequency = self.builder.get_object("freq_entry").get_text()
 
         # Check whether we actually have a (valid) value to use. If not, set the BAND field to an empty string ("").
         try:
             frequency = float(frequency)
         except ValueError:
-            self.sources["BAND"].set_active(0)
+            self.form_data["band"].set_active(0)
             return
 
         # Convert to MHz if necessary.
@@ -404,12 +312,12 @@ class AddQSODialog:
                 frequency >= adif.BANDS_RANGES[i][0]
                 and frequency <= adif.BANDS_RANGES[i][1]
             ):
-                self.sources["BAND"].set_active(i)
+                # TODO: replace with set_field()
+                self.builder.get_object("band_combo").set_active(i)
                 return
 
-        self.sources["BAND"].set_active(
-            0
-        )  # If we've reached this, then the frequency does not lie in any of the specified bands.
+        # TODO: replace with set_field()
+        self.builder.get_object("band_combo").set_active(0)
         return
 
     def hamlib_autofill(self, rig_model, rig_pathname):
@@ -429,7 +337,7 @@ class AddQSODialog:
             rig.open()
         # TODO: do not use bare 'except'
         except:
-            logging.error(
+            logger.error(
                 "Could not open a communication channel to the rig via Hamlib!"
             )
             return
@@ -444,10 +352,10 @@ class AddQSODialog:
                         frequency, from_unit="MHz", to_unit=self.frequency_unit
                     )
                 )
-            self.sources["FREQ"].set_text(frequency)
+            self.set_form_field("freq_entry", frequency)
         # TODO: do not use bare 'except'
         except:
-            logging.error("Could not obtain the current frequency via Hamlib!")
+            logger.error("Could not obtain the current frequency via Hamlib!")
 
         # Mode
         try:
@@ -457,13 +365,13 @@ class AddQSODialog:
             if mode == "USB" or mode == "LSB":
                 submode = mode
                 mode = "SSB"
-                self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
-                self.sources["SUBMODE"].set_active(adif.MODES[mode].index(submode))
+                self.form_data["mode"].set_active(sorted(adif.MODES.keys()).index(mode))
+                self.form_data["submode"].set_active(adif.MODES[mode].index(submode))
             else:
-                self.sources["MODE"].set_active(sorted(adif.MODES.keys()).index(mode))
+                self.form_data["mode"].set_active(sorted(adif.MODES.keys()).index(mode))
         # TODO: do not use bare 'except'
         except:
-            logging.error(
+            logger.error(
                 "Could not obtain the current mode (e.g. FM, AM, CW) via Hamlib!"
             )
 
@@ -472,7 +380,7 @@ class AddQSODialog:
             rig.close()
         # TODO: do not use bare 'except'
         except:
-            logging.error(
+            logger.error(
                 "Could not close the communication channel to the rig via Hamlib!"
             )
 
@@ -506,7 +414,7 @@ class AddQSODialog:
             else:
                 raise ValueError("Unknown callsign database: %s" % database)
         except ValueError as e:
-            logging.exception(e)
+            logger.exception(e)
             d = PopupDialog(parent=self.dialog, message=e)
             d.error()
             return
@@ -536,7 +444,7 @@ class AddQSODialog:
             return
 
         # Get the callsign from the CALL field.
-        full_callsign = self.sources["CALL"].get_text()
+        full_callsign = self.form_data["call"].get_text()
         if not full_callsign:
             # Empty callsign field.
             d = PopupDialog(
@@ -560,7 +468,7 @@ class AddQSODialog:
                 full_callsign, ignore_prefix_suffix=ignore_prefix_suffix
             )
             for field_name in list(fields_and_data.keys()):
-                self.sources[field_name].set_text(fields_and_data[field_name])
+                self.set_form_field(field_name, fields_and_data[field_name])
         return
 
     def calendar_callback(self, widget):
@@ -568,9 +476,80 @@ class AddQSODialog:
         c = CalendarDialog(self.application)
         response = c.dialog.run()
         if response == Gtk.ResponseType.OK:
-            self.sources["QSO_DATE"].set_text(c.date)
+            self.set_form_field("date", c.date)
         c.dialog.destroy()
         return
+
+    def get_form(self):
+        form_data = {}
+
+        for field in self.db_table.columns:
+            try:
+                form_data.update({field: self.get_form_field_text(field)})
+            except ValueError as e:
+                logger.exception(e)
+
+        logger.debug(f"Form data returned by QSODialog.get_form() is '{form_data}'")
+        return form_data
+
+    def get_form_field(self, form_field):
+        try:
+            value = self.builder.get_object(f"{form_field}_entry")
+            logger.debug(f"Form data returned by QSODialog.get_form_field({form_field}) is '{value}'")
+            return value
+        except AttributeError:
+            logger.exception(f"Form field '{form_field}' could not be found: '{e}'")
+
+    def get_form_field_text(self, form_field):
+        logger.debug(f"QSODialog.get_form_field_text() received parameter '{form_field}'")
+
+        try:
+            value = self.builder.get_object(f"{form_field}_entry").get_text()
+            logger.debug(f"QSODialog.get_form_field_text() returned '{value}'")
+            return value
+        except AttributeError:
+            pass
+
+        try:
+            value = self.builder.get_object(f"{form_field}_combo").get_active_text()
+            logger.debug(f"QSODialog.get_form_field_text() returned {value})")
+            return value
+        except AttributeError:
+            pass
+
+        try:
+            field = self.builder.get_object(f"{form_field}_textview").get_buffer()
+            (start, end) = field.get_bounds()
+            value = field.get_text(start, end, True)
+            logger.debug(f"QSODialog.get_form_field_text() returned {value})")
+            return value
+        except AttributeError:
+            pass
+
+        raise KeyError(f"Form field '{form_field}' could not be found.")
+
+    def set_form_field(self, form_field_name, value):
+        logger.debug(f"Trying to find form field {form_field_name}")
+        form_field_object = self.get_form_field(form_field_name)
+        logger.debug(f"Got {form_field_object}")
+
+        try:
+            return form_field_object.set_text(value)
+        except AttributeError:
+            pass
+
+        try:
+            return form_field_object.set_activetext(value)
+        except AttributeError:
+            pass
+
+        try:
+            field = form_field_object.set_buffer(value)
+            (start, end) = field.get_bounds()
+            return field.get_text(start, end, True)
+        except AttributeError:
+            pass
+
 
     def set_current_datetime_callback(self, widget=None):
         """Insert the current date and time."""
@@ -592,8 +571,8 @@ class AddQSODialog:
                 datetime.utcnow()
             )  # Use UTC by default, since this is expected by ADIF.
 
-        self.sources["QSO_DATE"].set_text(dt.strftime("%Y%m%d"))
-        self.sources["TIME_ON"].set_text(dt.strftime("%H%M"))
+        self.set_form_field("date_entry", dt.strftime("%Y%m%d"))
+        self.set_form_field("time_entry", dt.strftime("%H%M"))
 
         return
 
@@ -614,7 +593,7 @@ class AddQSODialog:
             if to_unit not in scaling.keys():
                 raise ValueError("Unknown frequency unit '%s' in to_unit" % to_unit)
         except ValueError as e:
-            logging.exception(e)
+            logger.exception(e)
             return frequency
         # Cast to float before scaling.
         if not isinstance(frequency, float):
@@ -624,7 +603,7 @@ class AddQSODialog:
                 else:
                     frequency = float(frequency)
             except (ValueError, TypeError):
-                logging.exception(
+                logger.exception(
                     "Could not convert frequency to a floating-point value."
                 )
                 return frequency

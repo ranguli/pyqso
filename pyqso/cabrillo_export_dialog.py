@@ -68,11 +68,7 @@ class CabrilloExportDialog:
     def __populate_form_fields(self, population_data):
         for k, v in population_data.items():
             gtk_object_path = f"{self.glade_prefix}_{k}_combo"
-            gtk_object = self.builder.get_object(gtk_object_path)
-            print(gtk_object_path)
-            print(gtk_object)
-            field = self.builder.get_object(f"{self.glade_prefix}_{k}_combo")
-            print(field)
+            field = self.builder.get_object(gtk_object_path)
             for dropdown_option in v:
                 field.append_text(dropdown_option)
 

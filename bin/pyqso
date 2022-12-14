@@ -30,14 +30,14 @@ import configparser
 import os
 import os.path
 
-import logging
 import signal
 import sys
 
 import pkg_resources
 
-logging.basicConfig(level=logging.INFO)
-logging.info("PyQSO version 1.1.0")
+from loguru import logger
+
+logger.add(sys.stderr, format="{time} {level} {message}", level="DEBUG")
 
 # This will help Python find the PyQSO modules that need to be imported below.
 pyqso_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), os.pardir)
@@ -76,10 +76,10 @@ class PyQSO:
             try:
                 os.makedirs(config_directory)
             except Exception as e:
-                logging.error(
+                logger.error(
                     "An error occurred whilst creating a directory for PyQSO configuration files. Try creating the directory '~/.config/pyqso' manually."
                 )
-                logging.exception(e)
+                logger.exception(e)
 
         # Get any application-specific preferences from the configuration file.
         config = configparser.ConfigParser()
@@ -111,7 +111,7 @@ class PyQSO:
         self.window.show_all()
 
         if logbook_path:
-            logging.info("Opening logbook: %s" % logbook_path)
+            logger.info("Opening logbook: %s" % logbook_path)
             self.logbook.open(path=logbook_path)
         else:
             # If no logbook path is specified at the command line,
@@ -123,7 +123,7 @@ class PyQSO:
                 if open_default_logbook and config.has_option(section, option):
                     logbook_path = config.get(section, option)
                     if logbook_path is not None and logbook_path != "":
-                        logging.info("Opening the default logbook: %s" % logbook_path)
+                        logger.info("Opening the default logbook: %s" % logbook_path)
                         self.logbook.open(path=logbook_path)
 
         return
@@ -169,19 +169,6 @@ if __name__ == "__main__":
         help="Path to a Logbook file. If this file does not already exist, then it will be created.",
     )
     args = parser.parse_args()
-
-    # Output debugging messages to a file.
-    if args.debug:
-        # Get the root logger.
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-        # Add a file handler.
-        handler = logging.FileHandler("pyqso.debug", mode="w")
-        formatter = logging.Formatter(
-            fmt="%(asctime)s %(levelname)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
 
     # Enforce an absolute logbook file path.
     if args.logbook:

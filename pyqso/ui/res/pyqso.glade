@@ -3023,7 +3023,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_call_entry">
+                              <object class="GtkEntry" id="call_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3086,7 +3086,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_date_entry">
+                              <object class="GtkEntry" id="date_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3149,7 +3149,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_time_entry">
+                              <object class="GtkEntry" id="time_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3212,7 +3212,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_frequency_entry">
+                              <object class="GtkEntry" id="freq_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3252,7 +3252,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_band_combo">
+                              <object class="GtkComboBoxText" id="band_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3291,7 +3291,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_mode_combo">
+                              <object class="GtkComboBoxText" id="mode_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3330,7 +3330,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_submode_combo">
+                              <object class="GtkComboBoxText" id="submode_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3369,7 +3369,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_propagation_mode_combo">
+                              <object class="GtkComboBoxText" id="prop_mode_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3408,7 +3408,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_power_entry">
+                              <object class="GtkEntry" id="tx_pwr_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3462,7 +3462,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_rst_sent_entry">
+                              <object class="GtkEntry" id="rst_sent_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3502,7 +3502,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="qso_rst_received_entry">
+                              <object class="GtkEntry" id="rst_rcvd_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3542,7 +3542,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_qsl_sent_combo">
+                              <object class="GtkComboBoxText" id="qsl_sent_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3581,7 +3581,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkComboBoxText" id="qso_qsl_received_combo">
+                              <object class="GtkComboBoxText" id="qsl_rcvd_combo">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                               </object>
@@ -3625,7 +3625,7 @@ Base64-encoded plain text in the configuration file.</property>
                                 <property name="can-focus">True</property>
                                 <property name="shadow-type">etched-in</property>
                                 <child>
-                                  <object class="GtkTextView" id="qso_notes_textview">
+                                  <object class="GtkTextView" id="notes_textview">
                                     <property name="visible">True</property>
                                     <property name="can-focus">True</property>
                                     <property name="wrap-mode">word-char</property>
@@ -3696,11 +3696,11 @@ Base64-encoded plain text in the configuration file.</property>
                         <property name="orientation">vertical</property>
                         <property name="spacing">2</property>
                         <child>
-                          <object class="GtkBox" id="station_name_hbox">
+                          <object class="GtkBox" id="name_hbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
-                              <object class="GtkLabel" id="station_name_label">
+                              <object class="GtkLabel" id="name_label">
                                 <property name="visible">True</property>
                                 <property name="can-focus">False</property>
                                 <property name="label" translatable="yes">Name</property>
@@ -3715,7 +3715,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_name_entry">
+                              <object class="GtkEntry" id="name_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3755,7 +3755,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_address_entry">
+                              <object class="GtkEntry" id="address_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3795,7 +3795,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_state_entry">
+                              <object class="GtkEntry" id="state_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3816,7 +3816,7 @@ Base64-encoded plain text in the configuration file.</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="station_country_hbox">
+                          <object class="GtkBox" id="country_hbox">
                             <property name="visible">True</property>
                             <property name="can-focus">False</property>
                             <child>
@@ -3835,7 +3835,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_country_entry">
+                              <object class="GtkEntry" id="country_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3889,7 +3889,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_dxcc_entry">
+                              <object class="GtkEntry" id="dxcc_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3929,7 +3929,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_cq_entry">
+                              <object class="GtkEntry" id="cqz_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -3969,7 +3969,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_itu_entry">
+                              <object class="GtkEntry" id="ituz_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -4009,7 +4009,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_iota_entry">
+                              <object class="GtkEntry" id="iota_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -4049,7 +4049,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="station_gridsquare_entry">
+                              <object class="GtkEntry" id="gridsquare_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -4136,7 +4136,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="satellite_name_entry">
+                              <object class="GtkEntry" id="sat_name_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
@@ -4190,7 +4190,7 @@ Base64-encoded plain text in the configuration file.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="satellite_mode_entry">
+                              <object class="GtkEntry" id="sat_mode_entry">
                                 <property name="visible">True</property>
                                 <property name="can-focus">True</property>
                                 <property name="width-chars">15</property>
