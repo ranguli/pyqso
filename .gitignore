@@ -9,6 +9,7 @@ __pycache__/
 *$py.class
 
 *.glade~
+*.glade#
 
 # C extensions
 *.so

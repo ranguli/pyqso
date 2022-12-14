@@ -28,10 +28,12 @@ from pyqso.data import Data
 from gi.repository import Gtk
 import configparser
 
-from pyqso.adif import (ADIF, AVAILABLE_FIELD_NAMES_ORDERED, AVAILABLE_FIELD_NAMES_TYPES)
+from pyqso.adif import (ADIF,
+                        AVAILABLE_FIELD_NAMES_ORDERED,
+                        AVAILABLE_FIELD_NAMES_TYPES)
 from pyqso.blank import Blank
 from pyqso.cabrillo import CabrilloWrapper
-from pyqso.cabrillo_export_dialog import CabrilloExportDialog
+from pyqso.ui.cabrillo_export_dialog import CabrilloExportDialog
 from pyqso.compare import compare_date_and_time, compare_default
 from pyqso.log import Log
 from pyqso.log_name_dialog import LogNameDialog
@@ -490,18 +492,20 @@ class Logbook:
         log_index = self.get_log_index()
         column = self.treeview[log_index].get_column(column_index)
 
-        if AVAILABLE_FIELD_NAMES_ORDERED[column_index - 1] == "QSO_DATE":
+        table = self.logs[log_index].name
+
+        if self.db[table].columns[column_index] == "date":
             # If the field being sorted is the QSO_DATE, then also sort by the TIME_ON field so we get the
             # correct chronological order.
             # Note: This assumes that the TIME_ON field is always immediately to the right of the QSO_DATE field.
             self.sorter[log_index].set_sort_func(
                 column_index,
                 compare_date_and_time,
-                user_data=[column_index, column_index + 1],
+                user_data=[column_index, column_index],
             )
         else:
             self.sorter[log_index].set_sort_func(
-                column_index, compare_default, user_data=column_index
+                column_index, compare_default, user_data=column
             )
 
         # If we are operating on the currently-sorted column...
@@ -1099,7 +1103,6 @@ class Logbook:
         rd = AddQSODialog(application=self.application, log=self.logs[log_index], db=self.db, index=row_index)
         all_valid = False  # Are all the field entries valid?
 
-        adif = ADIF()
         while not all_valid:
             # This while loop gives the user infinite attempts at giving valid data.
             # The add/edit QSO window will stay open until the user gives valid data,
@@ -1107,17 +1110,13 @@ class Logbook:
             all_valid = True
             response = rd.dialog.run()
             if response == Gtk.ResponseType.OK:
-                fields_and_data = {}
-                field_names = AVAILABLE_FIELD_NAMES_ORDERED
-                for i in range(0, len(field_names)):
+
+                # TODO: refactor indent hadouken
+                for k,v in rd.get_form().items():
                     # Validate user input.
-                    fields_and_data[field_names[i]] = rd.get_form_field_text(field_names[i])
                     if not (
-                        adif.is_valid(
-                            field_names[i],
-                            fields_and_data[field_names[i]],
-                            AVAILABLE_FIELD_NAMES_TYPES[field_names[i]],
-                        )
+                        True
+                        # TODO: validation here
                     ):
                         # Data is not valid - inform the user.
                         d = PopupDialog(
@@ -1128,26 +1127,12 @@ class Logbook:
                         d.error()
                         all_valid = False
                         break  # Don't check the other fields until the user has fixed the current field's data.
-
                 if all_valid:
                     try:
-                        # Get the QSO in its current state from the database.
-                        qso = log.get_qso_by_index(row_index)
-                        # Iterate over all fields and check whether the data has actually changed. Database updates can be expensive.
-                        for i in range(0, len(field_names)):
-                            if (
-                                qso[field_names[i]]
-                                != fields_and_data[field_names[i]]
-                            ):
-                                # Update the QSO in the database and then in the ListStore.
-                                # We add 1 onto the column_index here because we don't want to consider the index column.
-                                log.edit_qso(
-                                    row_index,
-                                    field_names[i],
-                                    fields_and_data[field_names[i]],
-                                    iter=child_iter,
-                                    column_index=i + 1,
-                                )
+                        # Filter out empty keys, otherwise we will update those
+                        # fields to be empty.
+                        form_data = {k: v for k, v in rd.get_form().items() if v}
+                        log.edit_qso(row_index, form_data, iter=child_iter)
                     except (sqlite.Error, IndexError) as e:
                         logger.exception(e)
                         d = PopupDialog(

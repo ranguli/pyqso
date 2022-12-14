@@ -20,16 +20,10 @@
 
 from gi.repository import Gdk, Gtk
 
-import configparser
-
 import base64
 from pyqso import util
 
 from datetime import datetime
-from os.path import expanduser
-
-from dataclasses import dataclass
-
 
 from loguru import logger
 
@@ -44,8 +38,9 @@ except ImportError:
 from pyqso import adif, callsign_lookup
 from pyqso.calendar_dialog import CalendarDialog
 from pyqso.ui.popup_dialog import PopupDialog
+from pyqso.ui.form_dialog import FormDialog
 
-class AddQSODialog:
+class AddQSODialog(FormDialog):
 
     """A dialog through which users can enter information about a QSO."""
 
@@ -57,10 +52,10 @@ class AddQSODialog:
         :arg int index: If specified, then the dialog turns into 'edit QSO mode' and fills the data sources (e.g. the Gtk.Entry boxes) with the existing data in the log. If not specified (i.e. index is None), then the dialog starts off with nothing in the data sources.
         """
 
+        super().__init__(application, log, db, index)
+
         logger.debug("Setting up the QSO dialog...")
 
-        self.application = application
-        self.builder = self.application.builder
         glade_file_path = str(util.get_glade_path())
         self.builder.add_objects_from_file(glade_file_path, ("qso_dialog",))
         self.dialog = self.builder.get_object("qso_dialog")
@@ -68,17 +63,11 @@ class AddQSODialog:
             "key-press-event", self.on_key_press
         )
 
-        self.db_table = db[log.name]
-
         # Set dialog title
         if index is not None:
             self.dialog.set_title("Edit Record %d" % index)
         else:
             self.dialog.set_title("Add Record")
-
-        # Check if a configuration file is present, since we might need it to set up the rest of the dialog.
-        config = configparser.ConfigParser()
-        have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
 
         # Create label:entry pairs and store them in a dictionary
         self.form_data = {}
@@ -106,8 +95,8 @@ class AddQSODialog:
         # freq
         self.form_data["freq"] = self.builder.get_object("qso_frequency_entry")
         (section, option) = ("qsos", "default_frequency_unit")
-        if have_config and config.has_option(section, option):
-            self.frequency_unit = config.get(section, option)
+        if self.have_config and self.config.has_option(section, option):
+            self.frequency_unit = self.config.get(section, option)
             self.builder.get_object("qso_frequency_label").set_label(
                 "Frequency (%s)" % self.frequency_unit
             )
@@ -205,8 +194,8 @@ class AddQSODialog:
             # Set up default field values
             # Mode
             (section, option) = ("qsos", "default_mode")
-            if have_config and config.has_option(section, option):
-                mode = config.get(section, option)
+            if self.have_config and self.config.has_option(section, option):
+                mode = self.config.get(section, option)
             else:
                 mode = ""
 
@@ -215,8 +204,8 @@ class AddQSODialog:
 
             # Submode
             (section, option) = ("qsos", "default_submode")
-            if have_config and config.has_option(section, option):
-                submode = config.get(section, option)
+            if self.have_config and self.config.has_option(section, option):
+                submode = self.config.get(section, option)
             else:
                 submode = ""
 
@@ -224,8 +213,8 @@ class AddQSODialog:
 
             # Power
             (section, option) = ("qsos", "default_power")
-            if have_config and config.has_option(section, option):
-                power = config.get(section, option)
+            if self.have_config and self.config.has_option(section, option):
+                power = self.config.get(section, option)
             else:
                 power = ""
 
@@ -234,14 +223,14 @@ class AddQSODialog:
             # If the Hamlib module is present, then use it to fill in various fields if desired.
             if have_hamlib:
                 if (
-                    have_config
-                    and config.has_option("hamlib", "autofill")
-                    and config.has_option("hamlib", "rig_model")
-                    and config.has_option("hamlib", "rig_pathname")
+                    self.have_config
+                    and self.config.has_option("hamlib", "autofill")
+                    and self.config.has_option("hamlib", "rig_model")
+                    and self.config.has_option("hamlib", "rig_pathname")
                 ):
-                    autofill = config.getboolean("hamlib", "autofill")
-                    rig_model = config.get("hamlib", "rig_model")
-                    rig_pathname = config.get("hamlib", "rig_pathname")
+                    autofill = self.config.getboolean("hamlib", "autofill")
+                    rig_model = self.config.get("hamlib", "rig_model")
+                    rig_pathname = self.config.get("hamlib", "rig_pathname")
                     if autofill:
                         self.hamlib_autofill(rig_model, rig_pathname)
 
@@ -249,8 +238,8 @@ class AddQSODialog:
 
         # TODO: refactor
         (section, option) = ("qsos", "autocomplete_band")
-        if have_config and config.has_option(section, option):
-            autocomplete_band = config.getboolean(section, option)
+        if self.have_config and self.config.has_option(section, option):
+            autocomplete_band = self.config.getboolean(section, option)
             if autocomplete_band:
                 self.builder.get_object("freq_entry").connect("changed", self.autocomplete_band)
         else:
@@ -389,12 +378,9 @@ class AddQSODialog:
     def callsign_lookup_callback(self, widget=None):
         """Get the callsign-related data from an online database and store it in the relevant Gtk.Entry boxes, but return None."""
 
-        # Get the database name.
-        config = configparser.ConfigParser()
-        have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
         try:
-            if have_config and config.has_option("qsos", "callsign_database"):
-                database = config.get("qsos", "callsign_database")
+            if self.have_config and self.config.has_option("qsos", "callsign_database"):
+                database = self.config.get("qsos", "callsign_database")
                 if database == "":
                     raise ValueError
             else:
@@ -421,13 +407,13 @@ class AddQSODialog:
 
         # Get username and password from configuration file.
         if (
-            have_config
-            and config.has_option("qsos", "callsign_database_username")
-            and config.has_option("qsos", "callsign_database_password")
+            self.have_config
+            and self.config.has_option("qsos", "callsign_database_username")
+            and self.config.has_option("qsos", "callsign_database_password")
         ):
-            username = config.get("qsos", "callsign_database_username")
+            username = self.config.get("qsos", "callsign_database_username")
             password = base64.b64decode(
-                config.get("qsos", "callsign_database_password")
+                self.config.get("qsos", "callsign_database_password")
             ).decode("utf-8")
             if not username or not password:
                 details_given = False
@@ -458,8 +444,8 @@ class AddQSODialog:
         if connected:
             # Check whether we want to ignore any prefixes (e.g. "IA/") or suffixes "(e.g. "/M") in the callsign
             # before performing the lookup.
-            if have_config and config.has_option("qsos", "ignore_prefix_suffix"):
-                ignore_prefix_suffix = config.getboolean("qsos", "ignore_prefix_suffix")
+            if self.have_config and self.config.has_option("qsos", "ignore_prefix_suffix"):
+                ignore_prefix_suffix = self.config.getboolean("qsos", "ignore_prefix_suffix")
             else:
                 ignore_prefix_suffix = True
 
@@ -497,11 +483,15 @@ class AddQSODialog:
             value = self.builder.get_object(f"{form_field}_entry")
             logger.debug(f"Form data returned by QSODialog.get_form_field({form_field}) is '{value}'")
             return value
-        except AttributeError:
+        except AttributeError as e:
             logger.exception(f"Form field '{form_field}' could not be found: '{e}'")
 
     def get_form_field_text(self, form_field):
         logger.debug(f"QSODialog.get_form_field_text() received parameter '{form_field}'")
+
+        # Ignore any requests for an 'id' field, it isn't part of the form.
+        if form_field == "id":
+            return
 
         try:
             value = self.builder.get_object(f"{form_field}_entry").get_text()
@@ -554,14 +544,10 @@ class AddQSODialog:
     def set_current_datetime_callback(self, widget=None):
         """Insert the current date and time."""
 
-        # Check if a configuration file is present.
-        config = configparser.ConfigParser()
-        have_config = config.read(expanduser("~/.config/pyqso/preferences.ini")) != []
-
         # Do we want to use UTC or the computer's local time?
         (section, option) = ("qsos", "use_utc")
-        if have_config and config.has_option(section, option):
-            use_utc = config.getboolean(section, option)
+        if self.have_config and self.config.has_option(section, option):
+            use_utc = self.config.getboolean(section, option)
             if use_utc:
                 dt = datetime.utcnow()
             else:

@@ -119,27 +119,34 @@ class Log(Gtk.ListStore):
         logger.debug("Successfully deleted the QSO from the log.")
         return
 
-    def edit_qso(self, index, field_name, data, iter=None, column_index=None):
+    def edit_qso(self, index, data, iter=None):
         """Edit a specified QSO by replacing the current data in a specified field with the data provided.
 
         :arg int index: The index of the QSO in the SQL database.
-        :arg str field_name: The name of the field whose data should be modified.
         :arg str data: The data that should replace the current data in the field.
         :arg iter: The iterator pointing to the QSO to be edited in the Gtk.ListStore. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
-        :arg column_index: The index of the column in the Gtk.ListStore to be edited. If the default value of None is used, only the database entry is edited and the corresponding Gtk.ListStore is left alone.
         :raises sqlite.Error, IndexError: If the QSO could not be edited.
         """
-        logger.debug("Editing field '%s' in QSO %d..." % (field_name, index))
+        logger.debug(f"Updating row of index {index} with new field values: {data}")
 
-        qso = self.db[self.name].find(id=index)
+        # The data we were passed contains everything SQL needs except the index
+        data.update(dict(id=index))
 
-        #self.db[self.name].update(dict(id=index, field_name))
+        self.db[self.name].update(data, ['id'])
 
-        if iter is not None and column_index is not None:
-            self.set(iter, column_index, data)  # ...and then the ListStore.
-        logger.debug(
-            "Successfully edited field '%s' in QSO %d in the log." % (field_name, index)
-        )
+        # We need to know the index of every column we want to update in order
+        # to update the Gtk ListStore.
+
+        if iter is None:
+            return
+
+        for index, column in enumerate(self.db[self.name].columns):
+            column_data = data.get(column)
+
+            if column_data:
+                self.set(iter, index, column_data)
+
+        logger.debug(f"Successfully updated row of index {index} with new field values: {data}")
         return
 
     def remove_duplicates(self):
