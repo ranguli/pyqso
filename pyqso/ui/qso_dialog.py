@@ -210,48 +210,31 @@ class AddQSODialog:
 
         # Populate various fields, if possible.
         if index is not None:
-            # The already exists, so display its current data in the input boxes.
+            # If we're editing an existing QSO, display its current data in the input boxes.
             qso = log.get_qso_by_index(index)
-            field_names = adif.AVAILABLE_FIELD_NAMES_ORDERED
-            for i in range(0, len(field_names)):
-                data = qso[field_names[i].lower()]
-                if data is None:
-                    data = ""
-                if field_names[i] == "BAND":
-                    self.sources[field_names[i]].set_active(adif.BANDS.index(data))
-                elif field_names[i] == "FREQ" and self.frequency_unit != "MHz":
-                    converted = self.convert_frequency(
-                        data, from_unit="MHz", to_unit=self.frequency_unit
-                    )
-                    self.sources[field_names[i]].set_text(str(converted))
-                elif field_names[i] == "MODE":
-                    self.sources[field_names[i]].set_active(
-                        sorted(adif.MODES.keys()).index(data)
-                    )
-                    # Handle SUBMODE at the same time.
-                    submode_data = qso["submode"]
-                    if submode_data is None:
-                        submode_data = ""
-                    self.sources["SUBMODE"].set_active(
-                        adif.MODES[data].index(submode_data)
-                    )
-                elif field_names[i] == "SUBMODE":
-                    # Skip, because this has been (or will be) handled when populating the MODE field.
+
+            for field, data in qso.items():
+
+                if not data:
                     continue
-                elif field_names[i] == "PROP_MODE":
-                    self.sources[field_names[i]].set_active(
-                        adif.PROPAGATION_MODES.index(data)
-                    )
-                elif field_names[i] == "QSL_SENT":
-                    self.sources[field_names[i]].set_active(
-                        qsl_sent_options.index(data)
-                    )
-                elif field_names[i] == "QSL_RCVD":
-                    self.sources[field_names[i]].set_active(
-                        qsl_rcvd_options.index(data)
-                    )
+
+                print(f"{field} - {data}")
+                if field == "id":
+                    continue
+
+                elif field == "band":
+                    self.sources[field.upper()].set_active(adif.BANDS.index(data))
+                elif field == "mode":
+                    self.sources[field.upper()].set_active(sorted(adif.MODES.keys()).index(data))
+                elif field == "submode":
+                    self.sources[field.upper()].set_active(adif.MODES[data].index(data))
                 else:
-                    self.sources[field_names[i]].set_text(data)
+                    try:
+                        self.sources[field.upper()].set_active(adif.AVAILABLE_FIELD_NAMES_ORDERED.index(field.upper()))
+                    except AttributeError:
+                        #self.sources[field.upper()].set_text(adif.AVAILABLE_FIELD_NAMES_ORDERED.index(data))
+                        self.sources[field.upper()].set_text(data)
+
         else:
             # Automatically fill in the current date and time
             self.set_current_datetime_callback()

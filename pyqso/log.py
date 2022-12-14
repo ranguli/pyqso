@@ -130,13 +130,10 @@ class Log(Gtk.ListStore):
         """
         logging.debug("Editing field '%s' in QSO %d..." % (field_name, index))
 
-        #self.db[self.name].update(dict(id=index, field_name)
+        qso = self.db[self.name].find(id=index)
+        print(qso)
 
-        #c = self.connection.cursor()
-        #query = "UPDATE %s SET %s" % (self.name, field_name)
-        #query = query + "=? WHERE id=?"
-        #c.execute(query, [data, index])  # First update the SQL database...
-
+        #self.db[self.name].update(dict(id=index, field_name))
 
         if iter is not None and column_index is not None:
             self.set(iter, column_index, data)  # ...and then the ListStore.
@@ -180,21 +177,15 @@ class Log(Gtk.ListStore):
         :rtype: bool
         """
 
-        """
         try:
-            with self.connection:
-                # First try to alter the table name in the database.
-                c = self.connection.cursor()
-                query = "ALTER TABLE %s RENAME TO %s" % (self.name, new_name)
-                c.execute(query)
-            # If the table name change was successful, then change the name attribute of the Log object too.
+            # Looks like we have to use raw SQL to rename tables in Dataset
+            self.db.query("ALTER TABLE %s RENAME TO %s" % (self.name, new_name))
             self.name = new_name
             success = True
         except sqlite.Error as e:
             logging.exception(e)
             success = False
         return success
-        """
 
     def get_duplicates(self):
         pass
@@ -207,8 +198,7 @@ class Log(Gtk.ListStore):
         :rtype: dict
         :raises sqlite.Error: If the QSO could not be retrieved from the database.
         """
-        result = self.db[self.name].find(id=index)
-        return result.find_one()
+        return self.db[self.name].find_one(id=index)
 
     @property
     def qsos(self):
