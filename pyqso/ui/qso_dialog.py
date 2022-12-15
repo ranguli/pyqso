@@ -174,18 +174,15 @@ class AddQSODialog(FormDialog):
                     continue
                 elif field == "band":
                     # TODO: replace
-                    self.set_form_field(field_entry, adif.BANDS.index(data))
+                    self.set_form_field_text(field_entry, adif.BANDS.index(data))
                 elif field == "mode":
-                    self.set_form_field(field_entry, sorted(adif.MODES.keys()).index(data))
+                    self.set_form_field_text(field_entry, sorted(adif.MODES.keys()).index(data))
                 elif field == "submode":
                     submode = qso.get("submode")
                     if submode:
-                        self.set_form_field(field_entry, adif.MODES[data].index(data))
+                        self.set_form_field_text(field_entry, adif.MODES[data].index(data))
                 else:
-                    try:
-                        self.set_form_field(f"{field}_combo", self.db_table.columns.index(field))
-                    except AttributeError:
-                        self.set_form_field(field_entry, data)
+                    self.set_form_field_text(field_entry, data)
 
         else:
             # Automatically fill in the current date and time
@@ -209,7 +206,7 @@ class AddQSODialog(FormDialog):
             else:
                 submode = ""
 
-            self.set_form_field("submode_combo", adif.MODES[mode].index(submode))
+            self.set_form_field_text("submode", adif.MODES[mode].index(submode))
 
             # Power
             (section, option) = ("qsos", "default_power")
@@ -218,7 +215,7 @@ class AddQSODialog(FormDialog):
             else:
                 power = ""
 
-            self.set_form_field("tx_pwr_entry", power)
+            self.set_form_field_text("tx_pwr", power)
 
             # If the Hamlib module is present, then use it to fill in various fields if desired.
             if have_hamlib:
@@ -280,13 +277,13 @@ class AddQSODialog(FormDialog):
     def autocomplete_band(self, widget=None):
         """If a value for the Frequency is entered, this function autocompletes the Band field."""
 
-        frequency = self.builder.get_object("freq_entry").get_text()
+        frequency = self.get_form_field_text("freq")
 
         # Check whether we actually have a (valid) value to use. If not, set the BAND field to an empty string ("").
         try:
             frequency = float(frequency)
         except ValueError:
-            self.form_data["band"].set_active(0)
+            self.set_form_field_text("band", 0)
             return
 
         # Convert to MHz if necessary.
@@ -295,18 +292,14 @@ class AddQSODialog(FormDialog):
                 frequency, from_unit=self.frequency_unit, to_unit="MHz"
             )
 
-        # Find which band the frequency lies in.
-        for i in range(1, len(adif.BANDS)):
-            if (
-                frequency >= adif.BANDS_RANGES[i][0]
-                and frequency <= adif.BANDS_RANGES[i][1]
-            ):
-                # TODO: replace with set_field()
-                self.builder.get_object("band_combo").set_active(i)
-                return
+        band = util.guess_frequency_band(frequency)
 
-        # TODO: replace with set_field()
-        self.builder.get_object("band_combo").set_active(0)
+        if band:
+            logger.debug(f"Frequency given is {frequency}, band guess is {band}.  Setting text")
+            self.set_form_field_text("band", band)
+        else:
+            logger.debug(f"Frequency given is {frequency}, could not guess band. Setting text to empty")
+            self.set_form_field_text("band", 0)
         return
 
     def hamlib_autofill(self, rig_model, rig_pathname):
@@ -341,7 +334,7 @@ class AddQSODialog(FormDialog):
                         frequency, from_unit="MHz", to_unit=self.frequency_unit
                     )
                 )
-            self.set_form_field("freq_entry", frequency)
+            self.set_form_field_text("freq", frequency)
         # TODO: do not use bare 'except'
         except:
             logger.error("Could not obtain the current frequency via Hamlib!")
@@ -454,7 +447,7 @@ class AddQSODialog(FormDialog):
                 full_callsign, ignore_prefix_suffix=ignore_prefix_suffix
             )
             for field_name in list(fields_and_data.keys()):
-                self.set_form_field(field_name, fields_and_data[field_name])
+                self.set_form_field_text(field_name, fields_and_data[field_name])
         return
 
     def calendar_callback(self, widget):
@@ -462,83 +455,9 @@ class AddQSODialog(FormDialog):
         c = CalendarDialog(self.application)
         response = c.dialog.run()
         if response == Gtk.ResponseType.OK:
-            self.set_form_field("date", c.date)
+            self.set_form_field_text("date", c.date)
         c.dialog.destroy()
         return
-
-    def get_form(self):
-        form_data = {}
-
-        for field in self.db_table.columns:
-            try:
-                form_data.update({field: self.get_form_field_text(field)})
-            except ValueError as e:
-                logger.exception(e)
-
-        logger.debug(f"Form data returned by QSODialog.get_form() is '{form_data}'")
-        return form_data
-
-    def get_form_field(self, form_field):
-        try:
-            value = self.builder.get_object(f"{form_field}_entry")
-            logger.debug(f"Form data returned by QSODialog.get_form_field({form_field}) is '{value}'")
-            return value
-        except AttributeError as e:
-            logger.exception(f"Form field '{form_field}' could not be found: '{e}'")
-
-    def get_form_field_text(self, form_field):
-        logger.debug(f"QSODialog.get_form_field_text() received parameter '{form_field}'")
-
-        # Ignore any requests for an 'id' field, it isn't part of the form.
-        if form_field == "id":
-            return
-
-        try:
-            value = self.builder.get_object(f"{form_field}_entry").get_text()
-            logger.debug(f"QSODialog.get_form_field_text() returned '{value}'")
-            return value
-        except AttributeError:
-            pass
-
-        try:
-            value = self.builder.get_object(f"{form_field}_combo").get_active_text()
-            logger.debug(f"QSODialog.get_form_field_text() returned {value})")
-            return value
-        except AttributeError:
-            pass
-
-        try:
-            field = self.builder.get_object(f"{form_field}_textview").get_buffer()
-            (start, end) = field.get_bounds()
-            value = field.get_text(start, end, True)
-            logger.debug(f"QSODialog.get_form_field_text() returned {value})")
-            return value
-        except AttributeError:
-            pass
-
-        raise KeyError(f"Form field '{form_field}' could not be found.")
-
-    def set_form_field(self, form_field_name, value):
-        logger.debug(f"Trying to find form field {form_field_name}")
-        form_field_object = self.get_form_field(form_field_name)
-        logger.debug(f"Got {form_field_object}")
-
-        try:
-            return form_field_object.set_text(value)
-        except AttributeError:
-            pass
-
-        try:
-            return form_field_object.set_activetext(value)
-        except AttributeError:
-            pass
-
-        try:
-            field = form_field_object.set_buffer(value)
-            (start, end) = field.get_bounds()
-            return field.get_text(start, end, True)
-        except AttributeError:
-            pass
 
 
     def set_current_datetime_callback(self, widget=None):
@@ -557,8 +476,8 @@ class AddQSODialog(FormDialog):
                 datetime.utcnow()
             )  # Use UTC by default, since this is expected by ADIF.
 
-        self.set_form_field("date_entry", dt.strftime("%Y%m%d"))
-        self.set_form_field("time_entry", dt.strftime("%H%M"))
+        self.set_form_field_text("date", dt.strftime("%Y%m%d"))
+        self.set_form_field_text("time", dt.strftime("%H%M"))
 
         return
 
@@ -599,3 +518,5 @@ class AddQSODialog(FormDialog):
 
         coefficient = scaling[from_unit] / scaling[to_unit]
         return float("%.6f" % (coefficient * frequency))
+
+

@@ -2,7 +2,7 @@ from loguru import logger
 import configparser
 from os.path import expanduser
 
-class FormDialog:
+class FormDialog(object):
 
     def __init__(self, application, log, db, index=None):
         self.application = application
@@ -28,11 +28,24 @@ class FormDialog:
 
     def get_form_field(self, form_field):
         try:
+            logger.debug(f"Trying to retrieve form field '{form_field}_entry'")
             value = self.builder.get_object(f"{form_field}_entry")
             logger.debug(f"Form data returned by QSODialog.get_form_field({form_field}) is '{value}'")
             return value
         except AttributeError as e:
-            logger.exception(f"Form field '{form_field}' could not be found: '{e}'")
+            logger.debug(f"Could not find form field '{form_field}_entry': {e}")
+            pass
+
+        try:
+            logger.debug(f"Trying to retrieve form field '{form_field}_combo'")
+            value = self.builder.get_object(f"{form_field}_combo")
+            logger.debug(f"Form data returned by QSODialog.get_form_field({form_field}) is '{value}'")
+            return value
+        except AttributeError as e:
+            logger.debug(f"Could not find form field '{form_field}_entry': {e}")
+            pass
+
+        logger.exception(f"Form field '{form_field}' could not be found")
 
     def get_form_field_text(self, form_field):
         logger.debug(f"QSODialog.get_form_field_text() received parameter '{form_field}'")
@@ -62,24 +75,13 @@ class FormDialog:
 
         raise KeyError(f"Form field '{form_field}' could not be found.")
 
-    def set_form_field(self, form_field_name, value):
-        logger.debug(f"Trying to find form field {form_field_name}")
-        form_field_object = self.get_form_field(form_field_name)
-        logger.debug(f"Got {form_field_object}")
-
+    def set_form_field_text(self, form_field, value):
         try:
-            return form_field_object.set_text(value)
+            self.builder.get_object(f"{form_field}_entry").set_text(value)
         except AttributeError:
             pass
 
         try:
-            return form_field_object.set_activetext(value)
-        except AttributeError:
-            pass
-
-        try:
-            field = form_field_object.set_buffer(value)
-            (start, end) = field.get_bounds()
-            return field.get_text(start, end, True)
+            value = self.builder.get_object(f"{form_field}_combo").set_active(value)
         except AttributeError:
             pass
