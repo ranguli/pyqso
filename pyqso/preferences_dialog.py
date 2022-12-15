@@ -124,18 +124,6 @@ class GeneralPage:
         config = configparser.ConfigParser()
         have_config = config.read(PREFERENCES_FILE) != []
 
-        # Show statistics.
-        self.sources["SHOW_YEARLY_STATISTICS"] = self.builder.get_object(
-            "general_show_yearly_statistics_checkbutton"
-        )
-        (section, option) = ("general", "show_yearly_statistics")
-        if have_config and config.has_option(section, option):
-            self.sources["SHOW_YEARLY_STATISTICS"].set_active(
-                config.getboolean(section, option)
-            )
-        else:
-            self.sources["SHOW_YEARLY_STATISTICS"].set_active(False)
-
         # Default logbook.
         self.sources["DEFAULT_LOGBOOK"] = self.builder.get_object(
             "general_default_logbook_checkbutton"
@@ -192,9 +180,6 @@ class GeneralPage:
     def data(self):
         """User preferences regarding General settings."""
         data = {}
-        data["SHOW_YEARLY_STATISTICS"] = self.sources[
-            "SHOW_YEARLY_STATISTICS"
-        ].get_active()
         data["DEFAULT_LOGBOOK"] = self.sources["DEFAULT_LOGBOOK"].get_active()
         data["DEFAULT_LOGBOOK_PATH"] = os.path.expanduser(
             self.sources["DEFAULT_LOGBOOK_PATH"].get_text()
